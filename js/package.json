@@ -1,0 +1,32 @@
+{
+  "name": "yard",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "babel-polyfill": "^6.23.0",
+    "immutable": "rc",
+    "prop-types": "^15.5.10",
+    "react-addons-perf": "^15.4.2",
+    "react-contexify": "^2.0.6",
+    "react-hyperscript": "^3.0.0",
+    "react-redux": "^5.0.5",
+    "react-router-dom": "^4.1.1",
+    "react-router-redux": "next",
+    "react-split-pane": "^0.1.63",
+    "redux": "^3.6.0",
+    "redux-saga": "^0.15.3",
+    "reselect": "^3.0.1",
+    "whatwg-fetch": "^2.0.3"
+  },
+  "devDependencies": {
+    "react-scripts": "1.0.7"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

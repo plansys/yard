@@ -1,0 +1,68 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "bef554b43bbe97593cb31f2a954a783c",
+    "packages": [
+        {
+            "name": "fluentdom/fluentdom",
+            "version": "6.1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FluentDOM/FluentDOM.git",
+                "reference": "28c53f17432611a3fa9f8c823d749bd425e160b9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FluentDOM/FluentDOM/zipball/28c53f17432611a3fa9f8c823d749bd425e160b9",
+                "reference": "28c53f17432611a3fa9f8c823d749bd425e160b9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "php": ">=5.6.0"
+            },
+            "suggest": {
+                "fluentdom/css-selector": "Allows to use css selectors."
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/FluentDOM.php"
+                ],
+                "psr-4": {
+                    "FluentDOM\\": "src/FluentDOM"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "FluentDOM Contributors",
+                    "homepage": "https://github.com/FluentDOM/FluentDOM/contributors"
+                }
+            ],
+            "description": "A fluent api for the php dom extension.",
+            "homepage": "http://fluentdom.org",
+            "keywords": [
+                "Xpath",
+                "dom",
+                "jquery",
+                "xml"
+            ],
+            "time": "2017-04-22 08:23:55"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

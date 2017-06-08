@@ -1,0 +1,16 @@
+{
+    "name": "plansys/yard",
+    "description": "Write ReactJS Component in PHP!",
+    "type": "library",
+    "require": {
+        "fluentdom/fluentdom": "^6.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rizky",
+            "email": "rizky@andromedia.co.id"
+        }
+    ],
+    "minimum-stability": "dev"
+}
