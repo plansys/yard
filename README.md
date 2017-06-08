@@ -39,7 +39,10 @@ my-project
  <?php
  
  require("yard/bridge/vanilla.php");
- \Yard::serve($_GET['r']);
+ \Yard::render([
+    'component' => $_GET['r'],
+    'mode' => isset($_GET['m']) ? $_GET['m'] : 'html'
+ ]);
  ```
  
 
