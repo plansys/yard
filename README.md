@@ -39,11 +39,11 @@ my-project
  <?php
  
  require("yard/bridge/vanilla.php");
- Yard::render('yarn/sample/Welcome');
+ \Yard::serve($_GET['r']);
  ```
  
 
-Then open `index.php` in your browser.
+Then open `index.php?r=/yard/sample/Welcome` in your browser.
 This will render `Welcome` Component in `/yard/sample/Welcome.php` file. 
 
 
