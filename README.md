@@ -44,8 +44,8 @@ my-project
  
 
 Then open `index.php?r=/yard/sample/Welcome` in your browser.
-This will render `Welcome` Component in `/yard/sample/Welcome.php` file. 
 
+This will render `Welcome` Component in `/yard/sample/Welcome.php` file. 
 
 <hr/>
 
