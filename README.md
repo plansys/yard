@@ -21,14 +21,14 @@ After those steps, your directory structure should look like this:
 
 ```
 my-project
-  ├─ components 
+  ├─ pages 
   ├─ redux
   └─ yard (~~ renamed from yard-master ~~)
-     ├─ js
-     ├─ core
      ├─ bridge
-     ├─ vendor
+     ├─ core
+     ├─ js
      ├─ sample
+     ├─ vendor
      └─ ...
   └─ index.php   
  ```
@@ -40,15 +40,15 @@ my-project
  
  require("yard/bridge/vanilla.php");
  \Yard::render([
-    'component' => $_GET['r'],
+    'page' => $_GET['p'], 
     'mode' => isset($_GET['m']) ? $_GET['m'] : 'html'
  ]);
  ```
  
 
-Then open `index.php?r=/yard/sample/Welcome` in your browser.
+Then open `index.php?p=/yard/sample/Welcome` in your browser.
 
-This will render `Welcome` Component in `/yard/sample/Welcome.php` file. 
+This will render `Welcome` Page in `/yard/sample/Welcome.php` file. 
 
 <hr/>
 
