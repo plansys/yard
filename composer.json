@@ -12,8 +12,10 @@
             "email": "rizky@andromedia.co.id"
         }
     ],
-    "minimum-stability": "dev",
-    "require-dev": {
-        "behat/behat": "^3.2@dev"
-    }
+    "autoload": {
+        "psr-4": {
+            "Yard\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
 }
