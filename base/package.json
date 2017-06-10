@@ -1,15 +1,17 @@
 {
   "name": "yard",
+  "homepage": ".",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
+    "babel-core": "^6.25.0",
     "babel-polyfill": "^6.23.0",
     "immutable": "rc",
     "prop-types": "^15.5.10",
+    "react": "^15.5.4",
     "react-addons-perf": "^15.4.2",
     "react-contexify": "^2.0.6",
+    "react-dom": "^15.5.4",
     "react-hyperscript": "^3.0.0",
     "react-redux": "^5.0.5",
     "react-router-dom": "^4.1.1",
@@ -24,6 +26,7 @@
     "react-scripts": "1.0.7"
   },
   "scripts": {
+    "dev": "react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
