@@ -27,6 +27,16 @@ You must install these tools in order to run development server:
 After installing those tools, you should install base dependency by running `yarn` on your base directory:  
 ![](/docs/assets/editing-base-1.png)
 
+> Temporary Warning:
+>
+> Because our development server host and port will be different with create-react-app development host, we have to edit some of react-scripts and react-dev-utils code in node\_modules:
+>
+> in \[your-base-dir\]/node\_modules/react-scripts/config/webpack.config.dev.js, line 27:
+>
+> -
+
+
+
 And then, run your development server by running `yarn start` on your base directory:
 
 ![](/docs/assets/editing-base-2.png)
