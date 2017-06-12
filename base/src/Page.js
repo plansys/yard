@@ -126,7 +126,7 @@ export const createPage = function(name, loader, props) {
         return (<div>Cannot create page, no loader provided!</div>)
     }
     
-    if (loader.isRoot) {
+    if (loader.isRoot && Loader.redux.store) {
         return ( 
             <Provider store={ Loader.redux.store }>
                 <loader.pageComponent loader={loader} { ...props } />

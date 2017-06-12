@@ -1,12 +1,16 @@
 <?php
-namespace \Yard\sample;
 
-class Welcome extends Page {
+namespace Pages;
 
-    public function render() {
-return <<<HTML
-    <div> Hello, World! </div>
+class Welcome extends \Yard\Page
+{
+
+    public function render()
+    {
+        return <<<HTML
+    <div> Hello,  asdas asd
+        <Page name="yard:Test"></Page>
+    </div>
 HTML;
     }
-    
 }

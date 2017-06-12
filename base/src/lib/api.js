@@ -1,6 +1,5 @@
-import Loader from './../Loader';
 
-const toQueryString = function (params) {
+const toQueryString = function (params, url) {
     if (!params) return "";
     
     if (params.r) {
@@ -16,13 +15,19 @@ const toQueryString = function (params) {
         query = '&' + query
     }
 
-    return query;
+    if (url.indexOf('?') > 0) {
+        return url + query;
+    } else {
+        return url + '?' + query;
+    }
 }
 
 const api = {
     get: function (endpoint, params, mode = 'text') {
-        var query = toQueryString(params);
-        var promise = fetch(Loader.baseUrl + '/index.php?r=redux/api|' + endpoint + query);
+        var url = window.yardurl.page
+                .replace('[page]', endpoint)
+                .replace('[mode]', 'api');
+        var promise = fetch(toQueryString(params, url));
         
         if (mode === 'text') {
             return promise.then(res => res.text());

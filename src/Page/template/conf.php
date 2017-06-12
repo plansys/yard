@@ -1,12 +1,12 @@
 {
-    alias: '<?= $this->alias ?>',
+    alias: '<?= $page->alias ?>',
     css: <?= $css ?>,
-<?php if ($this->placeholder): ?>
+<?php if ($page->placeholder): ?>
     placeholder: <?=  $placeholder; ?>,
 <?php endif; ?>
     loaders: <?= $loaders . ",\n"; ?>
-<?php if ($this->isRoot || $this->showDeps): ?>
-    dependencies: <?= "\n\t\t" . $dependencies . "\n\t"; ?>,
+<?php if ($page->isRoot || $page->showDeps): ?>
+    dependencies: <?= "\n\t\t" . $deps . "\n\t"; ?>,
 <?php endif; ?>
 <?php 
     $map = [];
@@ -26,7 +26,7 @@
     } 
 ?>
 <?php
-    if ($this->isRoot) {
+    if ($page->isRoot) {
         $redux = [];
         
         if ($actionCreators) {
@@ -36,7 +36,7 @@
         if ($reducers) {
             $redux[] = "\t\treducers: function(Immutable) {\n\t\t\t  " . trim($reducers) . "\n\t\t}";
         }
-        
+
         if ($sagas) {
             $redux[] = "\t\tsagas: function(e, api) {
             var take = e.take; var takem = e.takem; var put = e.put; var all = e.all; var race = e.race; var call = e.call; var apply = e.apply; var cps = e.cps; var fork = e.fork; var spawn = e.spawn; var join = e.join; var cancel = e.cancel; var select = e.select; var actionChannel = e.actionChannel; var cancelled = e.cancelled; var flush = e.flush; var getContext = e.getContext; var setContext = e.setContext; var takeEvery = e.takeEvery; var takeLatest = e.takeLatest; var throttle = e.throttle;
@@ -55,8 +55,8 @@
         <?= $js ?>
     },
     render: function(h) {
-        return <?= $component ?>;
+        return <?= implode("\n\t\t", explode("\n", $contents)); ?>;
     }
 }
 
-<?php if ($this->isRoot): ?>//# sourceURL=<?= $this->alias ?><?php endif; ?>
+<?php if ($page->isRoot): ?>//# sourceURL=<?= $page->alias ?><?php endif; ?>
