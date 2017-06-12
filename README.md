@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/plansys/yard/raw/master/js/public/favicon.ico"/></p>
+<p align="center"><img src="https://github.com/plansys/yard/raw/master/base/public/favicon.ico"/></p>
 
 # Yard: ReactJS Component in PHP
 
