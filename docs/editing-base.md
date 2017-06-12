@@ -32,10 +32,6 @@ After installing those tools, you should install base dependency by running `yar
 > Because our development server host and port will be different with create-react-app development host, we have to edit some of react-scripts and react-dev-utils code in node\_modules:
 >
 > in \[your-base-dir\]/node\_modules/react-scripts/config/webpack.config.dev.js, line 27:
->
-> -
-
-
 
 And then, run your development server by running `yarn start` on your base directory:
 
