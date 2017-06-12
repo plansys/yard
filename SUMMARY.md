@@ -1,5 +1,5 @@
 # Summary
 
 * [Introduction](README.md)
-* [Editing Base ](editing-base.md)
+* [Editing Base](docs/editing-base.md)
 

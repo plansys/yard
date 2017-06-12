@@ -1,5 +1,3 @@
-
-
 Assuming you want to run your development server on `http://localhost:3000`  \(the default value\), you have to edit your base declaration so it resemble something like this:
 
 ```php
@@ -23,15 +21,13 @@ Yard base is an [create-react-app](https://github.com/facebookincubator/create-r
 
 You must install these tools in order to run development server:
 
-1. [Nodejs](https://nodejs.org)
+1. [NodeJS](https://nodejs.org)
 2. [Yarn](https://yarnpkg.com)
 
-After installing those tools, you should install it's dependency by running `yarn` on your base directory:  
-![](/docs/assets/import.png)
+After installing those tools, you should install base dependency by running `yarn` on your base directory:  
+![](/docs/assets/editing-base-1.png)
 
 And then, run your development server by running `yarn start` on your base directory:
 
-![](/assets/editing-base-2.png)
-
-
+![](/docs/assets/editing-base-2.png)
 
