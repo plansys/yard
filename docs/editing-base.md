@@ -33,7 +33,7 @@ After installing those tools, you should install base dependency by running `yar
 
 > **Temporary Additional Step:**
 >
-> Because our development server host and port will be different with create-react-app development host, we have to edit some of react-scripts and react-dev-utils filein node\_modules:
+> Because our development server host and port will be different with create-react-app development host, we have to edit some of react-scripts and react-dev-utils file in node\_modules:
 >
 > **in \[your-base-dir\]/node\_modules/react-scripts/config/webpack.config.dev.js, line 27: **  
 >    change `const publicPath = '/'` into `const publicPath = 'http://localhost:3000/'`
@@ -42,6 +42,8 @@ After installing those tools, you should install base dependency by running `yar
 >    change `port: window.location.port,`  into `port: 3000,`  
 >   
 > We need to do this until react-scripts and react-dev-utils incorporate our needs.
+>
+> _If we don't do steps above, yard will fail to load it's base js file._
 
 And then, run your development server by running `yarn start` on your base directory:
 
