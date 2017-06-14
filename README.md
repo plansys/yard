@@ -46,7 +46,7 @@ my-project
  And put this code into `index.php` file:
  
  ```php
- <?php
+<?php
 
 require("vendor/autoload.php");
 $base = new \Yard\Base([
