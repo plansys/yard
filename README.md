@@ -49,11 +49,22 @@ my-project
 <?php
 
 require("vendor/autoload.php");
+
+$host = str_replace("index.php", "", strtok($_SERVER["REQUEST_URI"], '?'));
 $base = new \Yard\Base([
-  'base' => dirname(__FILE__) . '/bases/default',
-  'pages' => dirname(__FILE__) . '/pages',
-  'redux' => dirname(__FILE__) . '/redux',
-  'cache' => dirname(__FILE__) . '/cache',
+  'name' => 'Welcome to Yard',
+  'dir' => [
+    'base' => dirname(__FILE__) . '/bases/default/build',
+    'cache' => dirname(__FILE__) . '/cache',
+    'pages' => ['' => dirname(__FILE__) . '/pages'],
+    'redux' => dirname(__FILE__) . '/redux',
+  ],
+  'url' => [
+    'host' => $host,
+    'base' => $host . '/bases/default/build',
+    'page' => $host . '/?p=[page]&m=[mode]',
+    'cache' => $host . '/cache/[file]'
+  ]
 ]);
 
 $yard = new \Yard\Renderer($base);
