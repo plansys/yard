@@ -87,33 +87,34 @@ trait Redux
         foreach ($reducers as $k => $r) {
             $glob = glob(dirname($r['file']) . DIRECTORY_SEPARATOR . "*Action.php");
             foreach ($glob as $file) {
-                require($file);
                 $class = str_replace(".php", "", basename($file));
-                if (class_exists($class, false)) {
-                    $item = new $class;
-                    
-                    if (!isset($actions[$r['store']])) {
-                        $list[$r['store']] = [];
-                    }
-                    $list[$r['store']][$k] = $item->actionCreators();
-                    $res = &$list[$r['store']][$k];
-                    foreach ($res as $kr => $kv) {
-                        if (is_array($kv)) {
-                            if (!isset($kv['params'])) {
-                                $kv['params'] = "";
-                            }
+                if (!class_exists($class, false)) {
+                    require($file);
+                }
 
-                            $script = isset($kv['script']) ? substr($kv['script'], 3) : '';
-
-                            $return = self::toJs([
-                                'type' => $kv['type'],
-                                'payload' => @$kv['payload']
-                            ]);
-                            $res[$kr] = "js: function({$kv['params']}) {
-					{$script}
-					return {$return};
-				}";
+                $item = new $class;
+                
+                if (!isset($actions[$r['store']])) {
+                    $list[$r['store']] = [];
+                }
+                $list[$r['store']][$k] = $item->actionCreators();
+                $res = &$list[$r['store']][$k];
+                foreach ($res as $kr => $kv) {
+                    if (is_array($kv)) {
+                        if (!isset($kv['params'])) {
+                            $kv['params'] = "";
                         }
+
+                        $script = isset($kv['script']) ? substr($kv['script'], 3) : '';
+
+                        $return = self::toJs([
+                            'type' => $kv['type'],
+                            'payload' => @$kv['payload']
+                        ]);
+                        $res[$kr] = "js: function({$kv['params']}) {
+                {$script}
+                return {$return};
+            }";
                     }
                 }
             }

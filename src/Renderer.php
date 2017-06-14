@@ -24,14 +24,13 @@ class Renderer
         $mode = self::explode_last("|", $mode);
         $this->page = $this->base->newPage($alias, $isRoot);
 
-        $content = "";
         switch ($mode) {
             case "html":
                 $content = $this->renderHTML();
                 break;
             case "css":
                 header("Content-type: text/css");
-                $content = $this->renderCSS();
+                 $this->renderCSS();
                 break;
             case "js":
                 $cache = $this->page->getCacheFile();
@@ -39,18 +38,40 @@ class Renderer
                     header("Location: " . $this->page->getCacheUrl());
                 } else {
                     header("Content-type: text/javascript");
-                    $content = $this->renderJS();
+                    $this->renderJS();
                 }
+                break;
+            case "jsdev": 
+                    header("Content-type: text/javascript");
+                    $this->renderJS();
                 break;
             case "post":
                 $post = file_get_contents("php://input");
                 $this->page->updateCache($post);
                 break;
+            case "sw": 
+                header('Content-Type: text/javascript');
+                $swjs = @file_get_contents($this->base->dir['base'] . '/service-worker.js');
+                
+                $start = strpos($swjs, 'var precacheConfig=') + strlen('var precacheConfig=');
+                $stop = strpos($swjs, ',cacheName="');
+                $swtxt = substr($swjs, $start, $stop - $start);
+                $sw = json_decode($swtxt, true);
+                $files = $this->page->getServiceWorkerFiles();
+                
+                foreach ($sw as $k=>$s) {
+                    $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
+                }
+                $sw[0] = [$this->base->url['host'], $this->page->getCacheHash()];
+                
+                $sw = array_merge($sw, $files);
+                $swjs = str_replace($swtxt, json_encode($sw), $swjs);
+                echo $swjs . 'console.log(urlsToCacheKeys);';
+            break;
             case "api": 
-                break;
+            break;
         }
 
-        return $content;
     }
   
     public function renderHTML()

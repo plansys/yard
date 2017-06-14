@@ -55,11 +55,12 @@ class Configuration
                         $deps['elements'][] = $p;
                     }
                 }
-                $deps['pages']['"' . $page->placeholder->alias . '"'] = 'js:' . $page->placeholder->renderConf();
+                $deps['pages'][$page->placeholder->alias] = 'js:' . $page->placeholder->renderConf();
                 $placeholder = json_encode($page->placeholder->alias);
             }
         }
         $deps = self::toJs($deps);
+
 
         if ($page->isRoot) {
             $reducers = $this->renderReduxReducers();
@@ -95,7 +96,15 @@ class Configuration
         return trim($js) . "\n";
     }
 
-    private function parseReducers()
-    {
+    public function getServiceWorkerFiles() {
+        $files = [];
+        $pageFiles = Dependency::parseFiles($this->page, self::parseRender($this->page));
+        array_unshift($pageFiles, Dependency::parseRootFileItem($this->page, $this->page->alias));
+        foreach ($pageFiles as $pfs) {
+            foreach ($pfs as $f) {
+                $files[] = $f;
+            }
+        }
+        return $files;
     }
 }

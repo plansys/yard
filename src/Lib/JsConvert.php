@@ -13,7 +13,11 @@ trait JsConvert
         $count = 0;
         foreach ($arr as $key => $value) {
             if (self::is_assoc($arr) || (!self::is_assoc($arr) && $sequential_keys == true)) {
-                $output.= ($quotes ? '"' : '') . $key . ($quotes ? '"' : '') . ': ';
+                if (strpos($key, '.') !== false) {
+                    $output .= '"' . $key . '"' . ": ";
+                } else {
+                    $output.= ($quotes ? '"' : '') . $key . ($quotes ? '"' : '') . ': ';
+                }
             }
             if (is_array($value)) {
                 $output.= self::toJs($value, $sequential_keys, $quotes, $beautiful_json);

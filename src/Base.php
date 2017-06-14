@@ -24,6 +24,14 @@ class Base
         $this->validateDir(@$settings['dir']);
         $this->validateUrl(@$settings['url']);
 
+        foreach ($settings['url'] as $k=>$url) {
+            if (strpos($url, 'http') !== 0) {
+                $settings['url'][$k] = substr($url, 0, 3) . str_replace("//", "/", substr($url, 3));
+            } else {
+                $settings['url'][$k] = substr($url, 0, 7) . str_replace("//", "/", substr($url, 7));
+            }
+        }
+        
         $this->name = @$settings['name'];
         $this->dir = $settings['dir'];
         $this->url = $settings['url'];
@@ -114,12 +122,12 @@ class Base
     private function validateDir($dir)
     {
         if (!is_array($dir)) {
-            throw new \Exception('Failed to create base: dir key is not an array!');
+            throw new \Exception('Failed to instantiate a base: dir key is not an array!');
         }
 
         foreach ($this->dir as $k => $d) {
             if (!isset($dir[$k])) {
-                throw new \Exception("Failed to create base: dir.{$k} key is missing in dir");
+                throw new \Exception("Failed to instantiate a base: dir.{$k} key is missing in dir");
             }
             $is = 'is_' . gettype($d);
             $isvalid = $is($dir[$k]);
@@ -129,16 +137,16 @@ class Base
             }
 
             if (!$isvalid) {
-                throw new \Exception("Failed to create base: dir.{$k} key is not a " . gettype($d));
+                throw new \Exception("Failed to instantiate a base: dir.{$k} key is not a " . gettype($d));
             } else {
                 if ($is == 'is_string') {
                     if (!is_dir($dir[$k])) {
-                        throw new \Exception("Failed to create base: {$dir[$k]} is not a directory");
+                        throw new \Exception("Failed to instantiate a base: {$dir[$k]} is not a directory");
                     }
                 } else if ($is == 'is_array') {
                     foreach ($dir[$k] as $kd => $dd) {
                         if (!is_dir($dd)) {
-                            throw new \Exception("Failed to create base: {$dd} is not a directory");
+                            throw new \Exception("Failed to instantiate a base: {$dd} is not a directory");
                         }
                     }
                 }
@@ -149,18 +157,18 @@ class Base
     private function validateUrl($dir)
     {
         if (!is_array($dir)) {
-            throw new \Exception('Failed to create base: url key is not an array!');
+            throw new \Exception('Failed to instantiate a base: url key is not an array!');
         }
 
         foreach ($this->url as $k => $d) {
             if (!isset($dir[$k])) {
-                throw new \Exception("Failed to create base: url.{$k} key is missing in url");
+                throw new \Exception("Failed to instantiate a base: url.{$k} key is missing in url");
             }
 
             $is = 'is_' . gettype($d);
             $isvalid = $is($dir[$k]);
             if (!$isvalid) {
-                throw new \Exception("Failed to create base: url.{$k} key is not a " . gettype($d));
+                throw new \Exception("Failed to instantiate a base: url.{$k} key is not a " . gettype($d));
             } 
         }
     }

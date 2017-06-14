@@ -9,7 +9,8 @@
     }
 
     window.yardurl = <?= json_encode($page->base->renderUrl()) ?>;
+    window.pageName = '<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>';
     pageReady(function() {
-        window.render( "<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>");
+        window.render(window.pageName);
     });
 </script>
