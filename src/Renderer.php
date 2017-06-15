@@ -91,8 +91,6 @@ class Renderer
         $html = file_get_contents($path);
         $html = strtr($html, [
             '[name]' => $this->base->name,
-            'href="/' => 'href="' . $baseUrl,
-            'src="/' => 'src="' . $baseUrl,
             'href="./' => 'href="' . $baseUrl,
             'src="./' => 'src="' . $baseUrl,
         ]);

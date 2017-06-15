@@ -23,7 +23,7 @@
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
-    "react-scripts": "1.0.7"
+    "@plansys/react-scripts": "*"
   },
   "scripts": {
     "dev": "react-scripts start",

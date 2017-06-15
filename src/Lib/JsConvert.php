@@ -13,7 +13,7 @@ trait JsConvert
         $count = 0;
         foreach ($arr as $key => $value) {
             if (self::is_assoc($arr) || (!self::is_assoc($arr) && $sequential_keys == true)) {
-                if (strpos($key, '.') !== false) {
+                if (!ctype_alnum($key)) {
                     $output .= '"' . $key . '"' . ": ";
                 } else {
                     $output.= ($quotes ? '"' : '') . $key . ($quotes ? '"' : '') . ': ';

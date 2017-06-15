@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import Immutable from 'immutable';
+const Immutable = import('immutable');
 
 export const importReducers = function (rawReducers, additionalReducers) {
     var reducers = {};
