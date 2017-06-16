@@ -17,6 +17,8 @@ export class Page extends React.Component {
             console.error('Loader conf is not loaded! You must have loader conf loaded before creating Page');
             return;
         }
+        
+        this.url = window.yard.url.root;
 
         this.props.loader.conf.js.bind(this)();
     }

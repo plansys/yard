@@ -85,7 +85,8 @@ class Base
     {
         return [
             'base' => $this->url['base'],
-            'page' => $this->url['page']
+            'page' => $this->url['page'],
+            'root' => $this->url['root']
         ];
     }
 

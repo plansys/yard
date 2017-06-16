@@ -14,6 +14,7 @@ class Page
     public $store;
     public $masterpage = false;
     public $placeholder = null;
+    public $url = "";
 
     public function mapStore()
     {
@@ -43,6 +44,8 @@ class Page
         $this->isRoot = $isRoot;
         $this->showDeps = $showDeps;
         $this->base = $base;
+        
+        $this->url = $base->url['root'];
 
         $this->conf = new Page\Configuration($this);
     }
