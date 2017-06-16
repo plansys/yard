@@ -2,13 +2,13 @@
 
 namespace Pages;
 
-class Welcome extends \Yard\Page
+class Hello extends \Yard\Page
 {
 
     public function render()
     {
         return <<<HTML
-    <div> Welcome To Yard! </div>
+    <div> Hello Yard!</div>
 HTML;
     }
 }
