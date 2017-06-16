@@ -14,10 +14,12 @@ class Base
         'redux' => ''
     ];
     public $url = [
+        'root' => '',
         'base' => '',
         'page' => '',
         'cache' => ''
     ];
+    public $pages = [];
     public $pageNamespace = 'Pages\\';
 
     function __construct($settings = [])
@@ -51,7 +53,32 @@ class Base
             $this->pages = [''=>$settings['dir']['pages']];
         }
 
-        $this->pages['yard'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'Sample';
+        $d = DIRECTORY_SEPARATOR;
+        
+        # load sample yard pages
+        $this->pages['yard'] = dirname(__FILE__) . $d . 'Sample';
+        
+        # load redux-builder if exists
+        $builderReduxDir = dirname(__FILE__) . "{$d}..{$d}builder-redux{$d}pages" ; 
+        if (is_dir($builderReduxDir)) {
+            $this->pages['builder-redux'] = $builderReduxDir;  
+        }
+    }
+    
+    public function isPage($tag) {
+        $tag = str_replace("." , DIRECTORY_SEPARATOR, $tag);
+        $tags = explode(":", $tag);
+        $shortcut = '';
+        if (count($tags) > 1) {
+            $shortcut = array_shift($tags);
+            $tag = implode(":", $tags);
+        }
+        
+        if (is_file($this->pages[$shortcut] . DIRECTORY_SEPARATOR . $tag . '.php')) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function newPage($alias, $isRoot = true, $showDeps = true)

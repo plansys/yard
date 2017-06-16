@@ -10,7 +10,7 @@ trait Component
             return $render;
         } elseif (is_string($render)) {
             try {
-                $jsontxt = \Yard\Lib\HtmlToJson::convert($render);
+                $jsontxt = \Yard\Lib\HtmlToJson::convert($page->base, $render);
                 return json_decode($jsontxt, true);
             } catch (\Exception $e) {
                 $render = explode("\n", $render);

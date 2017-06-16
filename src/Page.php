@@ -45,7 +45,7 @@ class Page
         $this->showDeps = $showDeps;
         $this->base = $base;
         
-        $this->url = $base->url['root'];
+        $this->url = @$base->url['root'];
 
         $this->conf = new Page\Configuration($this);
     }

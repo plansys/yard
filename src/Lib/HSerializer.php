@@ -4,6 +4,13 @@ namespace Yard\Lib;
 
 class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 {
+    public $base;
+    
+    public function __construct($base, \DOMNode $node, $options = 0, $depth = 512) {
+        parent::__construct($node, $options, $depth);
+        $this->base = $base;
+    }
+    
     protected function getNode(\DOMElement $node)
     {
         $result = [
@@ -35,6 +42,24 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                     }
 
                     $c = [$c[0], $content];
+                }
+                if ($this->base->isPage($c[0])) {
+                    $newc = ['Page', ['name' => $c[0]]];
+                    if (count($c) > 1) {
+                        if (isset($c[1][0])) {
+                            $newc[] = $c[1];
+                        } else {
+                            foreach ($c[1] as $k=>$cc) {
+                                $newc[1][$k] = $cc;
+                            }
+                            $newc[1]['name'] = $c[0];
+                            
+                            if (count($c) > 2) {
+                                $newc[] = $c[2];
+                            }
+                        }
+                    }
+                    $c = $newc;
                 }
                 
                 if (is_array($childs)) {

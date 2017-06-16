@@ -185,7 +185,7 @@ class Dependency
 
         return $tags;
     }
-
+    
     public static function parseLoaders($pageRender, $tags = false)
     {
         if ($tags === false) {
@@ -212,7 +212,7 @@ class Dependency
                     }
                     $tags[] = $tag[1]['name'];
                 }
-
+                
                 if (count($tag) == 2 &&
                   is_array($tag[1]) &&
                   !self::is_assoc($tag[1])) {

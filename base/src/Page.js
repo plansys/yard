@@ -100,7 +100,17 @@ export class Page extends React.Component {
                     })
                     return null;
                 }
-
+                
+                if (children.length === 1) {
+                    if (children[0].type === 'span' && typeof children[0].props.children === 'string') {
+                        props.children = children[0].props.children;
+                    } else {
+                        props.children = children;
+                    } 
+                } else {
+                    props.children = children;
+                }
+                
                 return createPage(props.name, loader, props);
             case "Placeholder":
                 return h(Loader.ui.loaded[tag], {
