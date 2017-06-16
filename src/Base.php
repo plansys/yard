@@ -5,7 +5,8 @@ namespace Yard;
 class Base
 {
     use \Yard\Lib\ArrayTools;
-
+    
+    public $offline = false;
     public $dir = [
         'base' => '',
         'cache' => '',
@@ -30,6 +31,10 @@ class Base
             } else {
                 $settings['url'][$k] = substr($url, 0, 7) . str_replace("//", "/", substr($url, 7));
             }
+        }
+        
+        if (isset($settings['offline'])) {
+            $this->offline = $settings['offline'];
         }
         
         $this->name = @$settings['name'];

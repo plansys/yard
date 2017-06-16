@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-const Immutable = import('immutable');
 
 export const importReducers = function (rawReducers, additionalReducers) {
     var reducers = {};
@@ -12,16 +11,22 @@ export const importReducers = function (rawReducers, additionalReducers) {
             var key = i + '__' + k;
             this[key] = {};
 
+            var importReduxLib = r.import.map(lib => {
+                return import('./../redux/' + lib);
+            });
+            
             // eslint-disable-next-line
             reducers[key] = function (state, { payload, type }) {
                 if (typeof state === "undefined") { 
-                    state = r.init.bind(this[key])(Immutable);
+                    // eslint-disable-next-line
+                    state = (new Function(...[...r.import, 'r'] , `return r.init()`)).bind(this[key])(...[...importReduxLib, r]);
                 }
                 
                 for (var x in r.reducers) {
                     var item = r.reducers[x];
                     if (item.type === type) {
-                        state = item.reducer.bind(this[key])(state, payload, Immutable);
+                        // eslint-disable-next-line
+                        state = (new Function(...[...r.import, 'item'], `return item.reducer(state, payload)`)).bind(this[key])(...[...importReduxLib, item]);
                     }
                 }
                 

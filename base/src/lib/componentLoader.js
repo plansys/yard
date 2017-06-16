@@ -17,7 +17,7 @@ export const componentLoader = (tag) => {
 }
 
 export const loadConf = (alias, isRoot) => {
-    var url = window.yardurl.page
+    var url = window.yard.url.page
                 .replace('[page]', alias)
                 .replace('[mode]', (isRoot ? 'r|' : '') + 'js');
 
@@ -42,11 +42,11 @@ export const loadConf = (alias, isRoot) => {
                 // we need to do this in client side, because it is too complex to convert
                 // es5 to es2015 in php (server side)
                 return new Promise((resolve, reject) => {
-                    const babelUrl = window.yardurl.base + '/babel.min.js';
-                    const postUrl = window.yardurl.page
+                    const babelUrl = window.yard.url.base + '/babel.min.js';
+                    const postUrl = window.yard.url.page
                                         .replace('[page]', alias)
                                         .replace('[mode]', (isRoot ? 'r|' : '')+ 'post');
-                    const clearUrl = window.yardurl.page
+                    const clearUrl = window.yard.url.page
                                         .replace('[page]', alias)
                                         .replace('[mode]', (isRoot ? 'r|' : '')+ 'clean');
 

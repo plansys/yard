@@ -135,7 +135,12 @@ trait Redux
             if (!isset($list[$r['store']])) {
                 $list[$r['store']] = [];
             }
-            $list[$r['store']][$k] = $r['class']->list();
+            
+            $list[$r['store']][$k] = [
+                'import' => property_exists($r['class'], 'import') ? $r['class']->import : [],
+                'init' => 'js:' . $r['class']->init(),
+                'reducers' => $r['class']->reducers()
+            ];
         }
 
         return "return " . self::toJs($list) . ";";

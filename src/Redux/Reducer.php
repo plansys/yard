@@ -2,6 +2,7 @@
 
 namespace Yard\Redux;
 
-class Reducer {
-  
+abstract class Reducer {
+    abstract public function init();
+    abstract public function reducers();
 }

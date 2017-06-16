@@ -8,9 +8,15 @@
         else f();
     }
 
-    window.yardurl = <?= json_encode($page->base->renderUrl()) ?>;
-    window.pageName = '<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>';
+    window.yard = {
+        url: <?= json_encode($page->base->renderUrl()) ?>,
+        page: {
+            name: '<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>'
+        },
+        offline: <?= json_encode($page->base->offline); ?>
+    };
+    
     pageReady(function() {
-        window.render(window.pageName);
+        window.render(window.yard.page.name);
     });
 </script>

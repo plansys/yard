@@ -11,9 +11,9 @@
 export default function register() {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      const base = !!window.yardurl ? window.yardurl.page : '';
+      const base = !!window.yard.url ? window.yard.url.page : '';
       const swUrl = base
-                      .replace('[page]', window.pageName)
+                      .replace('[page]', window.yard.page.name)
                       .replace('[mode]', 'sw');
                       
       navigator.serviceWorker

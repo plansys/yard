@@ -2,6 +2,6 @@
 
 namespace Yard\Redux;
 
-class Action {
-  
+abstract class Action {
+    abstract public function actionCreators();
 }

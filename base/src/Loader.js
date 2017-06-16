@@ -70,7 +70,7 @@ class Loader {
                     
                     function includeCSS(alias, shouldLoad) {
                         if (shouldLoad && Loader.page.css.indexOf(alias) < 0) {
-                            var url = window.yardurl.page
+                            var url = window.yard.url.page
                                         .replace('[page]', alias)
                                         .replace('[mode]',  'css');
                             addCSS(url);
@@ -158,8 +158,18 @@ class Loader {
                     routerMiddleware(Loader.redux.history),
                     sagaMiddleware
                 ]);
-
-                const sagasStore = conf.redux.sagas(reduxSagaEffects, api);
+                
+                
+                var keys = Object.keys(reduxSagaEffects)
+                            .concat('api')
+                            .concat('conf');
+                var values = Object.values(reduxSagaEffects)
+                            .concat(api)
+                            .concat(conf);
+                
+                //eslint-disable-next-line
+                const sagasStore =  (new Function(...keys,  'conf.redux.sagas()'))(...values);
+                
                 for (let t in sagasStore) {
                     let sagas = sagasStore[t];
                     for (let i in sagas) {

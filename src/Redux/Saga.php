@@ -2,6 +2,6 @@
 
 namespace Yard\Redux;
 
-class Saga {
+abstract class Saga {
   
 }

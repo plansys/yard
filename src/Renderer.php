@@ -93,6 +93,8 @@ class Renderer
             '[name]' => $this->base->name,
             'href="./' => 'href="' . $baseUrl,
             'src="./' => 'src="' . $baseUrl,
+            'href="/' => 'href="' . $baseUrl,
+            'src="/' => 'src="' . $baseUrl,
         ]);
 
         $first = substr($html, 0, strpos($html, '<script'));

@@ -4,7 +4,7 @@ import { Link as RLink } from 'react-router-dom';
 
 export default function Link(props, context) {
     let location = document.createElement('a');
-    location.href = window.yardurl.page;
+    location.href = window.yard.url.page;
     location.search = location.search
                         .replace('[page]', props.to)
                         .replace('[mode]', '')

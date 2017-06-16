@@ -1,4 +1,4 @@
-if (window.yardurl.base.substr(-1) != '/') window.yardurl.base += '/';
+if (window.yard.url.base.substr(-1) !== '/') window.yard.url.base += '/';
 
 //eslint-disable-next-line
-__webpack_public_path__ = window.yardurl.base;
+__webpack_public_path__ = window.yard.url.base;

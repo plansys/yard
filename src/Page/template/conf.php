@@ -38,8 +38,8 @@
         }
 
         if ($sagas) {
-            $redux[] = "\t\tsagas: function(e, api) {
-            var take = e.take; var takem = e.takem; var put = e.put; var all = e.all; var race = e.race; var call = e.call; var apply = e.apply; var cps = e.cps; var fork = e.fork; var spawn = e.spawn; var join = e.join; var cancel = e.cancel; var select = e.select; var actionChannel = e.actionChannel; var cancelled = e.cancelled; var flush = e.flush; var getContext = e.getContext; var setContext = e.setContext; var takeEvery = e.takeEvery; var takeLatest = e.takeLatest; var throttle = e.throttle;
+            $redux[] = "\t\tsagas: function() {
+            // var take = e.take; var takem = e.takem; var put = e.put; var all = e.all; var race = e.race; var call = e.call; var apply = e.apply; var cps = e.cps; var fork = e.fork; var spawn = e.spawn; var join = e.join; var cancel = e.cancel; var select = e.select; var actionChannel = e.actionChannel; var cancelled = e.cancelled; var flush = e.flush; var getContext = e.getContext; var setContext = e.setContext; var takeEvery = e.takeEvery; var takeLatest = e.takeLatest; var throttle = e.throttle;
  
                 " . trim($sagas) . "\n\t\t}";
         }
