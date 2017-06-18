@@ -26,7 +26,7 @@ export const importReducers = function (rawReducers, additionalReducers) {
                     var item = r.reducers[x];
                     if (item.type === type) {
                         // eslint-disable-next-line
-                        state = (new Function(...[...r.import, 'item'], `return item.reducer(state, payload)`)).bind(this[key])(...[...importReduxLib, item]);
+                        state = (new Function(...[...r.import, 'item','state', 'payload'], `return item.reducer(state, payload)`)).bind(this[key])(...[...importReduxLib, item, state, payload]);
                     }
                 }
                 

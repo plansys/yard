@@ -13,4 +13,7 @@ const render = (pageName) => {
 window.Root = Root;
 window.Loader = Loader;
 window.render = render;
-registerServiceWorker();
+
+if (window.yard.offline) {
+    registerServiceWorker();
+}
