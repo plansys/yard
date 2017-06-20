@@ -60,7 +60,7 @@ $base = new \Yard\Base([
     'redux' => dirname(__FILE__) . '/redux',
   ],
   'url' => [
-    'host' => $host,
+    'root' => $host . '/pages',
     'base' => $host . '/bases/default/build',
     'page' => $host . '/?p=[page]&m=[mode]',
     'cache' => $host . '/cache/[file]'
