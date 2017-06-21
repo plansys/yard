@@ -31,6 +31,8 @@ class Configuration
 
         $css = trim($this->page->css() == "") ? "false" : "true";
         $js = $this->renderJS();
+        
+        $includeJS = $this->renderIncludeJS();
 
         $mapStore = $this->renderMapStore();
         $mapAction = $this->renderMapAction();
@@ -94,6 +96,25 @@ class Configuration
         $js = explode("\n", $js);
         $js = implode("\n" . $pad, $js);
         return trim($js) . "\n";
+    }
+    
+    private function renderIncludeJS() {
+        $js = $this->page->includeJS();
+        
+        if (is_array($js) && !empty($js)) {
+            foreach ($js as $k => $v) {
+                if (strpos($v, 'http') !== 0) {
+                    $ex = explode(":", $v);
+                    if (count($ex) > 1) {
+                        $js[$k] = $this->page->base->getRootUrl($ex[0]) . '/' . $ex[1];
+                    }
+                }
+            }
+            
+            return $this->toJs($js);
+        } else {
+            return "";
+        }
     }
 
     public function getServiceWorkerFiles() {

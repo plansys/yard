@@ -1,6 +1,9 @@
 {
     alias: '<?= $page->alias ?>',
     css: <?= $css ?>,
+<?php if ($includeJS != ""): ?>
+    includeJS: <?= $includeJS . "\n\t\t"; ?>,
+<?php endif; ?>
 <?php if ($page->placeholder): ?>
     placeholder: <?=  $placeholder; ?>,
 <?php endif; ?>

@@ -26,6 +26,10 @@ class Page
         return [];
     }
 
+    public function includeJS() {
+        return [];
+    }
+
     public function js()
     {
     }

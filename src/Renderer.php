@@ -22,8 +22,11 @@ class Renderer
     {
         $isRoot = strtok($mode, '|') == 'r';
         $mode = self::explode_last("|", $mode);
-        $this->page = $this->base->newPage($alias, $isRoot);
-
+        
+        if ($mode != 'vendor') {
+            $this->page = $this->base->newPage($alias, $isRoot);
+        }
+        
         switch ($mode) {
             case "html":
                 $content = $this->renderHTML();
@@ -67,6 +70,22 @@ class Renderer
                 $sw = array_merge($sw, $files);
                 $swjs = str_replace($swtxt, json_encode($sw), $swjs);
                 echo $swjs . 'console.log(urlsToCacheKeys);';
+            break;
+            case "vendor":
+                if (isset($_GET['_v_dr'])) {
+                    $d = DIRECTORY_SEPARATOR;
+                    $dir = realpath(dirname(__FILE__) . "{$d}..{$d}..{$d}..{$d}");
+                    
+                    if (is_file($dir .  $_GET['_v_dr'])) {
+                        $info = new \SplFileInfo($dir . $_GET['_v_dr']);
+                        if ($info->getExtension() != "php") {
+                            $file = file_get_contents($dir . $d. $_GET['_v_dr']);
+                            header("Content-Type:" . mime_content_type($dir . $d. $_GET['_v_dr']));
+                            echo $file;
+                            die();
+                        }
+                    }
+                }
             break;
             case "api": 
             break;

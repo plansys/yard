@@ -18,7 +18,7 @@ export class Page extends React.Component {
             return;
         }
         
-        this.url = window.yard.url.root;
+        this.url = window.yard.url.pages[''];
 
         this.props.loader.conf.js.bind(this)();
     }

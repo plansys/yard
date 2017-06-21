@@ -1,6 +1,6 @@
 // loader
 import { Page } from './Page';
-import { addCSS } from './lib/injectTag';
+import { addJS, addCSS } from './lib/injectTag';
 import { componentLoader, loadConf, parseConf } from './lib/componentLoader';
 import { mapInput, mapAction } from './lib/reduxConnector';
 
@@ -77,7 +77,8 @@ class Loader {
                             Loader.page.css.push(alias);
                         }
                     }
-
+                    
+                    
                     includeCSS(conf.alias, conf.css);
                     if (conf.dependencies) {
                         for (var p in conf.dependencies.pages) {
@@ -85,7 +86,23 @@ class Loader {
                         }
                     }
 
-                    resolve(conf);
+                    if (conf.includeJS) {
+                        var jsdeps = [];
+                        
+                        conf.includeJS.forEach(js => {
+                            jsdeps.push(new Promise(resolve => {
+                                addJS(js, js, function() {
+                                    resolve(js);
+                                });
+                            }))
+                        })
+                        
+                        Promise.all(jsdeps).then(params => {
+                            resolve(conf);
+                        })
+                    } else {
+                        resolve(conf);
+                    }
                 })
             } else {
                 resolve(Loader.page.conf[name]);

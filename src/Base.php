@@ -10,11 +10,9 @@ class Base
     public $dir = [
         'base' => '',
         'cache' => '',
-        'pages' => [],
         'redux' => ''
     ];
     public $url = [
-        'root' => '',
         'base' => '',
         'page' => '',
         'cache' => ''
@@ -26,6 +24,7 @@ class Base
     {
         $this->validateDir(@$settings['dir']);
         $this->validateUrl(@$settings['url']);
+        $this->validatePages(@$settings['pages']);
 
         foreach ($settings['url'] as $k=>$url) {
             if (strpos($url, 'http') !== 0) {
@@ -42,26 +41,34 @@ class Base
         $this->name = @$settings['name'];
         $this->dir = $settings['dir'];
         $this->url = $settings['url'];
-
-        if (is_array($settings['dir']['pages'])) {
-            if (self::is_assoc($settings['dir']['pages'])) {
-                $this->pages = $settings['dir']['pages'];
-            } else {
-                throw new \Exception('Pages directory should be in [key=>value] format');
-            }
-        } else {
-            $this->pages = [''=>$settings['dir']['pages']];
-        }
+        $this->pages = $settings['pages'];
 
         $d = DIRECTORY_SEPARATOR;
         
         # load sample yard pages
-        $this->pages['yard'] = dirname(__FILE__) . $d . 'Sample';
+        $vurl = strtr($this->url['page'], [
+            '[page]' => 'vendor',
+            '[mode]' => 'vendor'
+        ]);
+        
+        if (strpos($vurl, '?') === false) {
+            $vurl = $vurl . "?_v_dr=";
+        } else {
+            $vurl = $vurl . "&_v_dr=";
+        }
+        
+        $this->pages['yard'] = [
+            'dir' => dirname(__FILE__) . $d . 'Sample',
+            'url' => $vurl . "/plansys/yard/src/Sample"
+        ];
         
         # load redux-builder if exists
         $builderReduxDir = dirname(__FILE__) . "{$d}..{$d}builder-redux{$d}pages" ; 
         if (is_dir($builderReduxDir)) {
-            $this->pages['builder-redux'] = $builderReduxDir;  
+            $this->pages['builder-redux'] = [
+                'dir' => $builderReduxDir,
+                'url' => $vurl . "/plansys/builder-redux/src/pages"
+            ];
         }
     }
     
@@ -79,6 +86,14 @@ class Base
         } else {
             return false;
         }
+    }
+    
+    public function getRootUrl($shortcut = '') {
+        $url = $this->pages['']['url'];
+        if (isset($this->pages[$shortcut])) {
+            $url = $this->pages[$shortcut]['url'];
+        }
+        return $url;
     }
 
     public function newPage($alias, $isRoot = true, $showDeps = true)
@@ -110,10 +125,15 @@ class Base
 
     public function renderUrl()
     {
+        $pages = [];
+        foreach ($this->pages as $k => $v) {
+            $pages[$k] = $v['url'];
+        }
+        
         return [
             'base' => $this->url['base'],
             'page' => $this->url['page'],
-            'root' => $this->url['root']
+            'pages' => $pages
         ];
     }
 
@@ -122,12 +142,12 @@ class Base
         $parr = explode(":", $alias);
     
         if (count($parr) == 1 && isset($this->pages[''])) {
-              $baseDir = $this->pages[''];
+              $baseDir = $this->pages['']['dir'];
               $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
               $class = str_replace(".", '\\', $alias);
         } elseif (count($parr) > 1) {
             if ($this->pages[$parr[0]]) {
-                $baseDir = $this->pages[$parr[0]];
+                $baseDir = $this->pages[$parr[0]]['dir'];
                 $path = str_replace(".", DIRECTORY_SEPARATOR, $parr[1]) . ".php";
                 $class = str_replace(".", '\\', $parr[1]);
             } else {
@@ -150,6 +170,14 @@ class Base
         } else {
               throw new \Exception('File not found for Page `' . $alias . '`: ' . $baseDir . DIRECTORY_SEPARATOR . $path);
         }
+    }
+    
+    private function validatePages($pages) {
+        if (is_array($pages)) {
+            if (!self::is_assoc($pages)) {
+                throw new \Exception('Pages should be in [key=>value] format');
+            }
+        } 
     }
 
     private function validateDir($dir)
