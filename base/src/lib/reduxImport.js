@@ -1,45 +1,73 @@
 import { combineReducers } from 'redux';
+import map from 'lodash.mapvalues';
+
+const extractFunc = function(func) {
+    var f = func.toString();
+    f = f.substr(f.indexOf('{') + 1);
+    f = f.substr(0, f.lastIndexOf('}'));
+    return f;
+}
+
+const switchReducers = function(reducers) {
+    var results = [];
+    reducers.map(item => {
+        return results.push(`
+        case '${item.type}':
+            ${extractFunc(item.reducer)}
+        break;
+        `)
+    });
+    
+    return results.join("\n");
+}
+
+const extractLib = function(lib) {
+    var results = lib.map(l => {
+        return `const ${l} = import("./../redux/${l}")`;
+    });
+    
+    return results.join("\n");
+}
 
 export const importReducers = function (rawReducers, additionalReducers) {
+    
     var reducers = {};
-
-    for (var i in rawReducers) {
-        var store = rawReducers[i];
-
-        for (var k in store) {
-            var r = store[k];
-            var key = i + '__' + k;
-            this[key] = {};
-
-            var importReduxLib = r.import.map(lib => {
-                return import('./../redux/' + lib);
-            });
+    
+    // flatten reducers
+    map(rawReducers, (rawstore, rawkey) => {
+        return map(rawstore, (store, key) => {
+            reducers[rawkey + '__' + key] = store;
+        })
+    });
+    
+    var results = {};
+    
+    map(reducers, (r, key) => {
+        var init = extractFunc(r.init);
+        var switchtype = switchReducers(r.reducers);
+        var importLib = extractLib(r.import);
+        
+        // eslint-disable-next-line
+        results[key] = new Function('state', '{ payload, type }', `
+            ${importLib}
             
-            // eslint-disable-next-line
-            reducers[key] = function (state, { payload, type }) {
-                if (typeof state === "undefined") { 
-                    // eslint-disable-next-line
-                    state = (new Function(...[...r.import, 'r'] , `return r.init()`)).bind(this[key])(...[...importReduxLib, r]);
-                }
-                
-                for (var x in r.reducers) {
-                    var item = r.reducers[x];
-                    if (item.type === type) {
-                        // eslint-disable-next-line
-                        state = (new Function(...[...r.import, 'item','state', 'payload'], `return item.reducer(state, payload)`)).bind(this[key])(...[...importReduxLib, item, state, payload]);
-                    }
-                }
-                
-                return state;
-            }.bind(this)
-        }
-    }
-
+            if (typeof state === 'undefined') {
+                ${init}
+            }
+        
+            switch (type) {
+                ${switchtype}
+            }
+            
+            return state;
+        `);
+    })
+    
     if (typeof additionalReducers !== "undefined") {
         for (var j in additionalReducers) {
-            reducers[j] = additionalReducers[j];
+            results[j] = additionalReducers[j];
         }
     }
 
-    return combineReducers(reducers);
+    return combineReducers(results);
 }

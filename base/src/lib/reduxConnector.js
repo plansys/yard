@@ -30,7 +30,7 @@ export const mapInput = function (input) {
                 break;
             }
         }
-
+        
         return result;
     }
 }

@@ -15,7 +15,7 @@ export default function register() {
       const swUrl = base
                       .replace('[page]', window.yard.page.name)
                       .replace('[mode]', 'sw');
-                      
+      
       navigator.serviceWorker
         .register(swUrl)
         .then(registration => {

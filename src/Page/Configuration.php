@@ -107,6 +107,8 @@ class Configuration
                     $ex = explode(":", $v);
                     if (count($ex) > 1) {
                         $js[$k] = $this->page->base->getRootUrl($ex[0]) . '/' . $ex[1];
+                    } else {
+                        $js[$k] = $this->page->base->getRootUrl('') . '/' . $ex[0];
                     }
                 }
             }
@@ -119,13 +121,22 @@ class Configuration
 
     public function getServiceWorkerFiles() {
         $files = [];
-        $pageFiles = Dependency::parseFiles($this->page, self::parseRender($this->page));
+        $pageFiles = [];
+
+        if ($this->page->masterpage != '') {
+            $master = $this->page->base->newPage($this->page->masterpage);
+            $pageFiles = Dependency::parseFiles($master, self::parseRender($master));
+            array_unshift($pageFiles, Dependency::parseRootFileItem($master, $master->alias));
+        }
+
+        $pageFiles = array_merge($pageFiles, Dependency::parseFiles($this->page, self::parseRender($this->page)));
         array_unshift($pageFiles, Dependency::parseRootFileItem($this->page, $this->page->alias));
         foreach ($pageFiles as $pfs) {
             foreach ($pfs as $f) {
                 $files[] = $f;
             }
         }
+
         return $files;
     }
 }

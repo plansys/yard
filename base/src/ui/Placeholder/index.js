@@ -2,13 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Route } from 'react-router'; 
 import { ConnectedRouter } from 'react-router-redux';
-import { createPage } from './../../../Page';
-import Loader from './../../../Loader';
+import { Page, createPage } from './../../Page';
+import Loader from './../../Loader';
 
 class Placeholder extends React.Component {
     constructor() {
         super(...arguments)
         
+        this._loader = {};
         this.state = {
             currentPage: null
         };
@@ -18,16 +19,12 @@ class Placeholder extends React.Component {
         return (
             <ConnectedRouter history={ this.props.history }>
                 <Route render={ (route) => {
-                        const params = new window.URLSearchParams(route.location.search);
-                        const pageName = params.get('r').split('page/').pop().split(":").pop();
-                        
-                        if (!this._loader) {
-                            this._loader = {};
-                        }
+                        const pageName = Page.history.now();
                         
                         if (!this._loader[pageName]) {
                             this._loader[pageName] = new Loader(pageName)
-                            this._loader[pageName].init.then(conf => {
+                            this._loader[pageName].init
+                            .then(conf => {
                                 this.setState({currentPage: pageName });
                             })
                             return null;

@@ -1,4 +1,5 @@
 import './lib/path';
+import 'babel-regenerator-runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import registerServiceWorker from './lib/registerServiceWorker';

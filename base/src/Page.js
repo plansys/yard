@@ -5,6 +5,48 @@ import { Provider } from 'react-redux';
 import Loader from './Loader';
 
 export class Page extends React.Component {
+    
+    static history = {
+        push: function(page) {
+            if (!Loader.redux) {
+                throw new Error('Loader.redux is not defined!'); 
+            }
+            
+            var url = window.yard.url.page
+                        .replace('[page]', page)
+                        .replace('[mode]',  '');
+        
+            window.yard.page.name = page;
+            Loader.redux.history.push(url);
+        },
+        replace: function(page) {
+            if (!Loader.redux) {
+                throw new Error('Loader.redux is not defined!'); 
+            }
+            
+            var url = window.yard.url.page
+                        .replace('[page]', page)
+                        .replace('[mode]',  '');
+            
+            window.yard.page.name = page;
+            Loader.redux.history.replace(url);
+        },
+        redirect: function(page) {
+            var url = window.yard.url.page
+                        .replace('[page]', page)
+                        .replace('[mode]',  '');
+        
+            window.location.href = url;
+        },
+        now: function() {
+            const rule = ".*" + window.yard.url.page.split("[page]").join("(.*)").split("[mode]").join("(.*)")
+            const url = window.location.href.replace(/\/?$/, '/');
+            
+            const match = url.match(new RegExp(rule));
+            return match[1];
+        }
+    }
+    
     constructor() {
         super(...arguments)
         this.state = {
@@ -19,8 +61,9 @@ export class Page extends React.Component {
         }
         
         this.url = window.yard.url.pages[''];
-
-        this.props.loader.conf.js.bind(this)();
+        
+        
+        this.props.loader.conf.js.bind(this)(Page);
     }
     
     componentWillReceiveProps(nextProps) {
@@ -61,15 +104,11 @@ export class Page extends React.Component {
 
     applyEvent(event, args) {
         if (this._events[event]) {
-            this._events[event](args);
+            this._events[event](...args);
         }
     }
 
     loadSubPage() {
-        this.setState({
-          isLoaded: false,
-        });
-        
         this._loaders = [];
         
         if (this.props.loader.conf.loaders) {
@@ -78,15 +117,21 @@ export class Page extends React.Component {
             });
         }
         
-        Promise
-            .all(this._loaders.map(l => l.init))
-            .then(results => {
-                if (!this._isMounted) return null;
-                this.setState({isLoaded: true});
-            })
+        if (this._loaders) {
+            this.setState({
+              isLoaded: false,
+            });
+            
+            Promise
+                .all(this._loaders.map(l => l.init))
+                .then(results => {
+                    if (!this._isMounted) return null;
+                    this.setState({isLoaded: true});
+                })
+        }
+        
     }
     hswap(tag, props, children) {
-        
         switch (tag) {
             case "js":
                 return props.bind(this)(this.hswap.bind(this));

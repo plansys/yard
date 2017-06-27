@@ -20,14 +20,21 @@ export const loadConf = (alias, isRoot) => {
     var url = window.yard.url.page
                 .replace('[page]', alias)
                 .replace('[mode]', (isRoot ? 'r|' : '') + 'js');
-
+    
+    var pageUrl = window.yard.url.page
+                .replace('[page]', alias)
+                .replace('[mode]', '')
+    
     return fetch(url)
         .then(res => {
+            if (!res) return;
+
             return res.text().then(text => {
                 var trimmedText = text;
                 if (trimmedText.length < 10) {
                     throw new Error('empty response');
                 }
+                
                 // if the text is already formatted in babel(es2015), then return it
                 if (trimmedText.indexOf('use strict') >= 0) {
                     return new Promise(resolve => {
@@ -49,6 +56,11 @@ export const loadConf = (alias, isRoot) => {
                     const clearUrl = window.yard.url.page
                                         .replace('[page]', alias)
                                         .replace('[mode]', (isRoot ? 'r|' : '')+ 'clean');
+                    
+                    if (text.indexOf('<html') === 0) {
+                        document.body.innerHTML = text;
+                        return;
+                    }
 
                     addJS(babelUrl, 'babel', () => {
                         var success = true;
@@ -57,6 +69,8 @@ export const loadConf = (alias, isRoot) => {
                             var output = Babel.transform('var vconf = ' + text, { /* eslint-disable-line rule-name */
                                 presets: ['es2015', 'react', 'stage-1']
                             }).code;
+                            
+                            output = output.replace('var _extends = Object.assign ||', 'var _extends = window._extends = Object.assign ||');
                         }
                         catch (e) {
                             success = false;
@@ -77,6 +91,9 @@ export const loadConf = (alias, isRoot) => {
                     });
                 })
             });
+        })
+        .catch(res => {
+            console.log(res, pageUrl);
         });
 }
 

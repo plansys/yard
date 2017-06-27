@@ -45,7 +45,11 @@ trait Redux
                     if (!class_exists($class, false)) {
                         require($reducerPath);
                     }
-                    $reducers[strtolower($reducer)] = new $class;
+                    $reducers[strtolower($reducer)] = [
+                        'class' => new $class,
+                        'file' => $reducerPath,
+                        'store' => $store
+                    ];
                 } else {
                     throw new \Exception ("Redux Store Reducer [{$store}.{$reducer}] not found in {$reducerPath}!");
                 }
@@ -157,8 +161,12 @@ trait Redux
         foreach ($reducers as $k => $r) {
             $glob = glob(dirname($r['file']) . DIRECTORY_SEPARATOR . "*Saga.php");
             foreach ($glob as $file) {
-                require($file);
                 $class = str_replace(".php", "", basename($file));
+                
+                if (!class_exists($class, false)) {
+                    require_once($file);
+                }
+                
                 if (class_exists($class, false)) {
                     $item = new $class;
                     

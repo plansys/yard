@@ -5,6 +5,7 @@ namespace Yard;
 class Page
 {
     use Page\Cache;
+    use \Yard\Lib\JsConvert;
     
     private $conf;
     public $alias = "";
@@ -49,9 +50,13 @@ class Page
         $this->showDeps = $showDeps;
         $this->base = $base;
         
-        $this->url = @$base->url['root'];
+        $this->url = @$base->pages['']['url'];
 
         $this->conf = new Page\Configuration($this);
+    }
+    
+    public function urlFor($url) {
+        return $this->url . $url;
     }
 
     public function getServiceWorkerFiles()

@@ -35,8 +35,15 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                         if ($j[0] == 'span') {
                             $content[] = $j[1];
                         } elseif ($j[0] == 'el') {
-                            foreach ($j[1] as $jj) {
-                                $content[] = $jj;
+                            
+                            if (count($j[1]) > 1) {
+                                $jc = ['div', []];
+                                foreach ($j[1] as $jj) {
+                                    $jc[1][] = $jj;
+                                }
+                                $content[] = $jc;
+                            } else {
+                                $content[] = $j[1][0];
                             }
                         }
                     }

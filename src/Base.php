@@ -7,6 +7,7 @@ class Base
     use \Yard\Lib\ArrayTools;
     
     public $offline = false;
+    public $host = '';
     public $dir = [
         'base' => '',
         'cache' => '',
@@ -38,6 +39,8 @@ class Base
             $this->offline = $settings['offline'];
         }
         
+
+        $this->host = $settings['host'];
         $this->name = @$settings['name'];
         $this->dir = $settings['dir'];
         $this->url = $settings['url'];
@@ -81,7 +84,7 @@ class Base
             $tag = implode(":", $tags);
         }
         
-        if (is_file($this->pages[$shortcut] . DIRECTORY_SEPARATOR . $tag . '.php')) {
+        if (is_file($this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php')) {
             return true;
         } else {
             return false;
@@ -116,8 +119,11 @@ class Base
             if (!class_exists($mp['class'], false)) {
                 throw new \Exception('Masterpage not found: ' . $new->masterpage);
             }
-
+            
             $master = new $mp['class']($new->masterpage, true, $new, $this);
+
+            $this->validateReduxStore($new, $master);
+            
             return $master;
         }
         return $new;
@@ -140,7 +146,6 @@ class Base
     public function resolve($alias, $returnAsString = true)
     {
         $parr = explode(":", $alias);
-    
         if (count($parr) == 1 && isset($this->pages[''])) {
               $baseDir = $this->pages['']['dir'];
               $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
@@ -169,6 +174,32 @@ class Base
               return $baseDir . DIRECTORY_SEPARATOR . $path;
         } else {
               throw new \Exception('File not found for Page `' . $alias . '`: ' . $baseDir . DIRECTORY_SEPARATOR . $path);
+        }
+    }
+    
+    private function validateReduxStore($new, $master) {
+        if (!empty($new->store)) {
+            
+            $ms = [];
+            foreach ($master->store as $raws) {
+                $ss = explode(".", $raws);
+                if (!isset($ms[$ss[0]])) {
+                    $ms[$ss[0]] = [];
+                }
+                
+                $ms[$ss[0]][$ss[1]] = $raws;
+            }
+            
+            foreach ($new->store as $s) {
+                $ss = explode(".", $s);
+                
+                if (!isset($ms[$ss[0]][$ss[1]])) {
+                    if (!isset($ms[$ss[0]]['*'])) {
+                        throw new \Exception("Store {$s} is not declared in Page: " . $master->alias . '. You should add `public $store = [\''.$ss[0].'.*\'];` in ' . $master->alias . '.php ');
+                    }
+                }
+            }
+            
         }
     }
     

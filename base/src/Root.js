@@ -19,7 +19,7 @@ class Root extends React.Component {
 
     render() {
         if (!this.state.isLoaded) return null;
-        return createPage(this.props.name, this._loader);
+        return createPage(this._loader.name, this._loader);
     }
 }
 

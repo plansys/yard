@@ -54,7 +54,7 @@
         } 
     }
 ?>
-    js: function() {
+    js: function(Page) {
         <?= $js ?>
     },
     render: function(h) {

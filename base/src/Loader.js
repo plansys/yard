@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import { importReducers } from './lib/reduxImport';
 import createSagaMiddleware from 'redux-saga';
 import * as reduxSagaEffects from 'redux-saga/effects';
-import api from './lib/api';
 
 // router
 import createHistory from 'history/createBrowserHistory'
@@ -57,9 +56,13 @@ class Loader {
     }
 
     initConf(name) {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             if (!Loader.page.conf[name]) {
-                loadConf(name, this.isRoot).then(rawconf => {
+                loadConf(name, this.isRoot)
+                    .catch(res => {
+                        reject(res);
+                    })
+                    .then(rawconf => {
                     var conf = parseConf(rawconf, name);
 
                     Loader.page.conf[conf.alias] = conf;
@@ -68,16 +71,23 @@ class Loader {
                     }
                     this.name = conf.alias;
                     
+                    const deps = [];
+                    
                     function includeCSS(alias, shouldLoad) {
                         if (shouldLoad && Loader.page.css.indexOf(alias) < 0) {
                             var url = window.yard.url.page
                                         .replace('[page]', alias)
                                         .replace('[mode]',  'css');
-                            addCSS(url);
+                                        
                             Loader.page.css.push(alias);
+                            
+                            deps.push(new Promise(resolve => {
+                                addCSS(url, function() {
+                                    resolve(url);
+                                });
+                            }))
                         }
                     }
-                    
                     
                     includeCSS(conf.alias, conf.css);
                     if (conf.dependencies) {
@@ -87,22 +97,18 @@ class Loader {
                     }
 
                     if (conf.includeJS) {
-                        var jsdeps = [];
-                        
                         conf.includeJS.forEach(js => {
-                            jsdeps.push(new Promise(resolve => {
+                            deps.push(new Promise(resolve => {
                                 addJS(js, js, function() {
                                     resolve(js);
                                 });
                             }))
                         })
-                        
-                        Promise.all(jsdeps).then(params => {
-                            resolve(conf);
-                        })
-                    } else {
+                    } 
+                    
+                    Promise.all(deps).then(params => {
                         resolve(conf);
-                    }
+                    })
                 })
             } else {
                 resolve(Loader.page.conf[name]);
@@ -154,7 +160,6 @@ class Loader {
 
     prepareRedux(conf) {
         return new Promise(resolve => {
-
             // init store
             if (this.isRoot !== false && conf.redux) {
                 if (typeof conf.redux.actionCreators === 'function') {
@@ -176,16 +181,18 @@ class Loader {
                     sagaMiddleware
                 ]);
                 
-                
                 var keys = Object.keys(reduxSagaEffects)
-                            .concat('api')
+                            .concat('Page')
                             .concat('conf');
                 var values = Object.values(reduxSagaEffects)
-                            .concat(api)
+                            .concat(Page)
                             .concat(conf);
                 
+                const entire = conf.redux.sagas.toString(); 
+                const body = entire.slice(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
+                
                 //eslint-disable-next-line
-                const sagasStore =  (new Function(...keys,  'conf.redux.sagas()'))(...values);
+                const sagasStore =  (new Function(...keys,  body))(...values);
                 
                 for (let t in sagasStore) {
                     let sagas = sagasStore[t];

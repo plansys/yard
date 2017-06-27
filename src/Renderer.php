@@ -32,7 +32,6 @@ class Renderer
                 $content = $this->renderHTML();
                 break;
             case "css":
-                header("Content-type: text/css");
                  $this->renderCSS();
                 break;
             case "js":
@@ -40,20 +39,17 @@ class Renderer
                 if (is_file($cache)) {
                     header("Location: " . $this->page->getCacheUrl());
                 } else {
-                    header("Content-type: text/javascript");
                     $this->renderJS();
                 }
                 break;
             case "jsdev": 
-                    header("Content-type: text/javascript");
-                    $this->renderJS();
+                $this->renderJS();
                 break;
             case "post":
                 $post = file_get_contents("php://input");
                 $this->page->updateCache($post);
                 break;
             case "sw": 
-                header('Content-Type: text/javascript');
                 $swjs = @file_get_contents($this->base->dir['base'] . '/service-worker.js');
                 
                 $start = strpos($swjs, 'var precacheConfig=') + strlen('var precacheConfig=');
@@ -65,11 +61,11 @@ class Renderer
                 foreach ($sw as $k=>$s) {
                     $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
                 }
-                $sw[0] = [$this->base->url['host'], $this->page->getCacheHash()];
-                
+                $sw[0] = [$this->base->host, $this->page->getCacheHash()];
                 $sw = array_merge($sw, $files);
+
                 $swjs = str_replace($swtxt, json_encode($sw), $swjs);
-                echo $swjs . 'console.log(urlsToCacheKeys);';
+                echo $swjs;
             break;
             case "vendor":
                 if (isset($_GET['_v_dr'])) {
@@ -86,8 +82,6 @@ class Renderer
                         }
                     }
                 }
-            break;
-            case "api": 
             break;
         }
 

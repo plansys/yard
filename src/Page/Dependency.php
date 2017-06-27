@@ -51,55 +51,86 @@ class Dependency
         return $deps;
     }
 
-    public static function parseRootFileItem($page, $alias)
-    {
-        $base = $page->base;
-        $files = [
-            [
-                strtr($base->url['page'], [
-                    "[page]" => $alias,
-                    "[mode]" =>  "r|js"
-                ]), 
-                $page->getCacheHash()
-            ]
-        ];
+   
 
-        if (trim($page->css()) != "") {
-            $files[] = [
-                strtr($base->url['page'], [
-                    "[page]" => $alias,
-                    "[mode]" =>  "r|css"
-                ]), 
-                $page->getCacheHash()
+    public static function addParsedFile($file, $hash, $array) {
+        $trimmed = rtrim($file, '/');
+
+        if ($file != $trimmed) {
+            $array[] = [
+                $trimmed,
+                $hash
             ];
         }
-        return $files;
+
+        $array[] = [
+            $file,
+            $hash
+        ];
+
+        return $array;
     }
 
     public static function parseFileItem($base, $alias)
     {
         $page = $base->newPage($alias);
-        $files = [
-            [
+        $files = [];
+
+        $files = self::addParsedFile(
                 strtr($base->url['page'], [
                     "[page]" => $alias,
                     "[mode]" =>  "js"
-                ]), 
-                $page->getCacheHash()
-            ]
-        ];
+                ]), $page->getCacheHash(), $files);
 
         if (trim($page->css()) != "") {
-            $files[] = [
+            $files = self::addParsedFile(
                 strtr($base->url['page'], [
                     "[page]" => $alias,
                     "[mode]" =>  "css"
-                ]), 
-                $page->getCacheHash()
-            ];
+                ]), $page->getCacheHash(), $files);
         }
         return $files;
     }
+
+     public static function parseRootFileItem($page, $alias)
+    {
+        $base = $page->base;
+        $files = [];
+
+        $files = self::addParsedFile(
+                strtr($base->url['page'], [
+                    "[page]" => $alias,
+                    "[mode]" =>  ""
+                ]), $page->getCacheHash(), $files);
+                
+        $files = self::addParsedFile(
+                strtr($base->url['page'], [
+                    "[page]" => $alias,
+                    "[mode]" =>  "r|js"
+                ]), $page->getCacheHash(), $files);
+
+        $files = self::addParsedFile(
+                strtr($base->url['page'], [
+                    "[page]" => $alias,
+                    "[mode]" =>  "js"
+                ]), $page->getCacheHash(), $files);
+
+        if (trim($page->css()) != "") {
+            $files = self::addParsedFile(
+                strtr($base->url['page'], [
+                    "[page]" => $alias,
+                    "[mode]" =>  "r|css"
+                ]), $page->getCacheHash(), $files);
+
+            $files = self::addParsedFile(
+                strtr($base->url['page'], [
+                    "[page]" => $alias,
+                    "[mode]" =>  "css"
+                ]), $page->getCacheHash(), $files);
+        }
+        return $files;
+    }
+
 
     public static function parseFiles($page, $pageRender, $tags = false)
     {
@@ -109,7 +140,6 @@ class Dependency
             if ($tag[0] == 'Page') {
                 $tags[$tag[1]['name']] = self::parseFileItem($page->base, $tag[1]['name']);
             }
-
             if (count($tag) == 2 &&
               is_array($tag[1]) &&
               !self::is_assoc($tag[1])) {
