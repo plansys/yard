@@ -62,7 +62,7 @@ $base = new \Yard\Base([
   'url' => [
     'root' => $host . '/pages',
     'base' => $host . '/bases/default/build',
-    'page' => $host . '/?p=[page]&m=[mode]',
+    'page' => $host . '/?p=[page]',
     'cache' => $host . '/cache/[file]'
   ]
 ]);

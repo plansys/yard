@@ -18,10 +18,14 @@ class Renderer
         $this->base = $base;
     }
 
-    public function render($alias, $mode = 'html')
+    public function render($rawAlias)
     {
-        $isRoot = strtok($mode, '|') == 'r';
-        $mode = self::explode_last("|", $mode);
+        $aliasarr = explode("...", $rawAlias);
+        $mode = count($aliasarr) > 1 ? $aliasarr[1] : 'html' ;
+        $alias = $aliasarr[0];
+
+        $isRoot = strtok($mode, '.') == 'r';
+        $mode = self::explode_last(".", $mode);
         
         if ($mode != 'vendor') {
             $this->page = $this->base->newPage($alias, $isRoot);
@@ -37,7 +41,8 @@ class Renderer
             case "js":
                 $cache = $this->page->getCacheFile();
                 if (is_file($cache)) {
-                    header("Location: " . $this->page->getCacheUrl());
+                    // header("Location: " . $this->page->getCacheUrl());
+                    echo file_get_contents($cache);
                 } else {
                     $this->renderJS();
                 }
@@ -57,14 +62,15 @@ class Renderer
                 $swtxt = substr($swjs, $start, $stop - $start);
                 $sw = json_decode($swtxt, true);
                 $files = $this->page->getServiceWorkerFiles();
-                
-                foreach ($sw as $k=>$s) {
-                    $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
-                }
-                $sw[0] = [$this->base->host, $this->page->getCacheHash()];
-                $sw = array_merge($sw, $files);
+                if (is_array($sw)) {
+                    foreach ($sw as $k=>$s) {
+                        $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
+                    }
+                    $sw[0] = [$this->base->host, $this->page->getCacheHash()];
+                    $sw = array_merge($sw, $files);
 
-                $swjs = str_replace($swtxt, json_encode($sw), $swjs);
+                    $swjs = str_replace($swtxt, json_encode($sw), $swjs);
+                }
                 echo $swjs;
             break;
             case "vendor":

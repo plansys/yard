@@ -13,8 +13,7 @@ export class Page extends React.Component {
             }
             
             var url = window.yard.url.page
-                        .replace('[page]', page)
-                        .replace('[mode]',  '');
+                        .replace('[page]', page);
         
             window.yard.page.name = page;
             Loader.redux.history.push(url);
@@ -25,25 +24,25 @@ export class Page extends React.Component {
             }
             
             var url = window.yard.url.page
-                        .replace('[page]', page)
-                        .replace('[mode]',  '');
+                        .replace('[page]', page);
             
             window.yard.page.name = page;
             Loader.redux.history.replace(url);
         },
         redirect: function(page) {
             var url = window.yard.url.page
-                        .replace('[page]', page)
-                        .replace('[mode]',  '');
+                        .replace('[page]', page);
         
             window.location.href = url;
         },
         now: function() {
-            const rule = ".*" + window.yard.url.page.split("[page]").join("(.*)").split("[mode]").join("(.*)")
+            const rule = ".*" + window.yard.url.page.split("[page]").join("(.*)")
             const url = window.location.href.replace(/\/?$/, '/');
             
             const match = url.match(new RegExp(rule));
-            return match[1];
+            const pageArr = match[1].split("...");
+            
+            return pageArr[0];
         }
     }
     

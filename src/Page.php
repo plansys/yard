@@ -7,7 +7,7 @@ class Page
     use Page\Cache;
     use \Yard\Lib\JsConvert;
     
-    private $conf;
+    public $conf;
     public $alias = "";
     public $isRoot = false;
     public $showDeps = false;

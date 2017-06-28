@@ -13,8 +13,7 @@ export default function register() {
     window.addEventListener('load', () => {
       const base = !!window.yard.url ? window.yard.url.page : '';
       const swUrl = base
-                      .replace('[page]', window.yard.page.name)
-                      .replace('[mode]', 'sw');
+                      .replace('[page]', window.yard.page.name + '...sw');
       
       navigator.serviceWorker
         .register(swUrl)
@@ -28,7 +27,8 @@ export default function register() {
                   // the fresh content will have been added to the cache.
                   // It's the perfect time to display a "New content is
                   // available; please refresh." message in your web app.
-                  console.log('New content is available; please refresh.');
+                  console.log('New content is available. refreshing page...');
+                  window.location.reload();
                 } else {
                   // At this point, everything has been precached.
                   // It's the perfect time to display a

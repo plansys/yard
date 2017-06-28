@@ -25,8 +25,7 @@ const toQueryString = function (params, url) {
 const api = {
     get: function (endpoint, params, mode = 'text') {
         var url = window.yard.url.page
-                .replace('[page]', endpoint)
-                .replace('[mode]', 'api');
+                .replace('[page]', endpoint + '...api')
         var promise = fetch(toQueryString(params, url));
         
         if (mode === 'text') {

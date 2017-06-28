@@ -98,19 +98,24 @@ class Configuration
         return trim($js) . "\n";
     }
     
+    public function getJSPath($js) {
+        if (strpos($js, 'http') !== 0) {
+            $ex = explode(":", $js);
+            if (count($ex) > 1) {
+                return $this->page->base->getRootUrl($ex[0]) . '/' . $ex[1];
+            } else {
+                return $this->page->base->getRootUrl('') . '/' . $ex[0];
+            }
+        }
+        return $js;
+    }
+
     private function renderIncludeJS() {
         $js = $this->page->includeJS();
         
         if (is_array($js) && !empty($js)) {
             foreach ($js as $k => $v) {
-                if (strpos($v, 'http') !== 0) {
-                    $ex = explode(":", $v);
-                    if (count($ex) > 1) {
-                        $js[$k] = $this->page->base->getRootUrl($ex[0]) . '/' . $ex[1];
-                    } else {
-                        $js[$k] = $this->page->base->getRootUrl('') . '/' . $ex[0];
-                    }
-                }
+                $js[$k] = $this->getJSPath($v);
             }
             
             return $this->toJs($js);

@@ -23,7 +23,7 @@ class Base
 
     function __construct($settings = [])
     {
-        $this->validateDir(@$settings['dir']);
+        $settings['dir'] = $this->validateDir(@$settings['dir']);
         $this->validateUrl(@$settings['url']);
         $this->validatePages(@$settings['pages']);
 
@@ -50,8 +50,7 @@ class Base
         
         # load sample yard pages
         $vurl = strtr($this->url['page'], [
-            '[page]' => 'vendor',
-            '[mode]' => 'vendor'
+            '[page]' => 'vendor...vendor'
         ]);
         
         if (strpos($vurl, '?') === false) {
@@ -233,8 +232,12 @@ class Base
             } else {
                 if ($is == 'is_string') {
                     if (!is_dir($dir[$k])) {
-                        throw new \Exception("Failed to instantiate a base: {$dir[$k]} is not a directory");
+                        if (!mkdir($dir[$k], 0777, true)) {
+                            throw new \Exception("Failed to create directory: {$dir[$k]}");
+                        }
                     }
+                    
+                    $dir[$k] = realpath($dir[$k]);
                 } else if ($is == 'is_array') {
                     foreach ($dir[$k] as $kd => $dd) {
                         if (!is_dir($dd)) {
@@ -244,6 +247,8 @@ class Base
                 }
             }
         }
+        
+        return $dir;
     }
 
     private function validateUrl($dir)

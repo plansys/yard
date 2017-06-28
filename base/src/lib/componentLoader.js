@@ -17,13 +17,12 @@ export const componentLoader = (tag) => {
 }
 
 export const loadConf = (alias, isRoot) => {
+
     var url = window.yard.url.page
-                .replace('[page]', alias)
-                .replace('[mode]', (isRoot ? 'r|' : '') + 'js');
+                .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'js')
     
     var pageUrl = window.yard.url.page
                 .replace('[page]', alias)
-                .replace('[mode]', '')
     
     return fetch(url)
         .then(res => {
@@ -34,7 +33,7 @@ export const loadConf = (alias, isRoot) => {
                 if (trimmedText.length < 10) {
                     throw new Error('empty response');
                 }
-                
+
                 // if the text is already formatted in babel(es2015), then return it
                 if (trimmedText.indexOf('use strict') >= 0) {
                     return new Promise(resolve => {
@@ -51,11 +50,9 @@ export const loadConf = (alias, isRoot) => {
                 return new Promise((resolve, reject) => {
                     const babelUrl = window.yard.url.base + '/babel.min.js';
                     const postUrl = window.yard.url.page
-                                        .replace('[page]', alias)
-                                        .replace('[mode]', (isRoot ? 'r|' : '')+ 'post');
+                                        .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'post');
                     const clearUrl = window.yard.url.page
-                                        .replace('[page]', alias)
-                                        .replace('[mode]', (isRoot ? 'r|' : '')+ 'clean');
+                                        .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'clean');
                     
                     if (text.indexOf('<html') === 0) {
                         document.body.innerHTML = text;

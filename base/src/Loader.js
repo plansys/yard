@@ -40,14 +40,14 @@ class Loader {
         }
 
         this.isRoot = isRoot;
-        this.name = name;
+        this.name = name.replace(/[^0-9a-z.]/gi, '');;
         this.conf = null;
         this.subpage = [];
         this.subpageidx = 0;
         this.pageComponent = Page;
 
         this.init = this
-            .initConf(name)
+            .initConf(this.name)
             .then(this.loadDependecies.bind(this))
             .then(this.prepareRedux.bind(this))
             .then(this.bindRenderer.bind(this))
@@ -76,8 +76,7 @@ class Loader {
                     function includeCSS(alias, shouldLoad) {
                         if (shouldLoad && Loader.page.css.indexOf(alias) < 0) {
                             var url = window.yard.url.page
-                                        .replace('[page]', alias)
-                                        .replace('[mode]',  'css');
+                                        .replace('[page]', alias + '...css');
                                         
                             Loader.page.css.push(alias);
                             
