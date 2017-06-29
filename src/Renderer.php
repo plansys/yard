@@ -66,7 +66,6 @@ class Renderer
                     foreach ($sw as $k=>$s) {
                         $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
                     }
-                    $sw[0] = [$this->base->host, $this->page->getCacheHash()];
                     $sw = array_merge($sw, $files);
 
                     $swjs = str_replace($swtxt, json_encode($sw), $swjs);

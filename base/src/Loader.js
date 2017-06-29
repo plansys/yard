@@ -40,7 +40,7 @@ class Loader {
         }
 
         this.isRoot = isRoot;
-        this.name = name.replace(/[^0-9a-z.]/gi, '');;
+        this.name = name.replace(/[^0-9a-z.:]/gi, '');;
         this.conf = null;
         this.subpage = [];
         this.subpageidx = 0;

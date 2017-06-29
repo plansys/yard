@@ -64,6 +64,12 @@ class Base
             'url' => $vurl . "/plansys/yard/src/Sample"
         ];
         
+        # load crud if exists
+        if (class_exists('\Plansys\Crud\Init')) {
+            $base = \Plansys\Crud\Init::getBase($this->host);
+            $this->pages['crud'] = $base['pages'][''];
+        }
+
         # load redux-builder if exists
         $builderReduxDir = dirname(__FILE__) . "{$d}..{$d}builder-redux{$d}pages" ; 
         if (is_dir($builderReduxDir)) {
