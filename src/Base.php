@@ -39,7 +39,6 @@ class Base
             $this->offline = $settings['offline'];
         }
         
-
         $this->host = $settings['host'];
         $this->name = @$settings['name'];
         $this->dir = $settings['dir'];

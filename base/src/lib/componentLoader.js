@@ -16,16 +16,7 @@ export const componentLoader = (tag) => {
         })
 }
 
-const isEmpty = function(o) {
-    for(var i in o){
-        if(o.hasOwnProperty(i)){
-            return false;
-        }
-    }
-    return true;
-}
-
-export const loadConf = (alias, isRoot, phpProps = {}) => {
+export const loadConf = (alias, isRoot) => {
 
     var url = window.yard.url.page
                 .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'js')
@@ -33,21 +24,7 @@ export const loadConf = (alias, isRoot, phpProps = {}) => {
     var pageUrl = window.yard.url.page
                 .replace('[page]', alias)
     
-    let params = {};
-    if (!isEmpty(phpProps)) {
-        params = {
-            headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-            },
-            method: "POST",
-            body: JSON.stringify(phpProps)
-        }
-    }
-
-    console.log(alias, isRoot, phpProps, params);
-
-    return fetch(url, params)
+    return fetch(url)
         .then(res => {
             if (!res) return;
 

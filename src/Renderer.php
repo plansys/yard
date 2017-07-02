@@ -47,14 +47,12 @@ class Renderer
                     echo file_get_contents($cache);
                 } else {
                     $post = file_get_contents("php://input");
-                    $phpProps = trim($post) != '' ? json_decode($post, true) : [];
-                    $this->renderJS($phpProps);
+                    $this->renderJS();
                 }
                 break;
             case "jsdev": 
                 $post = file_get_contents("php://input");
-                $phpProps = trim($post) != '' ? json_decode($post, true) : [];
-                $this->renderJS($phpProps);
+                $this->renderJS();
                 break;
             case "post":
                 $post = file_get_contents("php://input");
@@ -133,9 +131,9 @@ class Renderer
         echo $this->page->renderCSS();
     }
 
-    public function renderJS($phpProps = [])
+    public function renderJS()
     {
-        echo $this->page->renderConf($phpProps);
+        echo $this->page->renderConf();
     }
 
 }

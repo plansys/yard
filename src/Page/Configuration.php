@@ -23,12 +23,8 @@ class Configuration
         return ob_get_clean();
     }
 
-    public function render($phpProps = [])
+    public function render()
     {
-        if (!empty($phpProps)) {
-            var_dump($phpProps);
-            die();
-        }
 
         $indent = 1;
         $page = $this->page;
