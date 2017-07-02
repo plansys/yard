@@ -86,7 +86,8 @@ class Dependency
         if (is_array($includejs)) {
             $host = $base->host;
             if (strpos($base->host, 'http') === false) {
-                $host = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+                $protocol =  (isset($_SERVER['HTTPS']) && @$_SERVER['https'] == 'on' ? "https" : "http");
+                $host = $protocol . "://$_SERVER[HTTP_HOST]";
             }
             foreach($includejs as $js) {
                 $path = $page->conf->getJSPath($js);
