@@ -221,25 +221,13 @@ class Dependency
     
     public static function parseLoaders($pageRender, $tags = false)
     {
-        $parsePHPProps = function($attrs) {
-            $res = [];
-            foreach ($attrs as $k=>$a) {
-                if (strpos($k, 'php:') === 0) {
-                    $res[$k] = $a;
-                }
-            }
-            return $res;
-        };
 
         if ($tags === false) {
             $tag = $pageRender;
             $tags = [];
 
             if ($tag[0] == 'Page') {
-                $tags[] = [
-                    'page' => $tag[1]['name'],
-                    'phpProps' => $parsePHPProps($tag[1])
-                ];
+                $tags[] = [$tag[1]['name']];
             }
 
             if (count($tag) == 2 &&
@@ -258,10 +246,7 @@ class Dependency
                         continue;
                     }
 
-                    $tags[] = [
-                        'page' => $tag[1]['name'],
-                        'phpProps' => $parsePHPProps($tag[1])
-                    ];
+                    $tags[] = [$tag[1]['name']];
                 }
                 
                 if (count($tag) == 2 &&

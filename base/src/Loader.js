@@ -30,11 +30,11 @@ class Loader {
 
     static redux = {};
 
-    constructor(name, isRoot = false, phpProps = {}) {
-        this.loadPage(name, isRoot, phpProps);
+    constructor(name, isRoot = false) {
+        this.loadPage(name, isRoot);
     }
 
-    loadPage(name, isRoot = false, phpProps = {}) {
+    loadPage(name, isRoot = false) {
         if (typeof name !== 'string') {
             throw new Error('alias must be a string');
         }
@@ -45,8 +45,6 @@ class Loader {
         this.subpage = [];
         this.subpageidx = 0;
         this.pageComponent = Page;
-        this.phpProps = phpProps;
-
 
         this.init = this
             .initConf(this.name)
@@ -60,7 +58,7 @@ class Loader {
     initConf(name) {
         return new Promise((resolve, reject) => {
             if (!Loader.page.conf[name]) {
-                loadConf(name, this.isRoot, this.phpProps)
+                loadConf(name, this.isRoot)
                     .catch(res => {
                         reject(res);
                     })

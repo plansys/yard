@@ -113,7 +113,7 @@ export class Page extends React.Component {
         
         if (this.props.loader.conf.loaders) {
             this.props.loader.conf.loaders.forEach((item) => {
-                this._loaders.push(new Loader(item.page, false, item.phpProps));
+                this._loaders.push(new Loader(item, false));
             });
         }
         
@@ -139,15 +139,8 @@ export class Page extends React.Component {
                 let idx = this._loadersIdx++;
                 let loader = this._loaders[idx];
 
-                let phpProps = {};
-                map(props, (key, val) => {
-                    if (key.indexOf('php:') === 0) {
-                        phpProps[key] = val;
-                    }
-                })
-
                 if (!loader || (loader && !loader.conf)) {
-                    loader = this._loaders[idx] = new Loader(props.name, false, phpProps)
+                    loader = this._loaders[idx] = new Loader(props.name, false)
                     loader.init.then(conf => {
                         this.forceUpdate();
                     })

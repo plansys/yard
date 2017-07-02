@@ -53,7 +53,6 @@ class Page
         $this->base = $base;
         
         $this->url = @$base->pages['']['url'];
-
         $this->conf = new Page\Configuration($this);
     }
     
@@ -66,9 +65,9 @@ class Page
         return $this->conf->getServiceWorkerFiles();
     }
 
-    public function renderConf($phpProps = [])
+    public function renderConf()
     {
-        return $this->conf->render($phpProps);
+        return $this->conf->render();
     }
 
     public function renderInitJS()
