@@ -228,7 +228,7 @@ class Dependency
             $tags = [];
 
             if ($tag[0] == 'Page') {
-                $tags[] = [$tag[1]['name']];
+                $tags[] = $tag[1]['name'];
             }
 
             if (count($tag) == 2 &&
@@ -246,8 +246,7 @@ class Dependency
                     if (strpos(trim($tag[1]['name']), "js:") === 0) {
                         continue;
                     }
-
-                    $tags[] = [$tag[1]['name']];
+                    $tags[] = $tag[1]['name'];
                 }
                 
                 if (count($tag) == 2 &&
