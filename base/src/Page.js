@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import Loader from './Loader';
+import map from 'lodash.mapvalues';
 
 export class Page extends React.Component {
     
@@ -111,8 +112,8 @@ export class Page extends React.Component {
         this._loaders = [];
         
         if (this.props.loader.conf.loaders) {
-            this.props.loader.conf.loaders.forEach((pageName) => {
-                this._loaders.push(new Loader(pageName));
+            this.props.loader.conf.loaders.forEach((item) => {
+                this._loaders.push(new Loader(item.page, false, item.phpProps));
             });
         }
         
@@ -137,9 +138,16 @@ export class Page extends React.Component {
             case "Page":
                 let idx = this._loadersIdx++;
                 let loader = this._loaders[idx];
-                
+
+                let phpProps = {};
+                map(props, (key, val) => {
+                    if (key.indexOf('php:') === 0) {
+                        phpProps[key] = val;
+                    }
+                })
+
                 if (!loader || (loader && !loader.conf)) {
-                    loader = this._loaders[idx] = new Loader(props.name)
+                    loader = this._loaders[idx] = new Loader(props.name, false, phpProps)
                     loader.init.then(conf => {
                         this.forceUpdate();
                     })

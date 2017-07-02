@@ -23,8 +23,14 @@ class Configuration
         return ob_get_clean();
     }
 
-    public function render($indent = 1)
+    public function render($phpProps = [])
     {
+        if (!empty($phpProps)) {
+            var_dump($phpProps);
+            die();
+        }
+
+        $indent = 1;
         $page = $this->page;
         $renderParsed = self::parseRender($page);
         $contents = $this->renderComponent($renderParsed);
@@ -62,7 +68,6 @@ class Configuration
             }
         }
         $deps = self::toJs($deps);
-
 
         if ($page->isRoot) {
             $reducers = $this->renderReduxReducers();

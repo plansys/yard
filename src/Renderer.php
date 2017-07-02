@@ -33,7 +33,9 @@ class Renderer
         
         switch ($mode) {
             case "html":
-                $content = $this->renderHTML();
+                if (!$this->page->library) {
+                    $this->renderHTML();
+                }
                 break;
             case "css":
                  $this->renderCSS();
@@ -44,11 +46,15 @@ class Renderer
                     // header("Location: " . $this->page->getCacheUrl());
                     echo file_get_contents($cache);
                 } else {
-                    $this->renderJS();
+                    $post = file_get_contents("php://input");
+                    $phpProps = trim($post) != '' ? json_decode($post, true) : [];
+                    $this->renderJS($phpProps);
                 }
                 break;
             case "jsdev": 
-                $this->renderJS();
+                $post = file_get_contents("php://input");
+                $phpProps = trim($post) != '' ? json_decode($post, true) : [];
+                $this->renderJS($phpProps);
                 break;
             case "post":
                 $post = file_get_contents("php://input");
@@ -56,7 +62,6 @@ class Renderer
                 break;
             case "sw": 
                 $swjs = @file_get_contents($this->base->dir['base'] . '/service-worker.js');
-                
                 $start = strpos($swjs, 'var precacheConfig=') + strlen('var precacheConfig=');
                 $stop = strpos($swjs, ',cacheName="');
                 $swtxt = substr($swjs, $start, $stop - $start);
@@ -128,9 +133,9 @@ class Renderer
         echo $this->page->renderCSS();
     }
 
-    public function renderJS()
+    public function renderJS($phpProps = [])
     {
-        echo $this->page->renderConf();
+        echo $this->page->renderConf($phpProps);
     }
 
 }

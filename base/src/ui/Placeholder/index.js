@@ -22,7 +22,7 @@ class Placeholder extends React.Component {
                         const pageName = Page.history.now();
                         
                         if (!this._loader[pageName]) {
-                            this._loader[pageName] = new Loader(pageName)
+                            this._loader[pageName] = new Loader(pageName, false)
                             this._loader[pageName].init
                             .then(conf => {
                                 this.setState({currentPage: pageName });

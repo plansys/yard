@@ -28,9 +28,6 @@ trait JsConvert
             } else {
                 if (strpos(trim($value), "js:") === 0) {
                     $output .= trim(substr(trim($value), 3));
-                } elseif (strpos(trim($value), "php:") === 0) {
-                    $value = eval('return print_r(' . trim(substr(trim($value), 4)) . ', true);');
-                    $output .= ($quotes || $beautiful_json ? '"' : '') . $value . ($quotes || $beautiful_json ? '"' : '');
                 } else {
                     $value = str_replace('"', '\"', $value);
                     $output.= ($quotes || $beautiful_json ? '"' : '') . $value . ($quotes || $beautiful_json ? '"' : '');

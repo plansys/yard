@@ -112,11 +112,11 @@ trait Component
                         if (self::is_assoc($content[1])) {
                             $attr = ", " . self::toJS($content[1]);
                         } elseif ($count == 2) {
-                            $attr = $renderSub($content[1], $level);
+                            $child = $renderSub($content[1], $level);
                         }
                     }
                 } else {
-                    $attr = ',' . json_encode($content[1]);
+                    $child = ',' . json_encode($content[1]);
                 }
 
                 if ($count == 3) {
@@ -128,6 +128,8 @@ trait Component
                 }
             }
         }
+
+
 
         return "h('{$tag}'{$attr}{$child})";
     }

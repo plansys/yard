@@ -14,8 +14,10 @@ class Page
     public $base;
     public $store;
     public $masterpage = false;
+    public $library = false;
     public $placeholder = null;
     public $url = "";
+    public $props = [];
 
     public function mapStore()
     {
@@ -64,9 +66,9 @@ class Page
         return $this->conf->getServiceWorkerFiles();
     }
 
-    public function renderConf()
+    public function renderConf($phpProps = [])
     {
-        return $this->conf->render();
+        return $this->conf->render($phpProps);
     }
 
     public function renderInitJS()
