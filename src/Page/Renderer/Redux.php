@@ -173,7 +173,15 @@ trait Redux
                     if (!isset($actions[$r['store']])) {
                         $list[$r['store']] = [];
                     }
-                    $list[$r['store']][$k] = $item->sagas();
+
+                    $sagas = $item->sagas();
+                    foreach($sagas as $ks=> $vs) {
+                        if (strpos(trim($vs), 'js:') !== 0) {
+                            $sagas[$ks] = 'js:' . $sagas[$ks];
+                        }
+                    }
+
+                    $list[$r['store']][$k] = $sagas;
                 }
             }
         }

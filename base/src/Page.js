@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import Loader from './Loader';
-import map from 'lodash.mapvalues';
 
 export class Page extends React.Component {
     

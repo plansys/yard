@@ -8,7 +8,7 @@ from 'redux';
 export default function initStore(reducers, middlewares) {
      let middleware = applyMiddleware(...middlewares);
 
-     if (process.env.NODE_ENV !== 'production') {
+     if (process.env.NODE_ENV !== 'production' || window.yard.offline === false) {
           const devToolsExtension = window.devToolsExtension;
           if (typeof devToolsExtension === 'function') {
                middleware = compose(middleware, devToolsExtension());

@@ -94,6 +94,7 @@ trait Component
                                 break;
                             }
                         }
+
                         if ($noReturn) {
                             if (strpos($jsstr, "return ") === false && strpos($jsstr, "console") !== 0) {
                                 $jscode = explode("\n", $jsstr);
@@ -102,11 +103,12 @@ trait Component
                                     $jscode[$ln] = $num . $v;
                                 }
                                 $jsstr = json_encode($jscode);
-                                $jsstr = "console.error('The <js> should return <el> or string in Page [{$this->alias}]:', \"\\n\\n\" + {$jsstr}.join(\"\\n\"))";
+                                $jsstr = "console.error('The <js> should return <el> or string in Page [{$this->page->alias}]:', \"\\n\\n\" + {$jsstr}.join(\"\\n\"))";
                             }
                         } else {
                             $jsstr = " return (" . $jsstr . ")";
                         }
+                        
                         $attr = "," . " function(h) { $jsstr }";
                     } else {
                         if (self::is_assoc($content[1])) {
@@ -128,8 +130,6 @@ trait Component
                 }
             }
         }
-
-
 
         return "h('{$tag}'{$attr}{$child})";
     }
