@@ -7,7 +7,7 @@ class Dependency
     use \Yard\Lib\ArrayTools;
     use \Yard\Page\Renderer\Component;
 
-    public static function print($page, $pageRender, $deps = false)
+    public static function printPage($page, $pageRender, $deps = false)
     {
         $tags = array_keys(self::parseTags($pageRender));
         $isRoot = false;
@@ -30,7 +30,7 @@ class Dependency
                     if ($p != $page->alias) {
                         $np = $page->base->newPage($p, false, false);
                         $deps['pages'][$p] = $np;
-                        $deps = Dependency::print($page, self::parseRender($np), $deps);
+                        $deps = Dependency::printPage($page, self::parseRender($np), $deps);
                     }
                 }
             } else {
