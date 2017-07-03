@@ -45,10 +45,10 @@ class Configuration
         $deps = [];
         $placeholder = "";
         if ($page->isRoot || $page->showDeps) {
-            $deps = Dependency::print($page, $renderParsed);
+            $deps = Dependency::printPage($page, $renderParsed);
       
             if (!is_null($page->placeholder)) {
-                $pdeps = Dependency::print($page->placeholder, self::parseRender($page->placeholder));
+                $pdeps = Dependency::printPage($page->placeholder, self::parseRender($page->placeholder));
                 foreach ($pdeps['pages'] as $k => $p) {
                     if (!isset($deps['pages'][$k])) {
                         $deps['pages'][$k] = $p;
