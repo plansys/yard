@@ -51,9 +51,8 @@ class Dependency
         return $deps;
     }
 
-   
-
-    public static function addParsedFile($file, $hash, $array) {
+    public static function addParsedFile($file, $hash, $array)
+    {
         $trimmed = rtrim($file, '/');
 
         if ($file != $trimmed) {
@@ -89,7 +88,7 @@ class Dependency
                 $protocol =  (isset($_SERVER['HTTPS']) && @$_SERVER['https'] == 'on' ? "https" : "http");
                 $host = $protocol . "://$_SERVER[HTTP_HOST]";
             }
-            foreach($includejs as $js) {
+            foreach ($includejs as $js) {
                 $path = $page->conf->getJSPath($js);
                 $md5 = md5(file_get_contents($host . $path));
                 $files = self::addParsedFile($path, $md5, $files);
@@ -110,27 +109,26 @@ class Dependency
         return $files;
     }
 
-     public static function parseRootFileItem($page, $alias)
+    public static function parseRootFileItem($page, $alias)
     {
         $base = $page->base;
         $files = self::parseFileItem($page, $alias);
 
         $files = self::addParsedFile(
-                strtr($base->url['page'], [
-                    "[page]" => $alias
-                ]), $page->getCacheHash(), $files);
+              strtr($base->url['page'], [
+                  "[page]" => $alias
+              ]), $page->getCacheHash(), $files);
                 
         $files = self::addParsedFile(
-                strtr($base->url['page'], [
-                    "[page]" => $alias . '...r.js'
-                ]), $page->getCacheHash(), $files);
+              strtr($base->url['page'], [
+                  "[page]" => $alias . '...r.js'
+              ]), $page->getCacheHash(), $files);
 
         if (trim($page->css()) != "") {
             $files = self::addParsedFile(
                 strtr($base->url['page'], [
                     "[page]" => $alias . '...r.css'
                 ]), $page->getCacheHash(), $files);
-
         }
         return $files;
     }

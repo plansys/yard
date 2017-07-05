@@ -27,7 +27,7 @@ class Base
         $this->validateUrl(@$settings['url']);
         $this->validatePages(@$settings['pages']);
 
-        foreach ($settings['url'] as $k=>$url) {
+        foreach ($settings['url'] as $k => $url) {
             if (strpos($url, 'http') !== 0) {
                 $settings['url'][$k] = substr($url, 0, 3) . str_replace("//", "/", substr($url, 3));
             } else {
@@ -69,25 +69,23 @@ class Base
             $this->pages['crud'] = $base['pages'][''];
         }
 
-        # load redux-builder if exists
-        $builderReduxDir = dirname(__FILE__) . "{$d}..{$d}builder-redux{$d}pages" ; 
-        if (is_dir($builderReduxDir)) {
-            $this->pages['builder-redux'] = [
-                'dir' => $builderReduxDir,
-                'url' => $vurl . "/plansys/builder-redux/src/pages"
-            ];
+        # load crud if exists
+        if (class_exists('\Plansys\Db\Init')) {
+            $base = \Plansys\Db\Init::getBase($this->host);
+            $this->pages['db'] = $base['pages'][''];
         }
     }
     
-    public function isPage($tag) {
-        $tag = str_replace("." , DIRECTORY_SEPARATOR, $tag);
+    public function isPage($tag)
+    {
+        $tag = str_replace(".", DIRECTORY_SEPARATOR, $tag);
         $tags = explode(":", $tag);
         $shortcut = '';
         if (count($tags) > 1) {
             $shortcut = array_shift($tags);
             $tag = implode(":", $tags);
         }
-        
+
         if (is_file($this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php')) {
             return true;
         } else {
@@ -95,7 +93,8 @@ class Base
         }
     }
     
-    public function getRootUrl($shortcut = '') {
+    public function getRootUrl($shortcut = '')
+    {
         $url = $this->pages['']['url'];
         if (isset($this->pages[$shortcut])) {
             $url = $this->pages[$shortcut]['url'];
@@ -154,11 +153,13 @@ class Base
               $baseDir = $this->pages['']['dir'];
               $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
               $class = str_replace(".", '\\', $alias);
+              $shortcutNs = '';
         } elseif (count($parr) > 1) {
             if ($this->pages[$parr[0]]) {
                 $baseDir = $this->pages[$parr[0]]['dir'];
                 $path = str_replace(".", DIRECTORY_SEPARATOR, $parr[1]) . ".php";
                 $class = str_replace(".", '\\', $parr[1]);
+                $shortcutNs = $parr[0] . '\\';
             } else {
                 throw new \Exception('Pages directory not found: ' . $parr[0]);
             }
@@ -169,7 +170,7 @@ class Base
         if (is_file($baseDir . DIRECTORY_SEPARATOR . $path)) {
             if (!$returnAsString) {
                 return [
-                    'class' => '\\' . trim($this->pageNamespace, '\\') . '\\' . $class,
+                    'class' => '\\' . $shortcutNs . trim($this->pageNamespace, '\\') . '\\' . $class,
                     'path' => $path,
                     'baseDir' => $baseDir,
                     'fullPath' => $baseDir . DIRECTORY_SEPARATOR . $path
@@ -181,9 +182,9 @@ class Base
         }
     }
     
-    private function validateReduxStore($new, $master) {
+    private function validateReduxStore($new, $master)
+    {
         if (!empty($new->store)) {
-            
             $ms = [];
             foreach ($master->store as $raws) {
                 $ss = explode(".", $raws);
@@ -203,16 +204,16 @@ class Base
                     }
                 }
             }
-            
         }
     }
     
-    private function validatePages($pages) {
+    private function validatePages($pages)
+    {
         if (is_array($pages)) {
             if (!self::is_assoc($pages)) {
                 throw new \Exception('Pages should be in [key=>value] format');
             }
-        } 
+        }
     }
 
     private function validateDir($dir)
@@ -243,7 +244,7 @@ class Base
                     }
                     
                     $dir[$k] = realpath($dir[$k]);
-                } else if ($is == 'is_array') {
+                } elseif ($is == 'is_array') {
                     foreach ($dir[$k] as $kd => $dd) {
                         if (!is_dir($dd)) {
                             throw new \Exception("Failed to instantiate a base: {$dd} is not a directory");
@@ -271,7 +272,7 @@ class Base
             $isvalid = $is($dir[$k]);
             if (!$isvalid) {
                 throw new \Exception("Failed to instantiate a base: url.{$k} key is not a " . gettype($d));
-            } 
+            }
         }
     }
 }

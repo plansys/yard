@@ -1,6 +1,6 @@
 <?php
 
-namespace Pages;
+namespace yard\Pages;
 
 class Welcome extends \Yard\Page
 {
