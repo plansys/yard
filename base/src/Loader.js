@@ -70,16 +70,16 @@ class Loader {
                         Loader.page.conf[name] = conf.dependencies.pages[name];
                     }
                     this.name = conf.alias;
-                    
+
                     const deps = [];
-                    
+
                     function includeCSS(alias, shouldLoad) {
                         if (shouldLoad && Loader.page.css.indexOf(alias) < 0) {
                             var url = window.yard.url.page
                                         .replace('[page]', alias + '...css');
-                                        
+
                             Loader.page.css.push(alias);
-                            
+
                             deps.push(new Promise(resolve => {
                                 addCSS(url, function() {
                                     resolve(url);
@@ -87,7 +87,7 @@ class Loader {
                             }))
                         }
                     }
-                    
+
                     includeCSS(conf.alias, conf.css);
                     if (conf.dependencies) {
                         for (var p in conf.dependencies.pages) {
@@ -103,8 +103,8 @@ class Loader {
                                 });
                             }))
                         })
-                    } 
-                    
+                    }
+
                     Promise.all(deps).then(params => {
                         resolve(conf);
                     })
@@ -179,20 +179,22 @@ class Loader {
                     routerMiddleware(Loader.redux.history),
                     sagaMiddleware
                 ]);
-                
+
                 var keys = Object.keys(reduxSagaEffects)
                             .concat('Page')
                             .concat('conf');
-                var values = Object.values(reduxSagaEffects)
+
+                var values = Object.keys(reduxSagaEffects)
+                            .map((key) => reduxSagaEffects[key])
                             .concat(Page)
                             .concat(conf);
-                
-                const entire = conf.redux.sagas.toString(); 
+
+                const entire = conf.redux.sagas.toString();
                 const body = entire.slice(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
-                
+
                 //eslint-disable-next-line
                 const sagasStore =  (new Function(...keys,  body))(...values);
-                
+
                 for (let t in sagasStore) {
                     let sagas = sagasStore[t];
                     for (let i in sagas) {

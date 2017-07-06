@@ -12,7 +12,7 @@ export const mapInput = function (input) {
                     // eslint-disable-next-line
                     result[p] = function (store) {
                         var keys = Object.keys(store);
-                        var values = Object.values(store);
+                        var values = Object.keys(store).map((key) => store[key]);
                         var alias = list[p].replace('.', '__');
 
                         // eslint-disable-next-line
@@ -30,7 +30,7 @@ export const mapInput = function (input) {
                 break;
             }
         }
-        
+
         return result;
     }
 }
@@ -60,7 +60,7 @@ export const mapAction = function (action) {
                 result[p] = function () {
                     var actions = Loader.redux.actionCreators
                     var keys = Object.keys(actions);
-                    var values = Object.values(actions);
+                    var values = Object.keys(actions).map((key) => actions[key]);
 
                     // eslint-disable-next-line
                     var func = (new Function(...keys, `return ${this}`))(...values);
@@ -69,7 +69,7 @@ export const mapAction = function (action) {
                                 printKeys(actions));
                         return { type: "~~ERROR~~"};
                     }
-                    
+
                     return func(...arguments);
                 }.bind(act);
                 break;
