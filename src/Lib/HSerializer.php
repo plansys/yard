@@ -6,11 +6,21 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 {
     public $base;
     
+    /**
+     * @param \DOMNode $node
+     * @param int $options
+     * @param int $depth
+     */
     public function __construct($base, \DOMNode $node, $options = 0, $depth = 512) {
         parent::__construct($node, $options, $depth);
         $this->base = $base;
     }
     
+
+    /**
+     * @param \DOMElement $node
+     * @return array
+     */
     protected function getNode(\DOMElement $node)
     {
         $result = [

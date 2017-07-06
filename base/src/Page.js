@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import Loader from './Loader';
+import map from 'lodash.mapvalues';
 
 export class Page extends React.Component {
     
@@ -89,9 +90,12 @@ export class Page extends React.Component {
     
     render() {
         if (!this.state.isLoaded) return null;
-        
+
         this._loadersIdx = 0;
-        return React.Children.only(this.props.loader.conf.render.bind(this)(this.hswap.bind(this)))
+        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this));
+        if (!content.type) return null;
+        
+        return React.Children.only(content);
     }
 
     on(event, func) {
@@ -175,12 +179,26 @@ export const createPage = function(name, loader, props) {
         return (<div>Cannot create page, no loader provided!</div>)
     }
     
+    let NewPage = loader.pageComponent;
+    if (loader.conf.propTypes) {
+        NewPage.propTypes = {};
+        map(loader.conf.propTypes, (types, tag) => {
+            //eslint-disable-next-line
+            (new Function('NewPage', 'PropTypes', `NewPage.propTypes["${tag}"] = PropTypes.${types}`))(NewPage, PropTypes)
+        })
+    }
+
+    let newProps = {
+        ...props,
+        loader
+    };
+
     if (loader.isRoot && Loader.redux.store) {
         return ( 
             <Provider store={ Loader.redux.store }>
-                <loader.pageComponent loader={loader} { ...props } />
+                <NewPage { ...newProps } />
             </Provider> 
         )
     }
-    return <loader.pageComponent loader={loader} { ...props } />
+    return <NewPage { ...newProps } />
 }

@@ -13,7 +13,7 @@ class HtmlToJson
         # parse the dom
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml'=> LIBXML_COMPACT ]);
         $json = new HSerializer($base, $fdom);
-      
+        
         # turn it to string again, and then un-format it
         return str_replace('~^AND^~', '&', $json->__toString()); #un-replace '&'
     }

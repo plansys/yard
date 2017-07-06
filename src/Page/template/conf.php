@@ -55,6 +55,7 @@
     js: function(Page) {
         <?= $js ?>
     },
+<?= $propTypes ?>
     render: function(h) {
         return <?= implode("\n\t\t", explode("\n", $contents)); ?>;
     }

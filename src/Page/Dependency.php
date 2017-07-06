@@ -10,6 +10,7 @@ class Dependency
     public static function printPage($page, $pageRender, $deps = false)
     {
         $tags = array_keys(self::parseTags($pageRender));
+
         $isRoot = false;
         if ($deps === false) {
             $isRoot = true;
@@ -180,7 +181,10 @@ class Dependency
         if ($tags === false) {
             $tag = $pageRender;
             $tags = [];
-            $tags[$tag[0]] = true;
+
+            if (strpos(trim($tag[0]), "js:") !== 0) {
+                $tags[$tag[0]] = true;
+            }
 
             if (count($tag) == 2 &&
               is_array($tag[1]) &&
@@ -193,7 +197,7 @@ class Dependency
             }
         } else {
             foreach ($pageRender as $tag) {
-                if (!is_array($tag)) {
+                if (!is_array($tag) || strpos(trim($tag[0]), "js:") ===0) {
                     continue;
                 }
 

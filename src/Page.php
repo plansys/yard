@@ -14,7 +14,7 @@ class Page
     public $base;
     public $store;
     public $masterpage = false;
-    public $library = false;
+    public $norender = false;
     public $placeholder = null;
     public $url = "";
     public $props = [];
@@ -29,7 +29,8 @@ class Page
         return [];
     }
 
-    public function includeJS() {
+    public function includeJS()
+    {
         return [];
     }
 
@@ -45,6 +46,10 @@ class Page
     {
     }
 
+    public function propTypes()
+    {
+    }
+
     function __construct($alias, $isRoot, $showDeps, $base)
     {
         $this->alias = $alias;
@@ -56,7 +61,8 @@ class Page
         $this->conf = new Page\Configuration($this);
     }
     
-    public function urlFor($url) {
+    public function urlFor($url)
+    {
         return $this->url . $url;
     }
 

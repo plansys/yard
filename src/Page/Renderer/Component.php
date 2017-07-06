@@ -131,6 +131,12 @@ trait Component
             }
         }
 
-        return "h('{$tag}'{$attr}{$child})";
+        if (strpos($tag, 'js:') !== 0) {
+            $tag = "'" . $tag . "'";
+        } else {
+            $tag = substr(trim($tag), 3);
+        }
+
+        return "h({$tag}{$attr}{$child})";
     }
 }

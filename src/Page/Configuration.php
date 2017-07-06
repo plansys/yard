@@ -42,6 +42,11 @@ class Configuration
         $loaders = Dependency::parseLoaders($renderParsed);
         $loaders = count($loaders) > 0 ? self::toJs($loaders) : '[]';
 
+        $propTypes = $page->propTypes();
+        if (is_array($propTypes)) {
+            $propTypes = '    propTypes: ' . self::toJs($propTypes) . ",\n";
+        }
+
         $deps = [];
         $placeholder = "";
         if ($page->isRoot || $page->showDeps) {

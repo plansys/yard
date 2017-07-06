@@ -33,7 +33,7 @@ class Renderer
         
         switch ($mode) {
             case "html":
-                if (!$this->page->library) {
+                if ($this->page->norender == false) {
                     $this->renderHTML();
                 }
                 break;
