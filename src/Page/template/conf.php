@@ -57,7 +57,22 @@
     },
 <?= $propTypes ?>
     render: function(h) {
-        return <?= implode("\n\t\t", explode("\n", $contents)); ?>;
+        <?php
+            $render = implode("\n\t\t", explode("\n", $contents));
+            if (strpos($render, "h('jsdiv', ") === 0) {
+                $render = trim($render, "h('jsdiv', [");
+                $render = trim($render, "])");
+                $render = trim($render);
+                $render = trim($render, "`");
+                $render = explode("`,h(", $render);
+                $js = array_shift($render);
+                $render = trim($js . 'h(' . implode("`,h(", $render));
+            } else {
+                $render = ' return ' . $render;
+            }
+
+            echo $render;
+        ?>;
     }
 }
 

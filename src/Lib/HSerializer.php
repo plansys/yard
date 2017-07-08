@@ -26,10 +26,12 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         $result = [
             $node->nodeName,
         ];
+        
         $attributes = array_merge(
             $this->getNamespaces($node),
             $this->getAttributes($node)
         );
+
         if (!empty($attributes)) {
             $result[] = $attributes;
         }
@@ -42,7 +44,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                     $content = [];
 
                     foreach ($c[1] as $j) {
-                        if ($j[0] == 'span') {
+                        if ($j[0] == 'jstext') {
                             $content[] = $j[1];
                         } elseif ($j[0] == 'el') {
                             
@@ -94,7 +96,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                         $childs[] = $c;
                     } else {
                         if (trim($c) != '') {
-                            $childs[] = ['span', $c];
+                            $childs[] = ['jstext', $c];
                         }
                     }
                 }

@@ -11,7 +11,12 @@ trait Component
         } elseif (is_string($render)) {
             try {
                 $jsontxt = \Yard\Lib\HtmlToJson::convert($page->base, $render);
-                return json_decode($jsontxt, true);
+                $json = json_decode($jsontxt, true);
+
+                if ($json[0] == 'js') {
+                    return ['jsdiv', $json[1]];
+                }
+                return $json;
             } catch (\Exception $e) {
                 $render = explode("\n", $render);
                 $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
@@ -106,6 +111,10 @@ trait Component
                                 $jsstr = "console.error('The <js> should return <el> or string in Page [{$this->page->alias}]:', \"\\n\\n\" + {$jsstr}.join(\"\\n\"))";
                             }
                         } else {
+                            if (trim($jsstr) == '') {
+                                $jsstr = "''";
+                            }
+
                             $jsstr = " return (" . $jsstr . ")";
                         }
                         
@@ -135,6 +144,10 @@ trait Component
             $tag = "'" . $tag . "'";
         } else {
             $tag = substr(trim($tag), 3);
+        }
+
+        if ($content[0] == "jstext") {
+            return "`" . $content[1] . "`";
         }
 
         return "h({$tag}{$attr}{$child})";

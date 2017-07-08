@@ -2,7 +2,8 @@
 
 namespace Yard\Page;
 
-trait Cache {
+trait Cache
+{
     public function updateCache($post)
     {
         $file = $this->getCacheFile(false);
@@ -65,7 +66,8 @@ trait Cache {
         return $this->_cacheUrl;
     }
 
-    public function getCacheHash() {
+    public function getCacheHash()
+    {
         if (!$this->_cacheHash) {
             $this->getCacheFile();
         }

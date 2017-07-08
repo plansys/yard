@@ -178,11 +178,13 @@ class Dependency
 
     private static function parseTags($pageRender, $tags = false)
     {
+        $excludeTags = ['js', 'jstext', 'el'];
+
         if ($tags === false) {
             $tag = $pageRender;
             $tags = [];
 
-            if (strpos(trim($tag[0]), "js:") !== 0) {
+            if (!in_array($tag[0], $excludeTags) && strpos(trim($tag[0]), "js:") !== 0) {
                 $tags[$tag[0]] = true;
             }
 
@@ -203,7 +205,7 @@ class Dependency
 
                 if ($tag[0] == 'Page') {
                     $tags["Page:" . $tag[1]['name']] = true;
-                } else {
+                } else if (!in_array($tag[0], $excludeTags)) {
                     $tags[$tag[0]] = true;
                 }
 
