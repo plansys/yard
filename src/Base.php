@@ -86,7 +86,7 @@ class Base
             $tag = implode(":", $tags);
         }
 
-        if (is_file($this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php')) {
+        if (is_file(@$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php')) {
             return true;
         } else {
             return false;
