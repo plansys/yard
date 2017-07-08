@@ -1,5 +1,6 @@
 // loader
-import { Page } from './Page';
+import React from 'react';
+import { Page, createPage } from './Page';
 import { addJS, addCSS } from './lib/injectTag';
 import { componentLoader, loadConf, parseConf } from './lib/componentLoader';
 import { mapInput, mapAction } from './lib/reduxConnector';
@@ -15,7 +16,7 @@ import * as reduxSagaEffects from 'redux-saga/effects';
 import createHistory from 'history/createBrowserHistory'
 import { routerReducer, routerMiddleware } from 'react-router-redux'
 
-class Loader {
+class PageLoader extends React.Component {
     static page = {
         title: '',
         conf: {},
@@ -30,8 +31,12 @@ class Loader {
 
     static redux = {};
 
-    constructor(name, isRoot = false) {
-        this.loadPage(name, isRoot);
+    constructor() {
+        super(...arguments)
+        this.state = {
+            loaded: false
+        }
+        this.loadPage(this.props.name, this.props.isRoot || false);
     }
 
     loadPage(name, isRoot = false) {
@@ -51,66 +56,69 @@ class Loader {
             .then(this.loadDependecies.bind(this))
             .then(this.prepareRedux.bind(this))
             .then(this.bindRenderer.bind(this))
+            .then(conf => {
+                this.setState({loaded: true})
+            })
 
         return this.init;
     }
 
     initConf(name) {
         return new Promise((resolve, reject) => {
-            if (!Loader.page.conf[name]) {
+            if (!PageLoader.page.conf[name]) {
                 loadConf(name, this.isRoot)
                     .catch(res => {
                         reject(res);
                     })
                     .then(rawconf => {
-                    var conf = parseConf(rawconf, name);
+                        var conf = parseConf(rawconf, name);
 
-                    Loader.page.conf[conf.alias] = conf;
-                    if (conf.alias !== name && conf.dependencies.pages[name]) {
-                        Loader.page.conf[name] = conf.dependencies.pages[name];
-                    }
-                    this.name = conf.alias;
-
-                    const deps = [];
-
-                    function includeCSS(alias, shouldLoad) {
-                        if (shouldLoad && Loader.page.css.indexOf(alias) < 0) {
-                            var url = window.yard.url.page
-                                        .replace('[page]', alias + '...css');
-
-                            Loader.page.css.push(alias);
-
-                            deps.push(new Promise(resolve => {
-                                addCSS(url, function() {
-                                    resolve(url);
-                                });
-                            }))
+                        PageLoader.page.conf[conf.alias] = conf;
+                        if (conf.alias !== name && conf.dependencies.pages[name]) {
+                            PageLoader.page.conf[name] = conf.dependencies.pages[name];
                         }
-                    }
+                        this.name = conf.alias;
 
-                    includeCSS(conf.alias, conf.css);
-                    if (conf.dependencies) {
-                        for (var p in conf.dependencies.pages) {
-                            includeCSS(p, conf.dependencies.pages[p].css);
+                        const deps = [];
+
+                        function includeCSS(alias, shouldLoad) {
+                            if (shouldLoad && PageLoader.page.css.indexOf(alias) < 0) {
+                                var url = window.yard.url.page
+                                    .replace('[page]', alias + '...css');
+
+                                PageLoader.page.css.push(alias);
+
+                                deps.push(new Promise(resolve => {
+                                    addCSS(url, function () {
+                                        resolve(url);
+                                    });
+                                }))
+                            }
                         }
-                    }
 
-                    if (conf.includeJS) {
-                        conf.includeJS.forEach(js => {
-                            deps.push(new Promise(resolve => {
-                                addJS(js, js, function() {
-                                    resolve(js);
-                                });
-                            }))
+                        includeCSS(conf.alias, conf.css);
+                        if (conf.dependencies) {
+                            for (var p in conf.dependencies.pages) {
+                                includeCSS(p, conf.dependencies.pages[p].css);
+                            }
+                        }
+
+                        if (conf.includeJS) {
+                            conf.includeJS.forEach(js => {
+                                deps.push(new Promise(resolve => {
+                                    addJS(js, js, function () {
+                                        resolve(js);
+                                    });
+                                }))
+                            })
+                        }
+
+                        Promise.all(deps).then(params => {
+                            resolve(conf);
                         })
-                    }
-
-                    Promise.all(deps).then(params => {
-                        resolve(conf);
                     })
-                })
             } else {
-                resolve(Loader.page.conf[name]);
+                resolve(PageLoader.page.conf[name]);
             }
         })
     }
@@ -123,27 +131,27 @@ class Loader {
             }
 
             for (var page in conf.dependencies.pages) {
-                Loader.page.conf[page] = conf.dependencies.pages[page];
+                PageLoader.page.conf[page] = conf.dependencies.pages[page];
             }
 
             conf.dependencies.elements.forEach(el => {
                 if (el[0] === el[0].toUpperCase()) {
-                    Loader.ui.promise[el] = (tag) => componentLoader(el);
+                    PageLoader.ui.promise[el] = (tag) => componentLoader(el);
                 }
             })
 
-            const tags = Object.keys(Loader.ui.promise);
+            const tags = Object.keys(PageLoader.ui.promise);
             if (tags.length > 0) {
                 Promise
-                    .all(tags.map(tag => Loader.ui.promise[tag](tag))) // import all ui dependencies
+                    .all(tags.map(tag => PageLoader.ui.promise[tag](tag))) // import all ui dependencies
                     .then((result) => {
-                        Loader.ui.promise = {};
+                        PageLoader.ui.promise = {};
 
                         // mark all page conf as loaded
                         // move all ui element it to Loader.ui.loaded
                         tags.forEach((tag, idx) => {
-                            Loader.ui.loaded[tag] = result[idx];
-                            delete Loader.ui.promise[tag];
+                            PageLoader.ui.loaded[tag] = result[idx];
+                            delete PageLoader.ui.promise[tag];
                         })
 
                         resolve(conf);
@@ -162,38 +170,38 @@ class Loader {
             // init store
             if (this.isRoot !== false && conf.redux) {
                 if (typeof conf.redux.actionCreators === 'function') {
-                    Loader.redux.actionCreators = conf.redux.actionCreators();
+                    PageLoader.redux.actionCreators = conf.redux.actionCreators();
                 }
 
-                Loader.redux.reducers = function () { };
+                PageLoader.redux.reducers = function () { };
                 this._reducersScope = {};
                 if (typeof conf.redux.reducers === 'function') {
-                    Loader.redux.reducers = importReducers.bind(this._reducersScope)(conf.redux.reducers(), {
+                    PageLoader.redux.reducers = importReducers.bind(this._reducersScope)(conf.redux.reducers(), {
                         route: routerReducer
                     });
                 }
 
                 const sagaMiddleware = createSagaMiddleware()
-                Loader.redux.history = createHistory()
-                Loader.redux.store = initStore(Loader.redux.reducers, [
-                    routerMiddleware(Loader.redux.history),
+                PageLoader.redux.history = createHistory()
+                PageLoader.redux.store = initStore(PageLoader.redux.reducers, [
+                    routerMiddleware(PageLoader.redux.history),
                     sagaMiddleware
                 ]);
 
                 var keys = Object.keys(reduxSagaEffects)
-                            .concat('Page')
-                            .concat('conf');
+                    .concat('Page')
+                    .concat('conf');
 
                 var values = Object.keys(reduxSagaEffects)
-                            .map((key) => reduxSagaEffects[key])
-                            .concat(Page)
-                            .concat(conf);
+                    .map((key) => reduxSagaEffects[key])
+                    .concat(Page)
+                    .concat(conf);
 
                 const entire = conf.redux.sagas.toString();
                 const body = entire.slice(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
 
                 //eslint-disable-next-line
-                const sagasStore =  (new Function(...keys,  body))(...values);
+                const sagasStore = (new Function(...keys, body))(...values);
 
                 for (let t in sagasStore) {
                     let sagas = sagasStore[t];
@@ -230,6 +238,14 @@ class Loader {
         })
     }
 
+    render() {
+        if (!this.conf) {
+            return null;
+        }
+
+        return createPage(this.name, this, this.props);
+    }
+
 }
 
-export default Loader
+export default PageLoader

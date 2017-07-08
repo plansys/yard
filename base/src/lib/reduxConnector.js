@@ -1,4 +1,4 @@
-import Loader from './../Loader';
+import PageLoader from './../PageLoader';
 
 export const mapInput = function (input) {
     var list = input();
@@ -58,7 +58,7 @@ export const mapAction = function (action) {
         switch (typeof act) {
             case "string":
                 result[p] = function () {
-                    var actions = Loader.redux.actionCreators
+                    var actions = PageLoader.redux.actionCreators
                     var keys = Object.keys(actions);
                     var values = Object.keys(actions).map((key) => actions[key]);
 

@@ -1,25 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createPage } from './Page';
-import Loader from './Loader';
+import PageLoader from './PageLoader';
 
 class Root extends React.Component {
-    constructor() {
-        super(...arguments)
-
-        this.state = {
-            isLoaded: false
-        };
-
-        this._loader = new Loader(this.props.name, true)
-        this._loader.init.then(conf => {
-            this.setState({ isLoaded: true });
-        })
-    }
-
     render() {
-        if (!this.state.isLoaded) return null;
-        return createPage(this._loader.name, this._loader);
+        return <PageLoader name={this.props.name} root={true} />;
     }
 }
 

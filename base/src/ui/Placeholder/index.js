@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Route } from 'react-router'; 
 import { ConnectedRouter } from 'react-router-redux';
 import { Page, createPage } from './../../Page';
-import Loader from './../../Loader';
+import PageLoader from './../../PageLoader';
 
 class Placeholder extends React.Component {
     constructor() {
@@ -22,7 +22,7 @@ class Placeholder extends React.Component {
                         const pageName = Page.history.now();
                         
                         if (!this._loader[pageName]) {
-                            this._loader[pageName] = new Loader(pageName, false)
+                            this._loader[pageName] = new PageLoader(pageName, false)
                             this._loader[pageName].init
                             .then(conf => {
                                 this.setState({currentPage: pageName });
