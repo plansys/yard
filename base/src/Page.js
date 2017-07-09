@@ -120,7 +120,7 @@ export class Page extends React.Component {
 
                 return h(PageLoader, {
                     ...props,
-                    children: children.length === 1 ? children[0] : children,
+                    children: !!children && children.length === 1 ? children[0] : children,
                     name: props.name
                 });
             case "Placeholder":

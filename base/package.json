@@ -6,6 +6,7 @@
   "dependencies": {
     "babel-core": "^6.25.0",
     "babel-regenerator-runtime": "^6.5.0",
+    "g": "^2.0.1",
     "immutable": "rc",
     "lodash.mapvalues": "^4.6.0",
     "prop-types": "^15.5.10",
@@ -21,7 +22,8 @@
     "redux": "^3.6.0",
     "redux-saga": "^0.15.3",
     "reselect": "^3.0.1",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "yarn": "^0.27.5"
   },
   "devDependencies": {
     "@plansys/react-scripts": "*",
