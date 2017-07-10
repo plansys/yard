@@ -31,6 +31,17 @@ class Renderer
             $this->page = $this->base->newPage($alias, $isRoot);
         }
         
+        if (strpos($mode, 'db') === 0) {
+            $spec = explode("_", $mode);
+            if (count($spec) > 1) {
+                $spec = array_pop($spec);
+            } else {
+                $spec = '';
+            }
+
+            $mode = 'db';
+        }
+        
         switch ($mode) {
             case "html":
                 if ($this->page->norender == false) {
@@ -60,7 +71,8 @@ class Renderer
                 break;
             case "db":
                 if (class_exists('\Plansys\Db\Init')) {
-                    $result = \Plansys\Db\Init::query($this->page, @$_POST['json']);
+                    $post = file_get_contents("php://input");
+                    $result = \Plansys\Db\Init::query($this->page, $spec, $post);
                     echo json_encode($result);
                 }
                 break;

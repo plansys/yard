@@ -61,16 +61,22 @@ class Page
         $this->conf = new Page\Configuration($this);
     }
     
-    public function loadFile($file)
+    public function loadFile()
     {
+        $files = func_get_args();
         $reflector = new \ReflectionClass(get_class($this));
         $dir =  dirname($reflector->getFileName());
-        $path = $dir . DIRECTORY_SEPARATOR . $file;
-        if (realpath($path)) {
-            return file_get_contents($path);
-        } else {
-            return "";
+        $results = [];
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            if (realpath($path)) {
+                $results[] = file_get_contents($path);
+            } else {
+                $results[] = "";
+            }
         }
+
+        return implode("\n\n", $results);
     }
 
     public function urlFor($url)
