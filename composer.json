@@ -16,6 +16,5 @@
         "psr-4": {
             "Yard\\": "src/"
         }
-    },
-    "minimum-stability": "dev"
+    }
 }

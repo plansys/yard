@@ -84,7 +84,7 @@ class Base
             $this->pages['db'] = $base['pages'][''];
         }
 
-        # load db if exists
+        # load ui if exists
         if (class_exists('\Plansys\Ui\Init')) {
             $base = \Plansys\Ui\Init::getBase($this->host);
             $this->pages['ui'] = $base['pages'][''];
