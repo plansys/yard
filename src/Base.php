@@ -18,32 +18,41 @@ class Base
         'page' => '',
         'cache' => ''
     ];
+    public $settings = [];
     public $pages = [];
     public $pageNamespace = 'Pages\\';
 
-    function __construct($settings = [])
+    function __construct($conf = [])
     {
-        $settings['dir'] = $this->validateDir(@$settings['dir']);
-        $this->validateUrl(@$settings['url']);
-        $this->validatePages(@$settings['pages']);
+        $conf['dir'] = $this->validateDir(@$conf['dir']);
+        $this->validateUrl(@$conf['url']);
+        $this->validatePages(@$conf['pages']);
 
-        foreach ($settings['url'] as $k => $url) {
+        foreach ($conf['url'] as $k => $url) {
             if (strpos($url, 'http') !== 0) {
-                $settings['url'][$k] = substr($url, 0, 3) . str_replace("//", "/", substr($url, 3));
+                $conf['url'][$k] = substr($url, 0, 3) . str_replace("//", "/", substr($url, 3));
             } else {
-                $settings['url'][$k] = substr($url, 0, 7) . str_replace("//", "/", substr($url, 7));
+                $conf['url'][$k] = substr($url, 0, 7) . str_replace("//", "/", substr($url, 7));
             }
         }
         
-        if (isset($settings['offline'])) {
-            $this->offline = $settings['offline'];
+        if (isset($conf['offline'])) {
+            $this->offline = $conf['offline'];
+        }
+
+        if (isset($conf['settings'])) {
+            if (!is_array($conf['settings'])) { 
+                throw new \Exception('Base Configuration Error, settings key must be an array!');
+            } else {
+                $this->settings = $conf['settings'];
+            }
         }
         
-        $this->host = $settings['host'];
-        $this->name = @$settings['name'];
-        $this->dir = $settings['dir'];
-        $this->url = $settings['url'];
-        $this->pages = $settings['pages'];
+        $this->host = $conf['host'];
+        $this->name = @$conf['name'];
+        $this->dir = $conf['dir'];
+        $this->url = $conf['url'];
+        $this->pages = $conf['pages'];
 
         $d = DIRECTORY_SEPARATOR;
         
@@ -69,10 +78,16 @@ class Base
             $this->pages['crud'] = $base['pages'][''];
         }
 
-        # load crud if exists
+        # load db if exists
         if (class_exists('\Plansys\Db\Init')) {
             $base = \Plansys\Db\Init::getBase($this->host);
             $this->pages['db'] = $base['pages'][''];
+        }
+
+        # load db if exists
+        if (class_exists('\Plansys\Ui\Init')) {
+            $base = \Plansys\Ui\Init::getBase($this->host);
+            $this->pages['ui'] = $base['pages'][''];
         }
     }
     

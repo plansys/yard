@@ -50,7 +50,7 @@ class Renderer
                     $this->renderJS();
                 }
                 break;
-            case "jsdev": 
+            case "jsdev":
                 $post = file_get_contents("php://input");
                 $this->renderJS();
                 break;
@@ -58,7 +58,13 @@ class Renderer
                 $post = file_get_contents("php://input");
                 $this->page->updateCache($post);
                 break;
-            case "sw": 
+            case "db":
+                if (class_exists('\Plansys\Db\Init')) {
+                    $result = \Plansys\Db\Init::query($this->page, @$_POST['json']);
+                    echo json_encode($result);
+                }
+                break;
+            case "sw":
                 $swjs = @file_get_contents($this->base->dir['base'] . '/service-worker.js');
                 $start = strpos($swjs, 'var precacheConfig=') + strlen('var precacheConfig=');
                 $stop = strpos($swjs, ',cacheName="');
@@ -66,7 +72,7 @@ class Renderer
                 $sw = json_decode($swtxt, true);
                 $files = $this->page->getServiceWorkerFiles();
                 if (is_array($sw)) {
-                    foreach ($sw as $k=>$s) {
+                    foreach ($sw as $k => $s) {
                         $sw[$k][0] = $this->base->url['base'] . '/' . $s[0];
                     }
                     $sw = array_merge($sw, $files);
@@ -74,7 +80,7 @@ class Renderer
                     $swjs = str_replace($swtxt, json_encode($sw), $swjs);
                 }
                 echo $swjs;
-            break;
+                break;
             case "vendor":
                 if (isset($_GET['_v_dr'])) {
                     $d = DIRECTORY_SEPARATOR;
@@ -90,9 +96,8 @@ class Renderer
                         }
                     }
                 }
-            break;
+                break;
         }
-
     }
   
     public function renderHTML()
@@ -123,7 +128,6 @@ class Renderer
         $html = $first . $this->page->renderInitJS() . $last;
 
         echo $html;
-
     }
 
     public function renderCSS()
@@ -135,5 +139,4 @@ class Renderer
     {
         echo $this->page->renderConf();
     }
-
 }

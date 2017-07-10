@@ -61,6 +61,18 @@ class Page
         $this->conf = new Page\Configuration($this);
     }
     
+    public function loadFile($file)
+    {
+        $reflector = new \ReflectionClass(get_class($this));
+        $dir =  dirname($reflector->getFileName());
+        $path = $dir . DIRECTORY_SEPARATOR . $file;
+        if (realpath($path)) {
+            return file_get_contents($path);
+        } else {
+            return "";
+        }
+    }
+
     public function urlFor($url)
     {
         return $this->url . $url;
