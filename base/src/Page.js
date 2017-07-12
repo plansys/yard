@@ -17,7 +17,8 @@ export class Page extends React.Component {
                 .replace('[page]', page);
 
             window.yard.page.name = page;
-            PageLoader.redux.history.push(url);
+            PageLoader.history.push(url);
+            Page.history.doChangeListener(page);
         },
         replace: function (page) {
             if (!PageLoader.redux) {
@@ -28,12 +29,14 @@ export class Page extends React.Component {
                 .replace('[page]', page);
 
             window.yard.page.name = page;
-            PageLoader.redux.history.replace(url);
+            PageLoader.history.replace(url);
+            Page.history.doChangeListener(page);
         },
         redirect: function (page) {
             var url = window.yard.url.page
                 .replace('[page]', page);
-
+            
+            Page.history.doChangeListener(page);
             window.location.href = url;
         },
         now: function () {
@@ -43,8 +46,25 @@ export class Page extends React.Component {
             const match = url.match(new RegExp(rule));
             const pageArr = match[1].split("...");
 
-            return pageArr[0];
-        }
+            return pageArr[0].split('/')[0];
+        },
+        onChange: function(func) {
+            if (typeof func !== 'function') {
+                throw new Error('Parameter must be a function');
+            }
+
+            window.onpopstate = function(e) {
+                Page.history.doChangeListener(Page.history.now());
+            }
+
+            Page.history.changeListener.push(func);
+        },
+        doChangeListener: function(page) {
+            Page.history.changeListener.forEach(c => {
+                c(page);
+            })
+        },
+        changeListener: []
     }
 
     constructor() {
@@ -81,6 +101,10 @@ export class Page extends React.Component {
         this.props.loader.init.then(conf => {
             this.setState({ '[[loaded]]': true });
         })
+
+        if (typeof this.props.refbind === 'function') {
+            this.props.refbind(this);
+        } 
     }
 
     componentWillUnmount() {
@@ -117,15 +141,21 @@ export class Page extends React.Component {
             case "js":
                 return props.bind(this)(this.hswap.bind(this));
             case "Page":
+                let newProps = { ...props }
+
+                if (newProps.ref) {
+                    delete newProps.ref;
+                    newProps.refbind = props.ref;
+                }
 
                 return h(PageLoader, {
-                    ...props,
+                    ...newProps,
                     children: !!children && children.length === 1 ? children[0] : children,
                     name: props.name
                 });
             case "Placeholder":
                 return h(PageLoader.ui.loaded[tag], {
-                    history: PageLoader.redux.history
+                    history: PageLoader.history
                 });
             default:
                 var stag = tag;

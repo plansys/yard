@@ -4,7 +4,7 @@ import PageLoader from './PageLoader';
 
 class Root extends React.Component {
     render() {
-        return <PageLoader name={this.props.name} root={true} />;
+        return <PageLoader name={this.props.name} isRoot={true} />;
     }
 }
 

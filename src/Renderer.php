@@ -49,12 +49,11 @@ class Renderer
                 }
                 break;
             case "css":
-                 $this->renderCSS();
+                $this->renderCSS();
                 break;
             case "js":
                 $cache = $this->page->getCacheFile();
                 if (is_file($cache)) {
-                    // header("Location: " . $this->page->getCacheUrl());
                     echo file_get_contents($cache);
                 } else {
                     $post = file_get_contents("php://input");
@@ -126,7 +125,18 @@ class Renderer
         }
         
         $baseUrl = $this->base->url['base'] .'/';
-        $html = file_get_contents($path);
+
+        if (strpos($path, 'https:') === 0) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $path);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            $html = curl_exec($ch);
+            curl_close($ch);
+        } else {
+            $html = file_get_contents($path);
+        }
+
         $html = strtr($html, [
             '[name]' => $this->base->name,
             'href="./' => 'href="' . $baseUrl,

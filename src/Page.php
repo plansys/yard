@@ -9,8 +9,6 @@ class Page
     
     public $conf;
     public $alias = "";
-    public $isRoot = false;
-    public $showDeps = false;
     public $base;
     public $store;
     public $masterpage = false;
@@ -18,6 +16,9 @@ class Page
     public $placeholder = null;
     public $url = "";
     public $props = [];
+
+    public $isRoot = false;
+    public $showDeps = false;
 
     public function mapStore()
     {
@@ -70,7 +71,9 @@ class Page
         foreach ($files as $file) {
             $path = $dir . DIRECTORY_SEPARATOR . $file;
             if (realpath($path)) {
-                $results[] = file_get_contents($path);
+                ob_start();
+                include($path);
+                $results[] = ob_get_clean();
             } else {
                 $results[] = "";
             }
@@ -101,18 +104,6 @@ class Page
     
     public function renderCSS($indent = 0)
     {
-        $css = $this->css();
-
-        if (!$css) {
-            return "";
-        }
-
-        $pad = "";
-        if ($indent > 0) {
-            $pad = str_pad("    ", ($indent) * 4);
-        }
-        $css = explode("\n", $css);
-        $css = implode("\n" . $pad, $css);
-        return $pad . $css;
+        return $this->getCssCacheContent();
     }
 }

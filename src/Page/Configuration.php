@@ -16,7 +16,8 @@ class Configuration
         $this->page = $page;
     }
 
-    public function renderInitJs() {
+    public function renderInitJs()
+    {
         $page = $this->page;
         ob_start();
         include('template/initjs.php');
@@ -31,7 +32,9 @@ class Configuration
         $renderParsed = self::parseRender($page);
         $contents = $this->renderComponent($renderParsed);
 
-        $css = trim($this->page->css() == "") ? "false" : "true";
+        $cssInfo = $this->page->generateCSS($this->page->css());
+        $css = $cssInfo['hash'];
+
         $js = $this->renderJS();
         
         $includeJS = $this->renderIncludeJS();
@@ -104,7 +107,8 @@ class Configuration
         return trim($js) . "\n";
     }
     
-    public function getJSPath($js) {
+    public function getJSPath($js)
+    {
         if (strpos($js, 'http') !== 0) {
             $ex = explode(":", $js);
             if (count($ex) > 1) {
@@ -116,7 +120,8 @@ class Configuration
         return $js;
     }
 
-    private function renderIncludeJS() {
+    private function renderIncludeJS()
+    {
         $js = $this->page->includeJS();
         
         if (is_array($js) && !empty($js)) {
@@ -130,7 +135,8 @@ class Configuration
         }
     }
 
-    public function getServiceWorkerFiles() {
+    public function getServiceWorkerFiles()
+    {
         $files = [];
         $pageFiles = [];
 

@@ -44,7 +44,12 @@ class Base
             if (!is_array($conf['settings'])) { 
                 throw new \Exception('Base Configuration Error, settings key must be an array!');
             } else {
-                $this->settings = $conf['settings'];
+                $app = new \StdClass();
+                foreach ($conf['settings'] as $k=>$v) {
+                    $app->{$k} = $v;
+                }
+
+                $this->settings = $app;
             }
         }
         

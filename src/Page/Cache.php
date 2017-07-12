@@ -4,6 +4,77 @@ namespace Yard\Page;
 
 trait Cache
 {
+    public function generateCSS($css)
+    {
+        if (trim($css) == '') {
+            return [
+                'file' => '',
+                'glob' => '',
+                'css' => '',
+                'hash' => 'false'
+            ];
+        }
+
+        $info = $this->getCssInfo($css);
+
+        if (!is_file($info['file'])) {
+            $this->cleanCssCache($info['glob']);
+        }
+
+        return $info;
+    }
+
+    public function getCssCacheContent()
+    {
+        $prefix = ".css-";
+        $alias = str_replace(":", "~", $this->alias);
+        $d = DIRECTORY_SEPARATOR;
+        $glob = glob($this->base->dir['cache'] . $d . $alias. $prefix . "*.css");
+
+        if (!empty($glob)) {
+            foreach ($glob as $f) {
+                return file_get_contents($f);
+            }
+        }
+
+        $info = $this->generateCSS($this->css());
+
+        if ($info['file'] != '') {
+            return $info['css'];
+        }
+
+        return $info['file'];
+    }
+
+    private function getCssInfo($css)
+    {
+        $hash = crc32($css);
+        $prefix = ".css-";
+        $alias = str_replace(":", "~", $this->alias);
+        $d = DIRECTORY_SEPARATOR;
+        $file = $this->base->dir['cache'] . $d . $alias. $prefix . $hash . ".css";
+        $file = str_replace("/", DIRECTORY_SEPARATOR, $file);
+
+        file_put_contents($file, $css);
+
+        return [
+            'file' => $file,
+            'glob' => $this->base->dir['cache'] . $d . $alias. $prefix . '*.css',
+            'hash' => $hash,
+            'css' => $css
+        ];
+    }
+
+    private function cleanCssCache($globPattern)
+    {
+        $glob = glob($globPattern);
+        if (count($glob) > 0) {
+            foreach ($glob as $f) {
+                unlink($f);
+            }
+        }
+    }
+
     public function updateCache($post)
     {
         $file = $this->getCacheFile(false);
@@ -44,7 +115,7 @@ trait Cache
         }
 
         $this->_conf = $this->renderConf();
-        $hash = md5($this->_conf);
+        $hash = crc32($this->_conf);
         $prefix = ".conf-" . ($this->isRoot ? "root-" : "");
         $alias = str_replace(":", "~", $this->alias);
         $d = DIRECTORY_SEPARATOR;

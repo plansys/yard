@@ -29,6 +29,7 @@ class PageLoader extends React.Component {
         loaded: { Page },
     };
 
+    static history = null;
     static redux = {};
 
     constructor() {
@@ -167,7 +168,10 @@ class PageLoader extends React.Component {
 
     prepareRedux(conf) {
         return new Promise(resolve => {
-            // init store
+            if (this.isRoot !== false) {
+                PageLoader.history = createHistory()
+            }
+        
             if (this.isRoot !== false && conf.redux) {
                 if (typeof conf.redux.actionCreators === 'function') {
                     PageLoader.redux.actionCreators = conf.redux.actionCreators();
@@ -182,9 +186,8 @@ class PageLoader extends React.Component {
                 }
 
                 const sagaMiddleware = createSagaMiddleware()
-                PageLoader.redux.history = createHistory()
                 PageLoader.redux.store = initStore(PageLoader.redux.reducers, [
-                    routerMiddleware(PageLoader.redux.history),
+                    routerMiddleware(PageLoader.history),
                     sagaMiddleware
                 ]);
 
