@@ -63,6 +63,12 @@ export const loadConf = (alias, isRoot) => {
                         var success = true;
                         try {
                             console.log("Transpiling: " + alias );
+
+                            if (text.trim()[0] != '{') {
+                                document.body.innerHTML = text;
+                                return;
+                            }
+
                             var output = Babel.transform('var vconf = ' + text, { /* eslint-disable-line rule-name */
                                 presets: ['es2015', 'react', 'stage-1']
                             }).code;

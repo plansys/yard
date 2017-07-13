@@ -16,9 +16,10 @@ trait Cache
         }
 
         $info = $this->getCssInfo($css);
-
+        
         if (!is_file($info['file'])) {
             $this->cleanCssCache($info['glob']);
+            file_put_contents($info['file'], $css);
         }
 
         return $info;
@@ -54,8 +55,6 @@ trait Cache
         $d = DIRECTORY_SEPARATOR;
         $file = $this->base->dir['cache'] . $d . $alias. $prefix . $hash . ".css";
         $file = str_replace("/", DIRECTORY_SEPARATOR, $file);
-
-        file_put_contents($file, $css);
 
         return [
             'file' => $file,
@@ -115,6 +114,7 @@ trait Cache
         }
 
         $this->_conf = $this->renderConf();
+
         $hash = crc32($this->_conf);
         $prefix = ".conf-" . ($this->isRoot ? "root-" : "");
         $alias = str_replace(":", "~", $this->alias);
