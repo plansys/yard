@@ -116,6 +116,7 @@ export class Page extends React.Component {
         if (!this.state['[[loaded]]']) return null;
 
         let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this));
+        if (!content) return null;        
         if (!content.type) return null;
 
         let render = React.Children.only(content);
