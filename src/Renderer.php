@@ -71,7 +71,7 @@ class Renderer
             case "db":
                 if (class_exists('\Plansys\Db\Init')) {
                     $post = file_get_contents("php://input");
-                    $result = \Plansys\Db\Init::query($this->page, $spec, $post);
+                    $result = \Plansys\Db\Init::query($this->page, $post);
                     echo json_encode($result);
                 }
                 break;

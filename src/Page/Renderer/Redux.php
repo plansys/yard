@@ -98,7 +98,7 @@ trait Redux
 
                 $item = new $class;
                 
-                if (!isset($actions[$r['store']])) {
+                if (!isset($list[$r['store']])) {
                     $list[$r['store']] = [];
                 }
                 $list[$r['store']][$k] = $item->actionCreators();

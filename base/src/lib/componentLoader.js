@@ -64,7 +64,7 @@ export const loadConf = (alias, isRoot) => {
                         try {
                             console.log("Transpiling: " + alias );
 
-                            if (text.trim()[0] != '{') {
+                            if (text.trim()[0] !== '{') {
                                 document.body.innerHTML = text;
                                 return;
                             }

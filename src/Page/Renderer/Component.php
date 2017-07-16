@@ -91,7 +91,7 @@ trait Component
                         }
 
                         $noReturn = false;
-                        $noReturnIf = ["if", "while", "return", "for", "switch", "console", "var"];
+                        $noReturnIf = ["if", "while", "return", "for", "switch", "console", "var", "let", "const"];
                         $jsstr = trim($jsstr);
                         foreach ($noReturnIf as $nr) {
                             if (strpos($jsstr, $nr) === 0) {
