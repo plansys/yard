@@ -52,21 +52,27 @@ require("vendor/autoload.php");
 
 $host = str_replace("index.php", "", strtok($_SERVER["REQUEST_URI"], '?'));
 $base = new \Yard\Base([
-  'name' => 'Welcome to Yard',
-  'dir' => [
-    'base' => dirname(__FILE__) . '/bases/default/build',
-    'cache' => dirname(__FILE__) . '/cache',
-    'pages' => ['' => dirname(__FILE__) . '/pages'],
-    'redux' => dirname(__FILE__) . '/redux',
-  ],
-  'url' => [
-    'root' => $host . '/pages',
-    'base' => $host . '/bases/default/build',
-    'page' => $host . '/?p=[page]',
-    'cache' => $host . '/cache/[file]'
-  ]
+    'name' => 'PLANSYS',
+    'offline' => false,
+    'settings' => null,
+    'host' => $host,
+    'pages' => [
+        '' => [
+            'dir'=> dirname(__FILE__) . '/pages',
+            'url' => $host . '/pages'
+        ]
+    ],
+    'dir' => [
+        'base' => dirname(__FILE__) . '/vendor/plansys/yard/base/build',
+        'cache' => dirname(__FILE__) . '/tmp',
+        'redux' => dirname(__FILE__) . '/views/redux',
+    ],
+    'url' => [
+        'base' => $host . '/vendor/plansys/yard/base/build',
+        'cache' => $host . '/tmp/[file]',
+        'page' => $host . '/index.php?p=[page]',
+    ]
 ]);
-
 $yard = new \Yard\Renderer($base);
 $page = isset($_GET['p']) ? $_GET['p'] : 'yard:Welcome';
 $mode = isset($_GET['m']) ? $_GET[','] : 'html';
