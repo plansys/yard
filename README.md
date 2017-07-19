@@ -74,10 +74,18 @@ $base = new \Yard\Base([
     ]
 ]);
 $yard = new \Yard\Renderer($base);
-$page = isset($_GET['p']) ? $_GET['p'] : 'yard:Welcome';
-$mode = isset($_GET['m']) ? $_GET[','] : 'html';
 
-$yard->render($page, $mode);
+$parr = explode('...', $_GET['p']);
+$modearr = count($parr) > 1 ? explode(".", $parr[1]) : [''];
+$mode = count($modearr) > 1 ? $modearr[1] : $modearr[0];
+
+if ($mode == 'css') {
+    header('Content-type: text/css');
+} else if (in_array($mode, ['js', 'jsdev', 'sw'])) {
+    header('Content-type: text/javascript');
+}
+
+echo $yard->render($_GET['p'])
 
  ```
  
