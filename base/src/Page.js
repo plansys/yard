@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import PageLoader from './PageLoader';
-import map from 'lodash.mapvalues';
 
 export class Page extends React.Component {
 
@@ -181,13 +180,13 @@ export const createPage = function (name, loader, props) {
     }
 
     let NewPage = loader.pageComponent;
-    if (loader.conf.propTypes) {
-        NewPage.propTypes = {};
-        map(loader.conf.propTypes, (types, tag) => {
-            //eslint-disable-next-line
-            (new Function('NewPage', 'PropTypes', `NewPage.propTypes["${tag}"] = PropTypes.${types}`))(NewPage, PropTypes)
-        })
-    }
+    // if (loader.conf.propTypes) {
+    //     NewPage.propTypes = {};
+    //     map(loader.conf.propTypes, (types, tag) => {
+    //         //eslint-disable-next-line
+    //         (new Function('NewPage', 'PropTypes', `NewPage.propTypes["${tag}"] = PropTypes.${types}`))(NewPage, PropTypes)
+    //     })
+    // }
 
     let newProps = {
         ...props,

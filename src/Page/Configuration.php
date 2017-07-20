@@ -7,7 +7,8 @@ class Configuration
     use \Yard\Lib\JsConvert;
     use \Yard\Page\Renderer\Component;
     use \Yard\Page\Renderer\Redux;
-  
+    
+
     public $page;
     public $template = 'template/conf.php';
   

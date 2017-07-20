@@ -139,10 +139,10 @@ trait Redux
             if (!isset($list[$r['store']])) {
                 $list[$r['store']] = [];
             }
-            
+
             $list[$r['store']][$k] = [
                 'import' => property_exists($r['class'], 'import') ? $r['class']->import : [],
-                'init' => 'js:' . $r['class']->init(),
+                'init' => "js: function() { \n" . $r['class']->init() . "\n}",
                 'reducers' => $r['class']->reducers()
             ];
         }
