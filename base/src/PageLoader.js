@@ -136,7 +136,7 @@ class PageLoader extends React.Component {
             }
 
             conf.dependencies.elements.forEach(el => {
-                if (el[0] === el[0].toUpperCase()) {
+                if (el[0] && el[0] === el[0].toUpperCase()) {
                     PageLoader.ui.promise[el] = (tag) => componentLoader(el);
                 }
             })

@@ -143,6 +143,7 @@ class Renderer
             'src="./' => 'src="' . $baseUrl,
             'href="/' => 'href="' . $baseUrl,
             'src="/' => 'src="' . $baseUrl,
+            'url(' => 'url(' . $baseUrl,
         ]);
 
         $first = substr($html, 0, strpos($html, '<script'));
