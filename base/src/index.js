@@ -16,5 +16,3 @@ window.render = render;
 if (window.yard.offline) {
     registerServiceWorker();
 }
-
-document.body.className = document.body.className.replace("body-loading","");
