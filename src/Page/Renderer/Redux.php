@@ -170,10 +170,6 @@ trait Redux
                 if (class_exists($class, false)) {
                     $item = new $class;
                     
-                    if (!isset($actions[$r['store']])) {
-                        $list[$r['store']] = [];
-                    }
-
                     $sagas = $item->sagas();
                     foreach($sagas as $ks=> $vs) {
                         if (strpos(trim($vs), 'js:') !== 0) {
