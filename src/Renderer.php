@@ -32,11 +32,12 @@ class Renderer
         }
         
         if (strpos($mode, 'db') === 0) {
-            $spec = explode("_", $mode);
-            if (count($spec) > 1) {
-                $spec = array_pop($spec);
+            $dbpage = explode("_", $mode);
+            if (count($dbpage) > 1) {
+                $dbpage = array_pop($dbpage);
+                $dbpage = $this->base->newPage($dbpage);
             } else {
-                $spec = '';
+                $dbpage = $this->page;
             }
 
             $mode = 'db';
@@ -71,8 +72,7 @@ class Renderer
             case "db":
                 if (class_exists('\Plansys\Db\Init')) {
                     $post = file_get_contents("php://input");
-                    $result = \Plansys\Db\Init::query($this->page, $post);
-                    echo json_encode($result);
+                    \Plansys\Db\Init::query($dbpage, $post);
                 }
                 break;
             case "sw":
