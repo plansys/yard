@@ -65,7 +65,7 @@ $base = new \Yard\Base([
     'dir' => [
         'base' => dirname(__FILE__) . '/vendor/plansys/yard/base/build',
         'cache' => dirname(__FILE__) . '/tmp',
-        'redux' => dirname(__FILE__) . '/views/redux',
+        'redux' => dirname(__FILE__) . '/redux',
     ],
     'url' => [
         'base' => $host . '/vendor/plansys/yard/base/build',
@@ -85,7 +85,7 @@ if ($mode == 'css') {
     header('Content-type: text/javascript');
 }
 
-echo $yard->render($_GET['p'])
+echo $yard->render($_GET['p']);
 
  ```
  
