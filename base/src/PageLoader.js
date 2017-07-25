@@ -238,6 +238,10 @@ class PageLoader extends React.Component {
 
             this.conf = conf;
             resolve(conf);
+
+            if (this.isRoot) {
+                document.body.className = document.body.className.replace("body-loading","");
+            }
         })
     }
 
