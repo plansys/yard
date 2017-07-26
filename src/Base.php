@@ -109,7 +109,8 @@ class Base
         }
         $file = @$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php';
         if (is_file($file)) {
-            $actualTag = str_replace(".php", "", basename(realpath($file)));
+            $len = strlen(@$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR);
+            $actualTag = str_replace(".php", "", substr(realpath($file), $len));
             return $actualTag == $tag;
         } else {
             return false;
