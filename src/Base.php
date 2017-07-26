@@ -41,7 +41,9 @@ class Base
         }
 
         if (isset($conf['settings'])) {
-            if (!is_array($conf['settings'])) { 
+            if (is_object($conf['settings'])) {
+                $this->settings = $conf['settings'];
+            } else if (!is_array($conf['settings'])) { 
                 throw new \Exception('Base Configuration Error, settings key must be an array!');
             } else {
                 $app = new \StdClass();

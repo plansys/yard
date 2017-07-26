@@ -61,6 +61,10 @@ class Page
         $this->url = @$base->pages['']['url'];
         $this->conf = new Page\Configuration($this);
     }
+
+    public function app() {
+        return $this->base->settings;
+    }
     
     public function loadFile()
     {

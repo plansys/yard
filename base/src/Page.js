@@ -96,7 +96,6 @@ export class Page extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        this.applyEvent('componentDidMount', arguments);
         this.props.loader.init.then(conf => {
             this.setState({ '[[loaded]]': true });
         })
@@ -104,6 +103,11 @@ export class Page extends React.Component {
         if (typeof this.props.refbind === 'function') {
             this.props.refbind(this);
         } 
+        
+        let args = arguments;
+        setTimeout(() => {
+            this.applyEvent('componentDidMount', args);        
+        })
     }
 
     componentWillUnmount() {
