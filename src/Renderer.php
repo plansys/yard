@@ -72,7 +72,12 @@ class Renderer
             case "db":
                 if (class_exists('\Plansys\Db\Init')) {
                     $post = file_get_contents("php://input");
-                    \Plansys\Db\Init::query($dbpage, $post);
+                    $res = \Plansys\Db\Init::query($dbpage, $post);
+                    if (is_object($res) || is_array($res)) {
+                        echo json_encode($res);
+                    } else if (!is_null($res)) {
+                        echo json_encode($res);
+                    }
                 }
                 break;
             case "sw":

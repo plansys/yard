@@ -107,9 +107,10 @@ class Base
             $shortcut = array_shift($tags);
             $tag = implode(":", $tags);
         }
-
-        if (is_file(@$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php')) {
-            return true;
+        $file = @$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php';
+        if (is_file($file)) {
+            $actualTag = str_replace(".php", "", basename(realpath($file)));
+            return $actualTag == $tag;
         } else {
             return false;
         }
