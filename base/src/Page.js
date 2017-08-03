@@ -43,8 +43,11 @@ export class Page extends React.Component {
             const url = window.location.href.replace(/\/?$/, '/');
 
             const match = url.match(new RegExp(rule));
-            const pageArr = match[1].split("...");
+            if (!match) {
+                return window.yard.page.name;
+            }
 
+            const pageArr = match[1].split("...");
             return pageArr[0].split('/')[0];
         },
         onChange: function(func) {

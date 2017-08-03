@@ -112,6 +112,7 @@ class Base
         if (is_file($file)) {
             $len = strlen(realpath(@$this->pages[$shortcut]['dir']) . DIRECTORY_SEPARATOR);
             $actualTag = str_replace(".php", "", substr(realpath($file), $len));
+
             return $actualTag == $tag;
         } else {
             return false;
