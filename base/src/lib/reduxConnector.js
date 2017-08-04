@@ -1,30 +1,28 @@
 import PageLoader from './../PageLoader';
 
 export const mapInput = function (input) {
-    var list = input();
+    let list = input();
     return function (store, props) {
-        var result = {};
+        let result = {};
 
-        for (var p in list) {
+        for (let p in list) {
             switch (typeof list[p]) {
                 case "string":
-
                     // eslint-disable-next-line
                     result[p] = function (store) {
-                        var keys = Object.keys(store);
-                        var values = Object.keys(store).map((key) => store[key]);
-                        var alias = list[p].replace('.', '__');
+                        let keys = Object.keys(store);
+                        let values = Object.keys(store).map((key) => store[key]);
+                        let alias = list[p];
 
                         // eslint-disable-next-line
                         return (new Function(...keys, `return ${alias}`)).bind(this)(...values);
-                    }(store, props)
+                    }(store, props);
                     break;
                 case "function":
-
                     // eslint-disable-next-line
                     result[p] = function (store, props) {
                         return list[p](store, props);
-                    }(store, props)
+                    }(store, props);
                     break;
                 default:
                 break;
@@ -37,7 +35,7 @@ export const mapInput = function (input) {
 
 
 const printKeys = function (obj, stack = '', result = '') {
-    for (var property in obj) {
+    for (let property in obj) {
         if (obj.hasOwnProperty(property)) {
             if (typeof obj[property] === "object") {
                 result += printKeys(obj[property], stack + '.' + property, result);
@@ -50,20 +48,20 @@ const printKeys = function (obj, stack = '', result = '') {
 }
 
 export const mapAction = function (action) {
-    var list = action();
-    var result = {};
+    let list = action();
+    let result = {};
 
-    for (var p in list) {
-        var act = list[p]
+    for (let p in list) {
+        let act = list[p]
         switch (typeof act) {
             case "string":
                 result[p] = function () {
-                    var actions = PageLoader.redux.actionCreators
-                    var keys = Object.keys(actions);
-                    var values = Object.keys(actions).map((key) => actions[key]);
+                    let actions = PageLoader.redux.actionCreators
+                    let keys = Object.keys(actions);
+                    let values = Object.keys(actions).map((key) => actions[key]);
 
                     // eslint-disable-next-line
-                    var func = (new Function(...keys, `return ${this}`))(...values);
+                    let func = (new Function(...keys, `return ${this}`))(...values);
                     if (typeof func !== "function") {
                         console.error("Action [" + this + "] is not defined!\n Avilable actions are: \n\n" +
                                 printKeys(actions));

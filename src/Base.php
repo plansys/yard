@@ -5,13 +5,12 @@ namespace Yard;
 class Base
 {
     use \Yard\Lib\ArrayTools;
-    
+
     public $offline = false;
     public $host = '';
     public $dir = [
         'base' => '',
-        'cache' => '',
-        'redux' => ''
+        'cache' => ''
     ];
     public $url = [
         'base' => '',
@@ -26,7 +25,7 @@ class Base
     {
         $conf['dir'] = $this->validateDir(@$conf['dir']);
         $this->validateUrl(@$conf['url']);
-        $this->validatePages(@$conf['pages']);
+        $this->validatePages(@$conf['modules']);
 
         foreach ($conf['url'] as $k => $url) {
             if (strpos($url, 'http') !== 0) {
@@ -35,7 +34,7 @@ class Base
                 $conf['url'][$k] = substr($url, 0, 7) . str_replace("//", "/", substr($url, 7));
             }
         }
-        
+
         if (isset($conf['offline'])) {
             $this->offline = $conf['offline'];
         }
@@ -43,61 +42,61 @@ class Base
         if (isset($conf['settings'])) {
             if (is_object($conf['settings'])) {
                 $this->settings = $conf['settings'];
-            } else if (!is_array($conf['settings'])) { 
+            } else if (!is_array($conf['settings'])) {
                 throw new \Exception('Base Configuration Error, settings key must be an array!');
             } else {
                 $app = new \StdClass();
-                foreach ($conf['settings'] as $k=>$v) {
+                foreach ($conf['settings'] as $k => $v) {
                     $app->{$k} = $v;
                 }
 
                 $this->settings = $app;
             }
         }
-        
+
         $this->host = $conf['host'];
         $this->name = @$conf['name'];
         $this->dir = $conf['dir'];
         $this->url = $conf['url'];
-        $this->pages = $conf['pages'];
+        $this->pages = $conf['modules'];
 
         $d = DIRECTORY_SEPARATOR;
-        
+
         # load sample yard pages
         $vurl = strtr($this->url['page'], [
             '[page]' => 'vendor...vendor'
         ]);
-        
+
         if (strpos($vurl, '?') === false) {
             $vurl = $vurl . "?_v_dr=";
         } else {
             $vurl = $vurl . "&_v_dr=";
         }
-        
+
         $this->pages['yard'] = [
             'dir' => dirname(__FILE__) . $d . 'Sample',
             'url' => $vurl . "/plansys/yard/src/Sample"
         ];
-        
-        # load crud if exists
-        if (class_exists('\Plansys\Crud\Init')) {
-            $base = \Plansys\Crud\Init::getBase($this->host);
-            $this->pages['crud'] = $base['pages'][''];
-        }
 
         # load db if exists
         if (class_exists('\Plansys\Db\Init')) {
             $base = \Plansys\Db\Init::getBase($this->host);
-            $this->pages['db'] = $base['pages'][''];
+            $this->pages['db'] = $base;
         }
 
         # load ui if exists
         if (class_exists('\Plansys\Ui\Init')) {
             $base = \Plansys\Ui\Init::getBase($this->host);
-            $this->pages['ui'] = $base['pages'][''];
+            $this->pages['ui'] = $base;
+        }
+
+        # load user if exists
+        if (class_exists('\Plansys\User\Init')) {
+            $base = \Plansys\User\Init::getBase($this->host);
+            $this->pages['user'] = $base;
         }
     }
-    
+
     public function isPage($tag)
     {
         $tag = str_replace(".", DIRECTORY_SEPARATOR, $tag);
@@ -118,7 +117,7 @@ class Base
             return false;
         }
     }
-    
+
     public function getRootUrl($shortcut = '')
     {
         $url = $this->pages['']['url'];
@@ -148,11 +147,11 @@ class Base
             if (!class_exists($mp['class'], false)) {
                 throw new \Exception('Masterpage not found: ' . $new->masterpage);
             }
-            
+
             $master = new $mp['class']($new->masterpage, true, $new, $this);
 
             $this->validateReduxStore($new, $master);
-            
+
             return $master;
         }
         return $new;
@@ -164,7 +163,7 @@ class Base
         foreach ($this->pages as $k => $v) {
             $pages[$k] = $v['url'];
         }
-        
+
         return [
             'base' => $this->url['base'],
             'page' => $this->url['page'],
@@ -176,10 +175,10 @@ class Base
     {
         $parr = explode(":", $alias);
         if (count($parr) == 1 && isset($this->pages[''])) {
-              $baseDir = $this->pages['']['dir'];
-              $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
-              $class = str_replace(".", '\\', $alias);
-              $shortcutNs = '';
+            $baseDir = $this->pages['']['dir'];
+            $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
+            $class = str_replace(".", '\\', $alias);
+            $shortcutNs = '';
         } elseif (count($parr) > 1) {
             if ($this->pages[$parr[0]]) {
                 $baseDir = $this->pages[$parr[0]]['dir'];
@@ -190,7 +189,7 @@ class Base
                 throw new \Exception('Pages directory not found: ' . $parr[0]);
             }
         } else {
-              throw new \Exception('Page not found: ' . $alias);
+            throw new \Exception('Page not found: ' . $alias);
         }
 
         if (is_file($baseDir . DIRECTORY_SEPARATOR . $path)) {
@@ -202,12 +201,12 @@ class Base
                     'fullPath' => $baseDir . DIRECTORY_SEPARATOR . $path
                 ];
             }
-              return $baseDir . DIRECTORY_SEPARATOR . $path;
+            return $baseDir . DIRECTORY_SEPARATOR . $path;
         } else {
-              throw new \Exception('File not found for Page `' . $alias . '`: ' . $baseDir . DIRECTORY_SEPARATOR . $path);
+            throw new \Exception('File not found for Page `' . $alias . '`: ' . $baseDir . DIRECTORY_SEPARATOR . $path);
         }
     }
-    
+
     private function validateReduxStore($new, $master)
     {
         if (!empty($new->store)) {
@@ -217,22 +216,22 @@ class Base
                 if (!isset($ms[$ss[0]])) {
                     $ms[$ss[0]] = [];
                 }
-                
+
                 $ms[$ss[0]][$ss[1]] = $raws;
             }
-            
+
             foreach ($new->store as $s) {
                 $ss = explode(".", $s);
-                
+
                 if (!isset($ms[$ss[0]][$ss[1]])) {
                     if (!isset($ms[$ss[0]]['*'])) {
-                        throw new \Exception("Store {$s} is not declared in Page: " . $master->alias . '. You should add `public $store = [\''.$ss[0].'.*\'];` in ' . $master->alias . '.php ');
+                        throw new \Exception("Store {$s} is not declared in Page: " . $master->alias . '. You should add `public $store = [\'' . $ss[0] . '.*\'];` in ' . $master->alias . '.php ');
                     }
                 }
             }
         }
     }
-    
+
     private function validatePages($pages)
     {
         if (is_array($pages)) {
@@ -268,7 +267,7 @@ class Base
                             throw new \Exception("Failed to create directory: {$dir[$k]}");
                         }
                     }
-                    
+
                     $dir[$k] = realpath($dir[$k]);
                 } elseif ($is == 'is_array') {
                     foreach ($dir[$k] as $kd => $dd) {
@@ -279,7 +278,7 @@ class Base
                 }
             }
         }
-        
+
         return $dir;
     }
 

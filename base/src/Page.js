@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import PageLoader from './PageLoader';
+import Placeholder from './ui/Placeholder';
 
 export class Page extends React.Component {
 
@@ -164,7 +165,7 @@ export class Page extends React.Component {
                     name: props.name
                 });
             case "Placeholder":
-                return h(PageLoader.ui.loaded[tag], {
+                return h(Placeholder, {
                     history: PageLoader.history
                 });
             default:

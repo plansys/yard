@@ -2,7 +2,7 @@
 import React from 'react';
 import { Page, createPage } from './Page';
 import { addJS, addCSS } from './lib/injectTag';
-import { componentLoader, loadConf, parseConf } from './lib/componentLoader';
+import { loadConf, parseConf } from './lib/componentLoader';
 import { mapInput, mapAction } from './lib/reduxConnector';
 
 // redux
@@ -48,8 +48,6 @@ class PageLoader extends React.Component {
         this.isRoot = isRoot;
         this.name = name.replace(/[^0-9a-z.:]/gi, '');;
         this.conf = null;
-        this.subpage = [];
-        this.subpageidx = 0;
         this.pageComponent = Page;
 
         this.init = this
@@ -114,7 +112,7 @@ class PageLoader extends React.Component {
                             })
                         }
 
-                        Promise.all(deps).then(params => {
+                        Promise.all(deps).then(() => {
                             resolve(conf);
                         })
                     })
@@ -135,11 +133,15 @@ class PageLoader extends React.Component {
                 PageLoader.page.conf[page] = conf.dependencies.pages[page];
             }
 
-            conf.dependencies.elements.forEach(el => {
-                if (el[0] && el[0] === el[0].toUpperCase()) {
-                    PageLoader.ui.promise[el] = (tag) => componentLoader(el);
-                }
-            })
+            // Load tag with uppercased first char as a Page,
+            // Commented because the page is already included in php dependencies...
+            // We have to add ReactJs native component manually without component loader
+            //
+            // conf.dependencies.elements.forEach(el => {
+            //     if (el[0] && el[0] === el[0].toUpperCase()) {
+            //         PageLoader.ui.promise[el] = (tag) => componentLoader(el);
+            //     }
+            // })
 
             const tags = Object.keys(PageLoader.ui.promise);
             if (tags.length > 0) {
@@ -153,7 +155,7 @@ class PageLoader extends React.Component {
                         tags.forEach((tag, idx) => {
                             PageLoader.ui.loaded[tag] = result[idx];
                             delete PageLoader.ui.promise[tag];
-                        })
+                        });
 
                         resolve(conf);
                     });
@@ -185,17 +187,17 @@ class PageLoader extends React.Component {
                     });
                 }
 
-                const sagaMiddleware = createSagaMiddleware()
+                const sagaMiddleware = createSagaMiddleware();
                 PageLoader.redux.store = initStore(PageLoader.redux.reducers, [
                     routerMiddleware(PageLoader.history),
                     sagaMiddleware
                 ]);
 
-                var keys = Object.keys(reduxSagaEffects)
+                let keys = Object.keys(reduxSagaEffects)
                     .concat('Page')
                     .concat('conf');
 
-                var values = Object.keys(reduxSagaEffects)
+                let values = Object.keys(reduxSagaEffects)
                     .map((key) => reduxSagaEffects[key])
                     .concat(Page)
                     .concat(conf);
@@ -206,14 +208,11 @@ class PageLoader extends React.Component {
                 //eslint-disable-next-line
                 const sagasStore = (new Function(...keys, body))(...values);
 
-                for (let t in sagasStore) {
-                    let sagas = sagasStore[t];
-                    for (let i in sagas) {
-                        for (let s in sagas[i]) {
-                            sagaMiddleware.run(sagas[i][s]);
-                        }
-                    }
-                }
+                Object.keys(sagasStore).forEach(k=> {
+                    Object.keys(sagasStore[k]).forEach(f => {
+                        sagaMiddleware.run(sagasStore[k][f]);
+                    })
+                })
             }
 
             // prepare react-redux connect args (mapStateToProps and mapDispatchToProps)

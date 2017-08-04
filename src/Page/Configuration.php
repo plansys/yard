@@ -43,8 +43,8 @@ class Configuration
         $mapStore = $this->renderMapStore();
         $mapAction = $this->renderMapAction();
 
-        $loaders = Dependency::parseLoaders($renderParsed);
-        $loaders = count($loaders) > 0 ? self::toJs($loaders) : '[]';
+        $originalLoaders = Dependency::parseLoaders($renderParsed);
+        $loaders = count($originalLoaders) > 0 ? self::toJs($originalLoaders) : '[]';
 
         $propTypes = $page->propTypes();
         if (is_array($propTypes)) {
@@ -75,9 +75,9 @@ class Configuration
         $deps = self::toJs($deps);
 
         if ($page->isRoot) {
-            $reducers = $this->renderReduxReducers();
-            $actionCreators = $this->renderReduxActions();
-            $sagas = $this->renderReduxSagas();
+            $reducers = $this->renderReduxReducers($originalLoaders);
+            $actionCreators = $this->renderReduxActions($originalLoaders);
+            $sagas = $this->renderReduxSagas($originalLoaders);
         }
 
         ## load conf template
