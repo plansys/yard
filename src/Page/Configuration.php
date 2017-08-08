@@ -103,6 +103,11 @@ class Configuration
         }
 
         $js = $this->page->js();
+        $finalizedJs = $this->page->finalizeJs($js);
+        if (!is_null($finalizedJs)) {
+            $js = $finalizedJs;
+        }
+
         $js = explode("\n", $js);
         $js = implode("\n" . $pad, $js);
         return trim($js) . "\n";

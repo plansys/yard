@@ -26,6 +26,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         $result = [
             $node->nodeName,
         ];
+
         
         $attributes = array_merge(
             $this->getNamespaces($node),
@@ -34,6 +35,11 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
         if (!empty($attributes)) {
             $result[] = $attributes;
+        }
+
+
+        if ($this->base->isPage($result[0])) {
+            $result = $this->getPage($result);
         }
 
         $childs = [];
@@ -63,22 +69,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                     $c = [$c[0], $content];
                 }
                 if ($this->base->isPage($c[0])) {
-                    $newc = ['Page', ['name' => $c[0]]];
-                    if (count($c) > 1) {
-                        if (isset($c[1][0])) {
-                            $newc[] = $c[1];
-                        } else {
-                            foreach ($c[1] as $k=>$cc) {
-                                $newc[1][$k] = $cc;
-                            }
-                            $newc[1]['name'] = $c[0];
-                            
-                            if (count($c) > 2) {
-                                $newc[] = $c[2];
-                            }
-                        }
-                    }
-                    $c = $newc;
+                    $c = $this->getPage($c);
                 }
                 
                 if (is_array($childs)) {
@@ -118,6 +109,25 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
             $result[$name] = $this->getValue($attribute->value);
         }
         return $result;
+    }
+
+    private function getPage($c) {
+        $newc = ['Page', ['name' => $c[0]]];
+        if (count($c) > 1) {
+            if (isset($c[1][0])) {
+                $newc[] = $c[1];
+            } else {
+                foreach ($c[1] as $k=>$cc) {
+                    $newc[1][$k] = $cc;
+                }
+                $newc[1]['name'] = $c[0];
+
+                if (count($c) > 2) {
+                    $newc[] = $c[2];
+                }
+            }
+        }
+        return $newc;
     }
 
     /**

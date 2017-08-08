@@ -4,6 +4,7 @@ import h from 'react-hyperscript';
 import { Provider } from 'react-redux';
 import PageLoader from './PageLoader';
 import Placeholder from './ui/Placeholder';
+import ReactDOM from 'react-dom';
 
 export class Page extends React.Component {
 
@@ -58,7 +59,7 @@ export class Page extends React.Component {
 
             window.onpopstate = function(e) {
                 Page.history.doChangeListener(Page.history.now());
-            }
+            };
 
             Page.history.changeListener.push(func);
         },
@@ -84,7 +85,7 @@ export class Page extends React.Component {
         }
 
         this.url = window.yard.url.pages[''];
-        this.props.loader.conf.js.bind(this)(Page);
+        this.props.loader.conf.js.bind(this)(Page, ReactDOM);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -125,7 +126,7 @@ export class Page extends React.Component {
             console.log(this.props.loader);
             return null;
         }
-        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this));
+        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this), ReactDOM);
         if (!content) return null;        
         if (!content.type) return null;
 

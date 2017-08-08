@@ -10,7 +10,6 @@ class Dependency
     public static function printPage($page, $pageRender, $deps = false)
     {
         $tags = array_keys(self::parseTags($pageRender));
-
         $isRoot = false;
         if ($deps === false) {
             $isRoot = true;

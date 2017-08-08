@@ -6,7 +6,7 @@ class Page
 {
     use Page\Cache;
     use \Yard\Lib\JsConvert;
-    
+
     public $conf;
     public $alias = "";
     public $base;
@@ -39,6 +39,10 @@ class Page
     {
     }
 
+    public function finalizeJs()
+    {
+    }
+
     public function css()
     {
     }
@@ -57,20 +61,21 @@ class Page
         $this->isRoot = $isRoot;
         $this->showDeps = $showDeps;
         $this->base = $base;
-        
+
         $this->url = @$base->pages['']['url'];
         $this->conf = new Page\Configuration($this);
     }
 
-    public function app() {
+    public function app()
+    {
         return $this->base->settings;
     }
-    
+
     public function loadFile()
     {
         $files = func_get_args();
         $reflector = new \ReflectionClass(get_class($this));
-        $dir =  dirname($reflector->getFileName());
+        $dir = dirname($reflector->getFileName());
         $results = [];
         foreach ($files as $file) {
             $path = $dir . DIRECTORY_SEPARATOR . $file;
@@ -105,7 +110,7 @@ class Page
     {
         return $this->conf->renderInitJS();
     }
-    
+
     public function renderCSS($indent = 0)
     {
         return $this->getCssCacheContent();

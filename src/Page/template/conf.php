@@ -52,11 +52,11 @@
         } 
     }
 ?>
-    js: function(Page) {
+    js: function(Page, ReactDOM) {
         <?= $js ?>
     },
 <?= $propTypes ?>
-    render: function(h) {
+    render: function(h, ReactDOM) {
         <?php
             $render = implode("\n\t\t", explode("\n", $contents));
             if (strpos($render, "h('jsdiv', ") === 0) {
