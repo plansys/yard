@@ -59,13 +59,13 @@ $base = new \Yard\Base([
     'pages' => [
         '' => [
             'dir'=> dirname(__FILE__) . '/pages',
-            'url' => $host . '/pages'
+            'url' => $host . '/pages',
+            'redux' => dirname(__FILE__) . '/redux'
         ]
     ],
     'dir' => [
         'base' => dirname(__FILE__) . '/vendor/plansys/yard/base/build',
         'cache' => dirname(__FILE__) . '/tmp',
-        'redux' => dirname(__FILE__) . '/redux',
     ],
     'url' => [
         'base' => $host . '/vendor/plansys/yard/base/build',
