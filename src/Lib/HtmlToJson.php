@@ -22,7 +22,7 @@ class HtmlToJson
           [
             // Replace ="js: blablabla"
             // "regex" => '/="js:([\w\W]+?)"/im',
-            "regex" => '/(=?)"((js:|)(([^"]|(?R))*))"\s/im',
+            "regex" => '/(=?)"((js:|)(([^"]|(?R))*))"[\w\W]?(\s|>)/im',
             "name" => 'attributeValue',
           ],
         ];
@@ -30,18 +30,21 @@ class HtmlToJson
         foreach ($replacerPlansys as $key => $item) {
           if (isset($item["name"]) && $item["name"] === "attributeValue") {
             $render = preg_replace_callback($item["regex"], function($matches) {
+              var_dump($matches);
               $fullMatch = $matches[0];
+              $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
               $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
               $value = $matches[4];
-              if ($isValidAttribute) return "={" . str_replace("\"","'", $value) . "} ";
+              if ($isValidAttribute) {
+                $ending = $hasCloseTagSign ? ">" : " ";
+                return "={" . str_replace("\"","'", $value) . " }" . $ending;
+              }
               return $fullMatch;
             }, $render);
           } else {
             $render = preg_replace($item["regex"], $item["replacement"], $render);
           }
         }
-        // var_dump($render);
-
 
         $replacerJSX = [
             // ============ TAG LEVEL =============== //
@@ -86,13 +89,13 @@ class HtmlToJson
                 $render = preg_replace($item["regex"], $item["replacement"], $render);
             }
         }
-
         return $render;
     }
 
     private static function doConvert($base, $render)
     {
         $render = self::preConvert($render);
+
 
         # parse the dom
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml'=> LIBXML_COMPACT ]);
