@@ -12,6 +12,13 @@ class HtmlToJson
 
         $init = $render;
 
+        $openingTemplate = false;
+        $usingBeforeRender = preg_match('/([\w\W]+?)(return[\w\W]+)/im', $render, $matches, PREG_OFFSET_CAPTURE);
+        if ($usingBeforeRender) {
+          $openingTemplate = $matches[1][0];
+          $render = $matches[2][0];
+        }
+
         $replacer = [
           // ============ TAG LEVEL =============== //
           [
@@ -52,6 +59,10 @@ class HtmlToJson
 
         foreach ($replacer as $key => $item) {
           $render = preg_replace($item["regex"], $item["replacement"], $render);
+        }
+
+        if ($usingBeforeRender) {
+          $render = '<js>' . $openingTemplate . $render .'</js>';
         }
 
         // var_dump($init);

@@ -11,31 +11,31 @@
 <?php if ($page->isRoot || $page->showDeps): ?>
     dependencies: <?= "\n\t\t" . $deps . "\n\t"; ?>,
 <?php endif; ?>
-<?php 
+<?php
     $map = [];
-    
+
     if ($mapStore) {
         $map[] = "\t\tinput: function() {\n\t\t\t   " . trim($mapStore) . "\n\t\t}";
     }
-    
+
     if ($mapAction) {
         $map[] = "\t\taction: function() {\n\t\t\t   " . trim($mapAction) . "\n\t\t}";
     }
-    
+
     if (count($map) > 0) {
         echo "\tmap: {\n";
         echo implode(",\n", $map);
         echo "\n\t},\n";
-    } 
+    }
 ?>
 <?php
     if ($page->isRoot) {
         $redux = [];
-        
+
         if ($actionCreators) {
             $redux[] = "\t\tactionCreators: function() {\n\t\t\t   " . trim($actionCreators) . "\n\t\t}";
         }
-        
+
         if ($reducers) {
             $redux[] = "\t\treducers: function(Immutable) {\n\t\t\t  " . trim($reducers) . "\n\t\t}";
         }
@@ -49,7 +49,7 @@
             echo "\tredux: {\n";
             echo implode(",\n", $redux);
             echo "\n\t},\n";
-        } 
+        }
     }
 ?>
     js: function(Page, ReactDOM) {
@@ -59,6 +59,7 @@
     render: function(h, ReactDOM) {
         <?php
             $render = implode("\n\t\t", explode("\n", $contents));
+
             if (strpos($render, "h('jsdiv', ") === 0) {
                 $render = trim($render, "h('jsdiv', [");
                 $render = trim($render, "])");
