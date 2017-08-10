@@ -52,11 +52,11 @@
         }
     }
 ?>
-    js: function(Page, ReactDOM) {
+    js: function(Page, ReactDOM, React) {
         <?= $js ?>
     },
 <?= $propTypes ?>
-    render: function(h, ReactDOM) {
+    render: function(h, ReactDOM, React) {
         <?php
             $render = implode("\n\t\t", explode("\n", $contents));
 
