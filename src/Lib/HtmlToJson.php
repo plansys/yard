@@ -12,14 +12,23 @@ class HtmlToJson
 
         $init = $render;
 
-        $openingTemplate = false;
-        $usingBeforeRender = preg_match('/([\w\W]+?)(return[\w\W]+)/im', $render, $matches, PREG_OFFSET_CAPTURE);
-        if ($usingBeforeRender) {
-          $openingTemplate = $matches[1][0];
-          $render = $matches[2][0];
-        }
+        // $openingTemplate = false;
+        // $usingBeforeRender = preg_match('/([\w\W]+?)(return[\w\W]+)/im', $render, $matches, PREG_OFFSET_CAPTURE);
+        // if ($usingBeforeRender) {
+        //   $openingTemplate = $matches[1][0];
+        //   $render = $matches[2][0];
+        // }
 
-        $replacer = [
+        $replacerPlansys = [
+          // ============ ATTRIBUTE =============== //
+          [
+            // Replace ="js: blablabla"
+            "regex" => '/="js:([\w\W]+?)"/im',
+            "replacement" => '{${1}}',
+          ],
+        ];
+
+        $replacerJSX = [
           // ============ TAG LEVEL =============== //
           [
             // Replace { ... spread }
@@ -32,24 +41,14 @@ class HtmlToJson
             "replacement" => 'if (${1}) return <el>${2}</el>',
           ],
 
-          // ============ ATTRIBUTE =============== //
-          [
-            // Replace ={ expression }
-            "regex" => '/={([\w\W]+?)}/im',
-            "replacement" => '="js:${1}"',
-          ],
-          [
-            // Replace ={ expression }
-            "regex" => '/={([\w\W]+?)}/im',
-            "replacement" => '="js:${1}"',
-          ],
-
           // ============ OUTSIDE =============== //
           [
             // Replace { expression }
-            "regex" => '/{([\w\W]+?)}/im',
-            "replacement" => '<js>${1}</js>',
+            // https://stackoverflow.com/a/14952740/6086756
+            "regex" => '/(=?)({([^{}]+|(?R))*})/im',
+            "name" => "globalBrackets"
           ],
+
           [
             // Replace return ( expression )
             "regex" => '/return\s?\(([\w\W]+?)\)/im',
@@ -57,13 +56,27 @@ class HtmlToJson
           ],
         ];
 
-        foreach ($replacer as $key => $item) {
+        foreach ($replacerPlansys as $key => $item) {
           $render = preg_replace($item["regex"], $item["replacement"], $render);
         }
 
-        if ($usingBeforeRender) {
-          $render = '<js>' . $openingTemplate . $render .'</js>';
+        foreach ($replacerJSX as $key => $item) {
+          if (isset($item["name"]) && $item["name"] === "globalBrackets") {
+            $render = preg_replace_callback($item["regex"], function($matches) {
+              $fullMatch = $matches[0];
+              $isAttribute = $matches[1] !== "";
+              $value = $matches[3];
+              if ($isAttribute) return "=\"js:" . str_replace("\"","'", $value) . "\"";
+              else return "<js>" . $value . "</js>";
+            }, $render);
+          } else {
+            $render = preg_replace($item["regex"], $item["replacement"], $render);
+          }
         }
+
+        // if ($openingTemplate) {
+        //   $render = '<js>' . $openingTemplate . $render .'</js>';
+        // }
 
         // var_dump($init);
         // var_dump($render);
