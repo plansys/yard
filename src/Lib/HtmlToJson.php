@@ -23,10 +23,27 @@ class HtmlToJson
           // ============ ATTRIBUTE =============== //
           [
             // Replace ="js: blablabla"
-            "regex" => '/="js:([\w\W]+?)"/im',
-            "replacement" => '{${1}}',
+            // "regex" => '/="js:([\w\W]+?)"/im',
+            "regex" => '/(=?)"((js:|)(([^"]|(?R))*))"\s/im',
+            "name" => 'attributeValue',
           ],
         ];
+
+        foreach ($replacerPlansys as $key => $item) {
+          if (isset($item["name"]) && $item["name"] === "attributeValue") {
+            $render = preg_replace_callback($item["regex"], function($matches) {
+              $fullMatch = $matches[0];
+              $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
+              $value = $matches[4];
+              if ($isValidAttribute) return "={" . str_replace("\"","'", $value) . "} ";
+              return $fullMatch;
+            }, $render);
+          } else {
+            $render = preg_replace($item["regex"], $item["replacement"], $render);
+          }
+        }
+        // var_dump($render);
+
 
         $replacerJSX = [
           // ============ TAG LEVEL =============== //
@@ -56,9 +73,7 @@ class HtmlToJson
           ],
         ];
 
-        foreach ($replacerPlansys as $key => $item) {
-          $render = preg_replace($item["regex"], $item["replacement"], $render);
-        }
+
 
         foreach ($replacerJSX as $key => $item) {
           if (isset($item["name"]) && $item["name"] === "globalBrackets") {
