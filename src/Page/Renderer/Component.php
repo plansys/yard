@@ -18,7 +18,7 @@ trait Component
                 }
                 return $json;
             } catch (\Exception $e) {
-                $render = explode("\n", $render);
+                $render = explode("\n", \Yard\Lib\HtmlToJson::preConvert($render));
                 $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
                 $col = self::explode_first(":", self::explode_last('character ', $e->getMessage())) + 1;
                 $tab = "    ";

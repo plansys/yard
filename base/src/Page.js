@@ -85,7 +85,7 @@ export class Page extends React.Component {
         }
 
         this.url = window.yard.url.pages[''];
-        this.props.loader.conf.js.bind(this)(Page, ReactDOM);
+        this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -126,7 +126,7 @@ export class Page extends React.Component {
             console.log(this.props.loader);
             return null;
         }
-        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this), ReactDOM);
+        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this), ReactDOM, React);
         if (!content) return null;        
         if (!content.type) return null;
 
