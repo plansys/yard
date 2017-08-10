@@ -30,13 +30,12 @@ class HtmlToJson
         foreach ($replacerPlansys as $key => $item) {
           if (isset($item["name"]) && $item["name"] === "attributeValue") {
             $render = preg_replace_callback($item["regex"], function($matches) {
-              var_dump($matches);
               $fullMatch = $matches[0];
               $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
               $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
               $value = $matches[4];
               if ($isValidAttribute) {
-                $ending = $hasCloseTagSign ? ">" : " ";
+                $ending = $hasCloseTagSign ? " >" : " ";
                 return "={" . str_replace("\"","'", $value) . " }" . $ending;
               }
               return $fullMatch;
@@ -63,7 +62,7 @@ class HtmlToJson
             [
                 // Replace { expression }
                 // https://stackoverflow.com/a/14952740/6086756
-                "regex" => '/(=?)({([^{}]+|(?R))*})/im',
+                "regex" => '/(=?)({(([^{}]+|(?R))*)})/im',
                 "name" => "globalBrackets"
             ],
 
@@ -73,8 +72,6 @@ class HtmlToJson
                 "replacement" => 'return <el>${1}</el>',
             ],
         ];
-
-
 
 
         foreach ($replacerJSX as $key => $item) {
@@ -89,13 +86,13 @@ class HtmlToJson
                 $render = preg_replace($item["regex"], $item["replacement"], $render);
             }
         }
+
         return $render;
     }
 
     private static function doConvert($base, $render)
     {
         $render = self::preConvert($render);
-
 
         # parse the dom
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml'=> LIBXML_COMPACT ]);
