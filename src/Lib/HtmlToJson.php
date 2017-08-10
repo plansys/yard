@@ -39,11 +39,7 @@ class HtmlToJson
 
         $replacerJSX = [
             // ============ TAG LEVEL =============== //
-            [
-                // Replace { ... spread }
-                "regex" => '/(<[\w\W]+?){(\s?\.\.\.([\w\W]+?\s?))}/im',
-                "replacement" => '${1}js:spread="${3}"',
-            ],
+
             [
                 // Replace return <If confition={expression}>expression</If>
                 "regex" => '/<If condition={([\w\W]+?)}>([\w\W]+?)<\/If>/im',
@@ -57,6 +53,12 @@ class HtmlToJson
                 "regex" => '/(=?)({(([^{}]+|(?R))*)})/im',
                 "name" => "globalBrackets"
             ],
+
+            // [
+            //     // Replace { ... spread }
+            //     "regex" => '/(<[\w\W]+?){(\s?\.\.\.([\w\W]+?\s?))}/im',
+            //     "replacement" => '${1}js:spread="${3}"',
+            // ],
 
             [
                 // Replace return ( expression )
