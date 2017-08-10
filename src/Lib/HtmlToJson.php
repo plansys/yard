@@ -17,10 +17,13 @@ class HtmlToJson
         //   $render = $matches[2][0];
         // }
 
+        $tagRegex = '/<[\w\W]+?>/im';
 
         // Select tag
-        $render = preg_replace_callback('/<[\w\W]+?>/im', function($matches) {
+        $render = preg_replace_callback($tagRegex, function($matches) {
           $tag = $matches[0];
+
+          // Plansys attribute to JSX
           $tag = preg_replace_callback('/(=?)"((js:|)(([^"]|(?R))*))"[\w\W]?(\s|>)/im', function($matches) {
             $fullMatch = $matches[0];
             $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
@@ -32,34 +35,19 @@ class HtmlToJson
             }
             return $fullMatch;
           }, $tag);
+
           return $tag;
         }, $render);
 
 
-
         $replacerJSX = [
             // ============ TAG LEVEL =============== //
-
             [
                 // Replace return <If confition={expression}>expression</If>
                 "regex" => '/<If condition={([\w\W]+?)}>([\w\W]+?)<\/If>/im',
                 "replacement" => 'if (${1}) return <el>${2}</el>',
             ],
-
             // ============ OUTSIDE =============== //
-            [
-                // Replace { expression }
-                // https://stackoverflow.com/a/14952740/6086756
-                "regex" => '/(=?)({(([^{}]+|(?R))*)})/im',
-                "name" => "globalBrackets"
-            ],
-
-            // [
-            //     // Replace { ... spread }
-            //     "regex" => '/(<[\w\W]+?){(\s?\.\.\.([\w\W]+?\s?))}/im',
-            //     "replacement" => '${1}js:spread="${3}"',
-            // ],
-
             [
                 // Replace return ( expression )
                 "regex" => '/return\s?\(([\w\W]+?)\)/im',
@@ -69,20 +57,44 @@ class HtmlToJson
 
 
         foreach ($replacerJSX as $key => $item) {
-            if (isset($item["name"]) && $item["name"] === "globalBrackets") {
-                $render = preg_replace_callback($item["regex"], function($matches) {
-                    $isAttribute = $matches[1] !== "";
-                    $value = $matches[3];
-                    if ($isAttribute) return "=\"js: " . str_replace("\"","'", $value) . "\"";
-                    else return "<js>" . $value . "</js>";
-                }, $render);
-            } else {
-                $render = preg_replace($item["regex"], $item["replacement"], $render);
-            }
+          $render = preg_replace($item["regex"], $item["replacement"], $render);
         }
 
-        // var_dump($render);
-        // die();
+        // Global Brackets
+        // https://stackoverflow.com/a/14952740/6086756
+        $globalBracketsRegex = '/(=?)({(([^{}]+|(?R))*)})/im';
+
+        // Select tag
+        $render = preg_replace_callback($tagRegex, function($matches) use ($globalBracketsRegex) {
+          $tag = $matches[0];
+
+          // Plansys attribute to JSX
+          $tag = preg_replace_callback($globalBracketsRegex, function($matches) {
+            $fullMatch = $matches[0];
+            // var_dump($matches);
+            $isAttribute = $matches[1] !== "";
+            $value = $matches[3];
+            if ($isAttribute) {
+              $hasSpread = preg_match('/\.\.\./im', $value, $m, PREG_OFFSET_CAPTURE);
+              if ($hasSpread) return '="js: {' . str_replace("\"","'", $value) . '}"';
+              return '="js: ' . str_replace("\"","'", $value) . '"';
+            } else {
+              // Is Spread props in tags
+              return 'js:spread="{' . $value . '}"';
+            }
+          }, $tag);
+
+          return $tag;
+        }, $render);
+
+        $bracketsOutside = '/(js:\s*|spread=")?({(([^{}]+|(?R))*)})/im';
+        $render = preg_replace_callback($bracketsOutside, function($matches) {
+            $fullMatch = $matches[0];
+            $isOutside = $matches[1] === "";
+            $value = $matches[3];
+            if ($isOutside) return "<js>" . $value . "</js>";
+            return $fullMatch;
+        }, $render);
 
         return $render;
     }
