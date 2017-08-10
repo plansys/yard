@@ -17,33 +17,25 @@ class HtmlToJson
         //   $render = $matches[2][0];
         // }
 
-        $replacerPlansys = [
-          // ============ ATTRIBUTE =============== //
-          [
-            // Replace ="js: blablabla"
-            // "regex" => '/="js:([\w\W]+?)"/im',
-            "regex" => '/(=?)"((js:|)(([^"]|(?R))*))"[\w\W]?(\s|>)/im',
-            "name" => 'attributeValue',
-          ],
-        ];
 
-        foreach ($replacerPlansys as $key => $item) {
-          if (isset($item["name"]) && $item["name"] === "attributeValue") {
-            $render = preg_replace_callback($item["regex"], function($matches) {
-              $fullMatch = $matches[0];
-              $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
-              $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
-              $value = $matches[4];
-              if ($isValidAttribute) {
-                $ending = $hasCloseTagSign ? " >" : " ";
-                return "={" . str_replace("\"","'", $value) . " }" . $ending;
-              }
-              return $fullMatch;
-            }, $render);
-          } else {
-            $render = preg_replace($item["regex"], $item["replacement"], $render);
-          }
-        }
+        // Select tag
+        $render = preg_replace_callback('/<[\w\W]+?>/im', function($matches) {
+          $tag = $matches[0];
+          $tag = preg_replace_callback('/(=?)"((js:|)(([^"]|(?R))*))"[\w\W]?(\s|>)/im', function($matches) {
+            $fullMatch = $matches[0];
+            $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
+            $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
+            $value = $matches[4];
+            if ($isValidAttribute) {
+              $ending = $hasCloseTagSign ? " >" : " ";
+              return "={" . str_replace("\"","'", $value) . " }" . $ending;
+            }
+            return $fullMatch;
+          }, $tag);
+          return $tag;
+        }, $render);
+
+
 
         $replacerJSX = [
             // ============ TAG LEVEL =============== //
