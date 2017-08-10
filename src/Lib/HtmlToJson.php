@@ -17,7 +17,7 @@ class HtmlToJson
           [
             // Replace { ... spread }
             "regex" => '/(<[\w\W]+?){(\s?\.\.\.([\w\W]+?\s?))}/im',
-            "replacement" => '${1}js:spread="${3}',
+            "replacement" => '${1}js:spread="${3}"',
           ],
           [
             // Replace return <If confition={expression}>expression</If>
@@ -54,9 +54,9 @@ class HtmlToJson
           $render = preg_replace($item["regex"], $item["replacement"], $render);
         }
 
-        var_dump($init);
-        var_dump($render);
-        die();
+        // var_dump($init);
+        // var_dump($render);
+        // die();
 
         # parse the dom
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml'=> LIBXML_COMPACT ]);
