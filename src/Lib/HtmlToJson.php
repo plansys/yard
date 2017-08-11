@@ -87,15 +87,42 @@ class HtmlToJson
           return $tag;
         }, $render);
 
+        // var_dump($render);
+
         // $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*|spread=")?({(([^{}]+|(?R))*)})/im';
-        $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*[\w\W]+?|spread=")?({(([^{}]+|(?R))*)})/im';
-        $render = preg_replace_callback($bracketsOutside, function($matches) {
-            $fullMatch = $matches[0];
-            $isOutside = $matches[1] === "";
-            $value = $matches[3];
-            if ($isOutside) return "<js>" . $value . "</js>";
-            return $fullMatch;
+
+        $outsideTagRegex = '/(\/?>)([\w\W]*?)(<\/?[\W]*)/im';
+        $render = preg_replace_callback($outsideTagRegex, function($matches) {
+          $fullMatch = $matches[0];
+          $opening = $matches[1];
+          $outside = $matches[2];
+          $closing = $matches[3];
+
+          $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*[\w\W]+?|spread=")?({(([^{}]+|(?R))*)})/im';
+          $outside = preg_replace_callback($bracketsOutside, function($matches) {
+              // var_dump($matches);
+              $fullMatch = $matches[0];
+              $isOutside = $matches[1] === "";
+              $value = $matches[3];
+              if ($isOutside) return "<js>" . $value . "</js>";
+              return $fullMatch;
+          }, $outside);
+          return $opening . $outside . $closing;
         }, $render);
+
+        // var_dump($render);
+
+        // $render = preg_replace_callback($bracketsOutside, function($matches) {
+        //     // var_dump($matches);
+        //     $fullMatch = $matches[0];
+        //     $isOutside = $matches[1] === "";
+        //     $value = $matches[3];
+        //     if ($isOutside) return "<js>" . $value . "</js>";
+        //     return $fullMatch;
+        // }, $render);
+
+        // var_dump($render);
+        // die();
 
         return $render;
     }
