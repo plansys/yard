@@ -10,13 +10,6 @@ class HtmlToJson
 
         $render = str_replace('&', '~^AND^~', $render); #replace '&' with something.
 
-        // $openingTemplate = false;
-        // $usingBeforeRender = preg_match('/([\w\W]+?)(return[\w\W]+)/im', $render, $matches, PREG_OFFSET_CAPTURE);
-        // if ($usingBeforeRender) {
-        //   $openingTemplate = $matches[1][0];
-        //   $render = $matches[2][0];
-        // }
-
         $tagRegex = '/<[\w\W]+?>/im';
 
         // Select tag
@@ -71,12 +64,9 @@ class HtmlToJson
           // Plansys attribute to JSX
           $tag = preg_replace_callback($globalBracketsRegex, function($matches) {
             $fullMatch = $matches[0];
-            // var_dump($matches);
             $isAttribute = $matches[1] !== "";
             $value = $matches[3];
             if ($isAttribute) {
-              // $hasSpread = preg_match('/\.\.\./im', $value, $m, PREG_OFFSET_CAPTURE);
-              // if ($hasSpread) return '="js: {' . str_replace("\"","'", $value) . '}"';
               return '="js: ' . str_replace("\"","'", $value) . '"';
             } else {
               // Is Spread props in tags
@@ -86,10 +76,6 @@ class HtmlToJson
 
           return $tag;
         }, $render);
-
-        // var_dump($render);
-
-        // $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*|spread=")?({(([^{}]+|(?R))*)})/im';
 
         $outsideTagRegex = '/(\/?>)([\w\W]*?)(<\/?[\W]*)/im';
         $render = preg_replace_callback($outsideTagRegex, function($matches) {
@@ -110,19 +96,8 @@ class HtmlToJson
           return $opening . $outside . $closing;
         }, $render);
 
-        // var_dump($render);
-
-        // $render = preg_replace_callback($bracketsOutside, function($matches) {
-        //     // var_dump($matches);
-        //     $fullMatch = $matches[0];
-        //     $isOutside = $matches[1] === "";
-        //     $value = $matches[3];
-        //     if ($isOutside) return "<js>" . $value . "</js>";
-        //     return $fullMatch;
-        // }, $render);
-
-        // var_dump($render);
-        // die();
+        $commentRegex = '/\/\/\s*?([\w\W][^\n]+)/im';
+        $render = preg_replace($commentRegex, "", $render);
 
         return $render;
     }
