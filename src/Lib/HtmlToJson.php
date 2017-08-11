@@ -75,8 +75,8 @@ class HtmlToJson
             $isAttribute = $matches[1] !== "";
             $value = $matches[3];
             if ($isAttribute) {
-              $hasSpread = preg_match('/\.\.\./im', $value, $m, PREG_OFFSET_CAPTURE);
-              if ($hasSpread) return '="js: {' . str_replace("\"","'", $value) . '}"';
+              // $hasSpread = preg_match('/\.\.\./im', $value, $m, PREG_OFFSET_CAPTURE);
+              // if ($hasSpread) return '="js: {' . str_replace("\"","'", $value) . '}"';
               return '="js: ' . str_replace("\"","'", $value) . '"';
             } else {
               // Is Spread props in tags
