@@ -7,11 +7,11 @@ class Configuration
     use \Yard\Lib\JsConvert;
     use \Yard\Page\Renderer\Component;
     use \Yard\Page\Renderer\Redux;
-    
+
 
     public $page;
     public $template = 'template/conf.php';
-  
+
     function __construct($page)
     {
         $this->page = $page;
@@ -37,7 +37,7 @@ class Configuration
         $css = $cssInfo['hash'];
 
         $js = $this->renderJS();
-        
+
         $includeJS = $this->renderIncludeJS();
 
         $mapStore = $this->renderMapStore();
@@ -55,7 +55,7 @@ class Configuration
         $placeholder = "";
         if ($page->isRoot || $page->showDeps) {
             $deps = Dependency::printPage($page, $renderParsed);
-      
+
             if (!is_null($page->placeholder)) {
                 $pdeps = Dependency::printPage($page->placeholder, self::parseRender($page->placeholder));
                 foreach ($pdeps['pages'] as $k => $p) {
@@ -91,7 +91,7 @@ class Configuration
         }
         $conf = explode("\n", $conf);
         $conf = implode("\n" . $pad, $conf);
-        
+
         return trim($conf);
     }
 
@@ -104,15 +104,23 @@ class Configuration
 
         $js = $this->page->js();
         $finalizedJs = $this->page->finalizeJs($js);
+
         if (!is_null($finalizedJs)) {
             $js = $finalizedJs;
         }
 
         $js = explode("\n", $js);
         $js = implode("\n" . $pad, $js);
-        return trim($js) . "\n";
+        $js = trim($js) . "\n";
+        // var_dump($js);
+        //
+        // $js = \Yard\Lib\HtmlToJson::convert($this->page->base, $js);
+        // var_dump($js);
+        // die();
+
+        return $js;
     }
-    
+
     public function getJSPath($js)
     {
         if (strpos($js, 'http') !== 0) {
@@ -129,12 +137,12 @@ class Configuration
     private function renderIncludeJS()
     {
         $js = $this->page->includeJS();
-        
+
         if (is_array($js) && !empty($js)) {
             foreach ($js as $k => $v) {
                 $js[$k] = $this->getJSPath($v);
             }
-            
+
             return $this->toJs($js);
         } else {
             return "";

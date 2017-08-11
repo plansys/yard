@@ -87,7 +87,7 @@ class HtmlToJson
           return $tag;
         }, $render);
 
-        $bracketsOutside = '/(js:\s*|spread=")?({(([^{}]+|(?R))*)})/im';
+        $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*|spread=")?({(([^{}]+|(?R))*)})/im';
         $render = preg_replace_callback($bracketsOutside, function($matches) {
             $fullMatch = $matches[0];
             $isOutside = $matches[1] === "";
