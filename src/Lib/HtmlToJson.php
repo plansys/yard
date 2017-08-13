@@ -7,111 +7,118 @@ class HtmlToJson
     use ArrayTools;
 
     public static function preConvert($render) {
+        return $render;
+    }
 
-        $render = str_replace('&', '~^AND^~', $render); #replace '&' with something.
+    public static function postConvert($json)
+    {
 
-        $tagRegex = '/<[\w\W]+?>/im';
+      $cleanJSProps = function ($props) {
+        $clean = preg_replace("/js:\s*?([\w\W]+?)/im", "\${1}", $props);
+        return $clean;
+      };
 
-        // Select tag
-        $render = preg_replace_callback($tagRegex, function($matches) {
-          $tag = $matches[0];
+      $recursive = function ($curentTag, $recursive) use ($cleanJSProps) {
+        $TAG = 0;
+        $CHILDREN_OR_PROPS = 1;
+        $tagName = $curentTag[$TAG];
 
-          // Plansys attribute to JSX
-          $tag = preg_replace_callback('/(=?)"((js:|)(([^"]|(?R))*))"[\w\W]?(\s|>)/im', function($matches) {
-            $fullMatch = $matches[0];
-            $hasCloseTagSign = preg_match('/>$/im', $fullMatch, $m, PREG_OFFSET_CAPTURE);
-            $isValidAttribute = $matches[1] !== "" && $matches[3] !== "";
-            $value = $matches[4];
-            if ($isValidAttribute) {
-              $ending = $hasCloseTagSign ? " >" : " ";
-              return "={" . str_replace("\"","'", $value) . " }" . $ending;
-            }
-            return $fullMatch;
-          }, $tag);
+        $isText = !isset($curentTag[$CHILDREN_OR_PROPS]);
+        if ($isText) return false;
 
-          return $tag;
-        }, $render);
+        $hasProps = is_object($curentTag[$CHILDREN_OR_PROPS]);
+        $child = false;
 
-
-        $replacerJSX = [
-            // ============ TAG LEVEL =============== //
-            [
-                // Replace return <If confition={expression}>expression</If>
-                "regex" => '/<If condition={([\w\W]+?)}>([\w\W]+?)<\/If>/im',
-                "replacement" => 'if (${1}) return <el>${2}</el>',
-            ],
-            // ============ OUTSIDE =============== //
-            [
-                // Replace return ( expression )
-                "regex" => '/return\s?\(([\w\W]+?)\)/im',
-                "replacement" => 'return <el>${1}</el>',
-            ],
-        ];
-
-
-        foreach ($replacerJSX as $key => $item) {
-          $render = preg_replace($item["regex"], $item["replacement"], $render);
+        if ($hasProps) {
+          $CHILD_INDEX = $CHILDREN_OR_PROPS + 1;
+          $props = $curentTag[$CHILDREN_OR_PROPS];
+          $child = $curentTag[$CHILD_INDEX];
+        }
+        else {
+          $CHILD_INDEX = $CHILDREN_OR_PROPS;
+          $child = $curentTag[$CHILDREN_OR_PROPS];
         }
 
-        // Global Brackets
-        // https://stackoverflow.com/a/14952740/6086756
-        $globalBracketsRegex = '/(=?)({(([^{}]+|(?R))*)})/im';
+        $hasChild = is_array($child);
 
-        // Select tag
-        $render = preg_replace_callback($tagRegex, function($matches) use ($globalBracketsRegex) {
-          $tag = $matches[0];
+        if (($tagName === "If" || $tagName === "if") && $hasChild && $hasProps) {
+          $condition = isset($props->{"condition"}) ? $props->{"condition"} : false;
+          if ($condition) {
+            $validCondition = $cleanJSProps($condition);
+            $newStructure = [
+              "js",
+              [
+                "if (" . $validCondition . ") {",
+                $child,
+                "}"
+              ],
+            ];
+            $curentTag = $newStructure;
+          }
+        }
 
-          // Plansys attribute to JSX
-          $tag = preg_replace_callback($globalBracketsRegex, function($matches) {
-            $fullMatch = $matches[0];
-            $isAttribute = $matches[1] !== "";
-            $value = $matches[3];
-            if ($isAttribute) {
-              return '="js: ' . str_replace("\"","'", $value) . '"';
-            } else {
-              // Is Spread props in tags
-              return 'js:spread="{' . $value . '}"';
-            }
-          }, $tag);
+        // SWITCH nya entar (masih mikir enaknya gimana)
+        // if (($tagName === "Choose" || $tagName === "choose") && $hasChild && $hasProps) {
+        //   $condition = isset($props->{"condition"}) ? $props->{"condition"} : false;
+        //   if ($condition) {
+        //     $validCondition = $cleanJSProps($condition);
+        //     $newStructure = [
+        //       "js",
+        //       [
+        //         "if (" . $validCondition . ") {",
+        //         $child,
+        //         "}"
+        //       ],
+        //     ];
+        //     $curentTag = $newStructure;
+        //   }
+        // }
 
-          return $tag;
-        }, $render);
+        if (($tagName === "For" || $tagName === "for") && $hasChild && $hasProps) {
+          $each = isset($props->{"each"}) ? $props->{"each"} : false;
+          $index = isset($props->{"index"}) ? $props->{"index"} : false;
+          $of = isset($props->{"of"}) ? $props->{"of"} : false;
+          if ($of && $each) {
+            $validOf = $cleanJSProps($of);
+            $newStructure = [
+              "js",
+              [
+                $validOf . ".map((" . $each . "" . ($index ? ", " . $index : "") . ") => { return (",
+                  $child,
+                  ")})"
+                ],
+              ];
+              $curentTag = $newStructure;
+          }
+        }
 
-        $outsideTagRegex = '/(\/?>)([\w\W]*?)(<\/?[\W]*)/im';
-        $render = preg_replace_callback($outsideTagRegex, function($matches) {
-          $fullMatch = $matches[0];
-          $opening = $matches[1];
-          $outside = $matches[2];
-          $closing = $matches[3];
-
-          $bracketsOutside = '/(if\s*\([\w\W]+\)\s*|\s*else\s*|js:\s*[\w\W]+?|spread=")?({(([^{}]+|(?R))*)})/im';
-          $outside = preg_replace_callback($bracketsOutside, function($matches) {
-              // var_dump($matches);
-              $fullMatch = $matches[0];
-              $isOutside = $matches[1] === "";
-              $value = $matches[3];
-              if ($isOutside) return "<js>" . $value . "</js>";
-              return $fullMatch;
-          }, $outside);
-          return $opening . $outside . $closing;
-        }, $render);
-
-        $commentRegex = '/\/\/\s*?([\w\W][^\n]+)/im';
-        $render = preg_replace($commentRegex, "", $render);
-
-        return $render;
+        if ($hasChild) {
+          $callback = function ($child) use ($recursive) {
+            return $recursive($child, $recursive);
+          };
+          $child = array_map($callback, $child);
+          $curentTag[$CHILD_INDEX] = $child;
+        }
+        return $curentTag;
+      };
+      $json = $recursive($json, $recursive);
+      return $json;
     }
 
     private static function doConvert($base, $render)
     {
+        $render = str_replace('&', '~^AND^~', $render); #replace '&' with something.
         $render = self::preConvert($render);
 
         # parse the dom
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml'=> LIBXML_COMPACT ]);
         $json = new HSerializer($base, $fdom);
+        $json = self::postConvert(json_decode($json));
+        var_dump($json);
+        $json = json_encode($json)
 
         # turn it to string again, and then un-format it
-        return str_replace('~^AND^~', '&', $json->__toString()); #un-replace '&'
+        return str_replace('~^AND^~', '&', $json); #un-replace '&'
     }
 
     public static function convert($base, $render, $try = 0)
