@@ -13,7 +13,6 @@ class HtmlToJson
 
     public static function postConvert($json)
     {
-
         $cleanJSProps = function ($props) {
             if (!is_string($props)) {
                 $props = json_encode($props);
@@ -47,13 +46,15 @@ class HtmlToJson
             if (($tagName === "If" || $tagName === "if") && $hasChild && $hasProps) {
                 if (property_exists($props, 'condition')) {
                     $condition = $cleanJSProps($props->{"condition"});
+
+                    # try to detect if child is a string.
                     if (count($child) == 1) {
                         if ($child[0][0] == 'jstext') {
                             $child = "'" . str_replace("'", "\'", trim($child[0][1])) . "'";
                         }
                     }
 
-                    # if child is a 'text' then, just concat it to the if string.
+                    # if child is a string then, just concat it to the if.
                     if (is_string($child)) {
                         $newStructure = [
                             "js",
@@ -86,7 +87,6 @@ class HtmlToJson
                     $currentTag = $newStructure;
                 }
             }
-
 
             // SWITCH nya entar (masih mikir enaknya gimana)
             // if (($tagName === "Choose" || $tagName === "choose") && $hasChild && $hasProps) {
@@ -140,8 +140,6 @@ class HtmlToJson
             return $currentTag;
         };
         $json = $recursive($json, $recursive);
-    //        print_r($json);
-    //        die();
         return $json;
     }
 
