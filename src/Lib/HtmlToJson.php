@@ -140,8 +140,6 @@ class HtmlToJson
             return $currentTag;
         };
         $json = $recursive($json, $recursive);
-    //        print_r($json);
-    //        die();
         return $json;
     }
 
