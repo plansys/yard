@@ -55,6 +55,7 @@ export const loadConf = (alias, isRoot) => {
                                         .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'clean');
                     
                     if (text.indexOf('<html') === 0) {
+                        document.body.className = '';
                         document.body.innerHTML = text;
                         return;
                     }
@@ -65,6 +66,7 @@ export const loadConf = (alias, isRoot) => {
                             console.log("Transpiling: " + alias );
 
                             if (text.trim()[0] !== '{') {
+                                document.body.className = '';
                                 document.body.innerHTML = text;
                                 return;
                             }

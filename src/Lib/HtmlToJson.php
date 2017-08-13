@@ -115,7 +115,8 @@ class HtmlToJson
         $json = new HSerializer($base, $fdom);
         $json = self::postConvert(json_decode($json));
         var_dump($json);
-        $json = json_encode($json)
+        die();
+        $json = json_encode($json);
 
         # turn it to string again, and then un-format it
         return str_replace('~^AND^~', '&', $json); #un-replace '&'
