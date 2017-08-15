@@ -8,9 +8,9 @@ class HtmlToJson
 
     public static function log($value)
     {
-      header("Content-Type: application/json");
-      echo json_encode($value);
-      die();
+        header("Content-Type: application/json");
+        echo json_encode($value);
+        die();
     }
 
     public static function preConvert($render)
@@ -31,75 +31,75 @@ class HtmlToJson
 
 
         $makeValidTextContent = function ($tag) {
-          $childStructure = $child[0];
-          $childTagName = $childStructure[0];
-          $childContent = $childStructure[1];
-          $trimContent = trim($tag->child[1]);
-          $replaceQuote = str_replace("'", "\"", $trimContent);
-          $child[0][1] = $replaceQuote;
-          return $child;
+            $childStructure = $child[0];
+            $childTagName = $childStructure[0];
+            $childContent = $childStructure[1];
+            $trimContent = trim($tag->child[1]);
+            $replaceQuote = str_replace("'", "\"", $trimContent);
+            $child[0][1] = $replaceQuote;
+            return $child;
         };
 
 
         $defineTagStructure = function ($tag) {
-          $TAG = 0;
-          $CHILDREN_OR_PROPS = 1;
-          $tagName = $tag[$TAG];
-          $isText = !isset($tag[$CHILDREN_OR_PROPS]);
-          if ($isText) return false;
+            $TAG = 0;
+            $CHILDREN_OR_PROPS = 1;
+            $tagName = $tag[$TAG];
+            $isText = !isset($tag[$CHILDREN_OR_PROPS]);
+            if ($isText) return false;
 
-          $hasProps = is_object($tag[$CHILDREN_OR_PROPS]);
+            $hasProps = is_object($tag[$CHILDREN_OR_PROPS]);
 
-          $props = null;
-          if ($hasProps) {
-              $CHILD_INDEX = $CHILDREN_OR_PROPS + 1;
-              $props = $tag[$CHILDREN_OR_PROPS];
-              $child = $tag[$CHILD_INDEX];
-          } else {
-              $CHILD_INDEX = $CHILDREN_OR_PROPS;
-              $child = $tag[$CHILDREN_OR_PROPS];
-          }
+            $props = null;
+            if ($hasProps) {
+                $CHILD_INDEX = $CHILDREN_OR_PROPS + 1;
+                $props = $tag[$CHILDREN_OR_PROPS];
+                $child = $tag[$CHILD_INDEX];
+            } else {
+                $CHILD_INDEX = $CHILDREN_OR_PROPS;
+                $child = $tag[$CHILDREN_OR_PROPS];
+            }
 
-          $hasArrayChild = is_array($child);
-          $define = new \stdClass();
-          $define->name = $tagName;
-          $define->props = $hasProps ? $props : false;
-          $define->child = $child;
-          $define->recursiveable = $hasArrayChild;
-          $define->convertable = $hasArrayChild;
-          return $define;
+            $hasArrayChild = is_array($child);
+            $define = new \stdClass();
+            $define->name = $tagName;
+            $define->props = $hasProps ? $props : false;
+            $define->child = $child;
+            $define->recursiveable = $hasArrayChild;
+            $define->convertable = $hasArrayChild;
+            return $define;
         };
 
         $convertBack = function ($tag) {
-          $hasProps = $tag->props;
-          $structure = [
-            $tag->name,
-            ($hasProps ? $tag->props : $tag->child),
-          ];
-          if ($hasProps) {
-            array_push($structure, $tag->child);
-          }
-          return $structure;
+            $hasProps = $tag->props;
+            $structure = [
+                $tag->name,
+                ($hasProps ? $tag->props : $tag->child),
+            ];
+            if ($hasProps) {
+                array_push($structure, $tag->child);
+            }
+            return $structure;
         };
 
         $makeResultTag = function ($structure) {
-          return   [
-            "el",
-            [$structure],
-            null,
-          ];
+            return [
+                "el",
+                [$structure],
+                null,
+            ];
         };
 
         $coverChild = function ($tag) use ($defineTagStructure) {
-          # try to detect if child is a string.
-          $singleChild = count($tag->child) === 1;
-          if ($singleChild) {
-            $firstChild = $tag->child[0];
-            $child = $defineTagStructure($firstChild);
-          } else {
-            $child = $defineTagStructure(['div', $tag->child]);
-          }
-          return $child;
+            # try to detect if child is a string.
+            $singleChild = count($tag->child) === 1;
+            if ($singleChild) {
+                $firstChild = $tag->child[0];
+                $child = $defineTagStructure($firstChild);
+            } else {
+                $child = $defineTagStructure(['div', $tag->child]);
+            }
+            return $child;
         };
 
 
@@ -107,67 +107,71 @@ class HtmlToJson
             $tag = $defineTagStructure($currentTag);
 
             $requireProps = function ($props, $tag) {
-              return property_exists($tag->props, $props);
+                return property_exists($tag->props, $props);
             };
 
+            if ($tag === false) {
+                return false;
+            }
+
             if (($tag->name === "If" || $tag->name === "if") && $tag->child && $tag->props) {
-              if ($requireProps("condition", $tag)) {
-                $condition = $cleanJSProps($tag->props->condition);
+                if ($requireProps("condition", $tag)) {
+                    $condition = $cleanJSProps($tag->props->condition);
 
-                $child = $coverChild($tag);
-                $newStructure = [
-                  "js", // tag name
+                    $child = $coverChild($tag);
+                    $newStructure = [
+                        "js", // tag name
 
-                  // Children
-                  [
-                    "\nif (" . $condition . ") { \n\t return ",
-                    $makeResultTag($convertBack($child)),
-                    "\t\n}",
-                  ],
+                        // Children
+                        [
+                            "\nif (" . $condition . ") { \n\t return ",
+                            $makeResultTag($convertBack($child)),
+                            "\t\n}",
+                        ],
 
-                  // Null
-                  null
-                ];
+                        // Null
+                        null
+                    ];
 
-                $currentTag = $newStructure;
-                $tag = $defineTagStructure($currentTag);
-              }
+                    $currentTag = $newStructure;
+                    $tag = $defineTagStructure($currentTag);
+                }
             }
 
 
             if (($tag->name === "For" || $tag->name === "for") && $tag->child && $tag->props) {
-              if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
-                $each = $tag->props->each;
-                $of = $cleanJSProps($tag->props->of);
-                $index = $requireProps("index", $tag) ? $tag->props->index : false;
+                if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
+                    $each = $tag->props->each;
+                    $of = $cleanJSProps($tag->props->of);
+                    $index = $requireProps("index", $tag) ? $tag->props->index : false;
 
-                $child = $coverChild($tag);
-                $newStructure = [
-                  "js", // tag name
+                    $child = $coverChild($tag);
+                    $newStructure = [
+                        "js", // tag name
 
-                  // Children
-                  [
-                    "\n" . $of . ".map((" . $each . ($index ? "," . $index : "") . ") => { \n\t return ",
-                    $makeResultTag($convertBack($child)),
-                    "})",
-                  ],
+                        // Children
+                        [
+                            "\n" . $of . ".map((" . $each . ($index ? "," . $index : "") . ") => { \n\t return ",
+                            $makeResultTag($convertBack($child)),
+                            "})",
+                        ],
 
-                  // Null
-                  null
-                ];
+                        // Null
+                        null
+                    ];
 
-                $currentTag = $newStructure;
-                $tag = $defineTagStructure($currentTag);
-              }
+                    $currentTag = $newStructure;
+                    $tag = $defineTagStructure($currentTag);
+                }
             }
 
 
             if (isset($tag) && $tag->recursiveable) {
-              $callback = function ($child) use ($recursive) {
-                  return $recursive($child, $recursive);
-              };
-              $child = array_map($callback, $tag->child);
-              $tag->child = $child;
+                $callback = function ($child) use ($recursive) {
+                    return $recursive($child, $recursive);
+                };
+                $child = array_map($callback, $tag->child);
+                $tag->child = $child;
             }
 
             $currentTag = $tag->convertable ? $convertBack($tag) : $currentTag;

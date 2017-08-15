@@ -17,12 +17,27 @@ class Base
         'page' => '',
         'cache' => ''
     ];
+    public $baseFile = '';
     public $settings = [];
     public $pages = [];
     public $pageNamespace = 'Pages\\';
 
-    function __construct($conf = [])
+    function __construct($baseFile = '')
     {
+        if (!is_string($baseFile)) {
+            throw new \Exception('baseFile must be a string');
+        }
+
+        if (!file_exists($baseFile)) {
+            throw new \Exception('baseFile doesn\'t exists');
+        }
+
+        $conf = include($baseFile);
+
+        if (!is_array($conf)) {
+            throw new \Exception('Invalid baseFile');
+        }
+
         $conf['dir'] = $this->validateDir(@$conf['dir']);
         $this->validateUrl(@$conf['url']);
         $this->validatePages(@$conf['modules']);
