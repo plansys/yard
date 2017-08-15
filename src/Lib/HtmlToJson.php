@@ -6,6 +6,13 @@ class HtmlToJson
 {
     use ArrayTools;
 
+    public static function log($value)
+    {
+      header("Content-Type: application/json");
+      echo json_encode($value);
+      die();
+    }
+
     public static function preConvert($render)
     {
         return $render;
@@ -22,123 +29,151 @@ class HtmlToJson
             return $clean;
         };
 
-        $recursive = function ($currentTag, $recursive) use ($cleanJSProps) {
-            $TAG = 0;
-            $CHILDREN_OR_PROPS = 1;
-            $tagName = $currentTag[$TAG];
-            $isText = !isset($currentTag[$CHILDREN_OR_PROPS]);
-            if ($isText) return false;
 
-            $hasProps = is_object($currentTag[$CHILDREN_OR_PROPS]);
+        $makeValidTextContent = function ($tag) {
+          $childStructure = $child[0];
+          $childTagName = $childStructure[0];
+          $childContent = $childStructure[1];
+          $trimContent = trim($tag->child[1]);
+          $replaceQuote = str_replace("'", "\"", $trimContent);
+          $child[0][1] = $replaceQuote;
+          return $child;
+        };
 
-            $props = null;
-            if ($hasProps) {
-                $CHILD_INDEX = $CHILDREN_OR_PROPS + 1;
-                $props = $currentTag[$CHILDREN_OR_PROPS];
-                $child = $currentTag[$CHILD_INDEX];
-            } else {
-                $CHILD_INDEX = $CHILDREN_OR_PROPS;
-                $child = $currentTag[$CHILDREN_OR_PROPS];
+
+        $defineTagStructure = function ($tag) {
+          $TAG = 0;
+          $CHILDREN_OR_PROPS = 1;
+          $tagName = $tag[$TAG];
+          $isText = !isset($tag[$CHILDREN_OR_PROPS]);
+          if ($isText) return false;
+
+          $hasProps = is_object($tag[$CHILDREN_OR_PROPS]);
+
+          $props = null;
+          if ($hasProps) {
+              $CHILD_INDEX = $CHILDREN_OR_PROPS + 1;
+              $props = $tag[$CHILDREN_OR_PROPS];
+              $child = $tag[$CHILD_INDEX];
+          } else {
+              $CHILD_INDEX = $CHILDREN_OR_PROPS;
+              $child = $tag[$CHILDREN_OR_PROPS];
+          }
+
+          $hasArrayChild = is_array($child);
+          $define = new \stdClass();
+          $define->name = $tagName;
+          $define->props = $hasProps ? $props : false;
+          $define->child = $child;
+          $define->recursiveable = $hasArrayChild;
+          $define->convertable = $hasArrayChild;
+          return $define;
+        };
+
+        $convertBack = function ($tag) {
+          $hasProps = $tag->props;
+          $structure = [
+            $tag->name,
+            ($hasProps ? $tag->props : $tag->child),
+          ];
+          if ($hasProps) {
+            array_push($structure, $tag->child);
+          }
+          return $structure;
+        };
+
+        $makeResultTag = function ($structure) {
+          return   [
+            "el",
+            [$structure],
+            null,
+          ];
+        };
+
+        $coverChild = function ($tag) use ($defineTagStructure) {
+          # try to detect if child is a string.
+          $singleChild = count($tag->child) === 1;
+          if ($singleChild) {
+            $firstChild = $tag->child[0];
+            $child = $defineTagStructure($firstChild);
+          } else {
+            $child = $defineTagStructure(['div', $tag->child]);
+          }
+          return $child;
+        };
+
+
+        $recursive = function ($currentTag, $recursive) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
+            $tag = $defineTagStructure($currentTag);
+
+            $requireProps = function ($props, $tag) {
+              return property_exists($tag->props, $props);
+            };
+
+            if (($tag->name === "If" || $tag->name === "if") && $tag->child && $tag->props) {
+              if ($requireProps("condition", $tag)) {
+                $condition = $cleanJSProps($tag->props->condition);
+
+                $child = $coverChild($tag);
+                $newStructure = [
+                  "js", // tag name
+
+                  // Children
+                  [
+                    "\nif (" . $condition . ") { \n\t return ",
+                    $makeResultTag($convertBack($child)),
+                    "\t\n}",
+                  ],
+
+                  // Null
+                  null
+                ];
+
+                $currentTag = $newStructure;
+                $tag = $defineTagStructure($currentTag);
+              }
             }
 
-            $hasChild = is_array($child);
 
-            if (($tagName === "If" || $tagName === "if") && $hasChild && $hasProps) {
-                if (property_exists($props, 'condition')) {
-                    $condition = $cleanJSProps($props->{"condition"});
+            if (($tag->name === "For" || $tag->name === "for") && $tag->child && $tag->props) {
+              if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
+                $each = $tag->props->each;
+                $of = $cleanJSProps($tag->props->of);
+                $index = $requireProps("index", $tag) ? $tag->props->index : false;
 
-                    # try to detect if child is a string.
-                    if (count($child) == 1) {
-                        if ($child[0][0] == 'jstext') {
-                            $child = "'" . str_replace("'", "\'", trim($child[0][1])) . "'";
-                        }
-                    }
+                $child = $coverChild($tag);
+                $newStructure = [
+                  "js", // tag name
 
-                    # if child is a string then, just concat it to the if.
-                    if (is_string($child)) {
-                        $newStructure = [
-                            "js",
-                            [
-                                "\nif (" . $condition . ") { \n\t return " . $child . ";\n}"
-                            ],
-                            null
-                        ];
-                    } else {
-                        if (count($child) == 1) {
-                            $child = $child[0];
-                        } else {
-                            if (property_exists($props, 'tag')) {
-                                $child = [$props->tag, $child];
-                            } else {
-                                $child = ['div', $child];
-                            }
-                        }
+                  // Children
+                  [
+                    "\n" . $of . ".map((" . $each . ($index ? "," . $index : "") . ") => { \n\t return ",
+                    $makeResultTag($convertBack($child)),
+                    "})",
+                  ],
 
-                        $newStructure = [
-                            "js",
-                            [
-                                "\nif (" . $condition . ") { \n\t return ",
-                                $child,
-                                "\t;\n}"
-                            ],
-                            null
-                        ];
-                    }
-                    $currentTag = $newStructure;
-                }
+                  // Null
+                  null
+                ];
+
+                $currentTag = $newStructure;
+                $tag = $defineTagStructure($currentTag);
+              }
             }
 
-            // SWITCH nya entar (masih mikir enaknya gimana)
-            // if (($tagName === "Choose" || $tagName === "choose") && $hasChild && $hasProps) {
-            //   $condition = isset($props->{"condition"}) ? $props->{"condition"} : false;
-            //   if ($condition) {
-            //     $validCondition = $cleanJSProps($condition);
-            //     $newStructure = [
-            //       "js",
-            //       [
-            //         "if (" . $validCondition . ") {",
-            //         $child,
-            //         "}"
-            //       ],
-            //     ];
-            //     $curentTag = $newStructure;
-            //   }
-            // }
 
-            if (($tagName === "For" || $tagName === "for") && $hasChild && $hasProps) {
-                $each = isset($props->{"each"}) ? $props->{"each"} : false;
-                $index = isset($props->{"index"}) ? $props->{"index"} : false;
-                $of = isset($props->{"of"}) ? $props->{"of"} : false;
-                if ($of && $each) {
-                    $validOf = $cleanJSProps($of);
-                    $newStructure = [
-                        "js",
-                        [
-                            $validOf . ".map((" . $each . "" . ($index ? ", " . $index : "") . ") => { return (",
-                            $child,
-                            ")})"
-                        ],
-                    ];
-                    $currentTag = $newStructure;
-                }
+            if (isset($tag) && $tag->recursiveable) {
+              $callback = function ($child) use ($recursive) {
+                  return $recursive($child, $recursive);
+              };
+              $child = array_map($callback, $tag->child);
+              $tag->child = $child;
             }
 
-            $hasChild = is_array($child);
-            if ($hasChild) {
-                if ($currentTag[0] === 'js') {
-                    if (count($currentTag) === 3) {
-                        unset($currentTag[2]);
-                    }
-                } else {
-                    $callback = function ($child) use ($recursive) {
-                        return $recursive($child, $recursive);
-                    };
-                    $child = array_map($callback, $child);
-                    $currentTag[$CHILD_INDEX] = $child;
-                }
-            }
+            $currentTag = $tag->convertable ? $convertBack($tag) : $currentTag;
             return $currentTag;
         };
+
         $json = $recursive($json, $recursive);
         return $json;
     }
@@ -153,6 +188,7 @@ class HtmlToJson
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml' => LIBXML_COMPACT]);
         $json = new HSerializer($base, $fdom);
         $json = self::postConvert(json_decode($json));
+        // self::log($json);
         $json = json_encode($json);
 
         # turn it to string again, and then un-format it
