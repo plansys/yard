@@ -104,7 +104,7 @@ class HtmlToJson
         };
 
 
-        $recursive = function ($currentTag, $recursive, $nextTag) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
+        $recursive = function ($currentTag, $recursive, $nextTag = false, $group = false, $index = false) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
             $tag = $defineTagStructure($currentTag);
 
             $requireProps = function ($props, $tag) {
@@ -137,6 +137,7 @@ class HtmlToJson
                   array_push($newStructure[1], " else { \n\t return ");
                   array_push($newStructure[1], $makeResultTag($convertBack($elseTagChild)));
                   array_push($newStructure[1], "\t\n}");
+                  unset($group[$index + 1]);
                   unset($nextTag);
                 }
 
@@ -230,7 +231,7 @@ class HtmlToJson
               $callback = function ($child, $index) use ($recursive, $tag) {
                   $nextTag = isset($tag->child[$index + 1]) ? $tag->child[$index + 1] : false;
                   $prevTag = isset($tag->child[$index - 1]) ? $tag->child[$index - 1] : false;
-                  return $recursive($child, $recursive, $nextTag);
+                  return $recursive($child, $recursive, $nextTag, $tag->child, $index);
               };
               // https://stackoverflow.com/a/5868491/6086756
               $newChild = array_map($callback, $tag->child, array_keys($tag->child));
@@ -241,7 +242,7 @@ class HtmlToJson
             return $currentTag;
         };
 
-        $json = $recursive($json, $recursive, false);
+        $json = $recursive($json, $recursive);
         // self::log($json);
         return $json;
     }
