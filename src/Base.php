@@ -17,12 +17,28 @@ class Base
         'page' => '',
         'cache' => ''
     ];
+    public $baseFile = '';
     public $settings = [];
-    public $pages = [];
+    public $modules = [];
     public $pageNamespace = 'Pages\\';
 
-    function __construct($conf = [])
+    function __construct($baseFile = '')
     {
+        if (!is_string($baseFile)) {
+            throw new \Exception('baseFile must be a string');
+        }
+
+        if (!file_exists($baseFile)) {
+            throw new \Exception('baseFile doesn\'t exists');
+        }
+
+        $this->baseFile = $baseFile;
+        $conf = include($baseFile);
+
+        if (!is_array($conf)) {
+            throw new \Exception('Invalid baseFile');
+        }
+
         $conf['dir'] = $this->validateDir(@$conf['dir']);
         $this->validateUrl(@$conf['url']);
         $this->validatePages(@$conf['modules']);
@@ -58,7 +74,7 @@ class Base
         $this->name = @$conf['name'];
         $this->dir = $conf['dir'];
         $this->url = $conf['url'];
-        $this->pages = $conf['modules'];
+        $this->modules = $conf['modules'];
 
         $d = DIRECTORY_SEPARATOR;
 
@@ -73,7 +89,7 @@ class Base
             $vurl = $vurl . "&_v_dr=";
         }
 
-        $this->pages['yard'] = [
+        $this->modules['yard'] = [
             'dir' => dirname(__FILE__) . $d . 'Sample',
             'url' => $vurl . "/plansys/yard/src/Sample"
         ];
@@ -81,19 +97,19 @@ class Base
         # load db if exists
         if (class_exists('\Plansys\Db\Init')) {
             $base = \Plansys\Db\Init::getBase($this->host);
-            $this->pages['db'] = $base;
+            $this->modules['db'] = $base;
         }
 
         # load ui if exists
         if (class_exists('\Plansys\Ui\Init')) {
             $base = \Plansys\Ui\Init::getBase($this->host);
-            $this->pages['ui'] = $base;
+            $this->modules['ui'] = $base;
         }
 
         # load user if exists
         if (class_exists('\Plansys\User\Init')) {
             $base = \Plansys\User\Init::getBase($this->host);
-            $this->pages['user'] = $base;
+            $this->modules['user'] = $base;
         }
     }
 
@@ -106,10 +122,10 @@ class Base
             $shortcut = array_shift($tags);
             $tag = implode(":", $tags);
         }
-        $file = @$this->pages[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php';
+        $file = @$this->modules[$shortcut]['dir'] . DIRECTORY_SEPARATOR . $tag . '.php';
 
         if (is_file($file)) {
-            $len = strlen(realpath(@$this->pages[$shortcut]['dir']) . DIRECTORY_SEPARATOR);
+            $len = strlen(realpath(@$this->modules[$shortcut]['dir']) . DIRECTORY_SEPARATOR);
             $actualTag = str_replace(".php", "", substr(realpath($file), $len));
 
             return $actualTag == $tag;
@@ -120,9 +136,9 @@ class Base
 
     public function getRootUrl($shortcut = '')
     {
-        $url = $this->pages['']['url'];
-        if (isset($this->pages[$shortcut])) {
-            $url = $this->pages[$shortcut]['url'];
+        $url = $this->modules['']['url'];
+        if (isset($this->modules[$shortcut])) {
+            $url = $this->modules[$shortcut]['url'];
         }
         return $url;
     }
@@ -160,7 +176,7 @@ class Base
     public function renderUrl()
     {
         $pages = [];
-        foreach ($this->pages as $k => $v) {
+        foreach ($this->modules as $k => $v) {
             $pages[$k] = $v['url'];
         }
 
@@ -174,14 +190,14 @@ class Base
     public function resolve($alias, $returnAsString = true)
     {
         $parr = explode(":", $alias);
-        if (count($parr) == 1 && isset($this->pages[''])) {
-            $baseDir = $this->pages['']['dir'];
+        if (count($parr) == 1 && isset($this->modules[''])) {
+            $baseDir = $this->modules['']['dir'];
             $path = str_replace(".", DIRECTORY_SEPARATOR, $alias) . ".php";
             $class = str_replace(".", '\\', $alias);
             $shortcutNs = '';
         } elseif (count($parr) > 1) {
-            if ($this->pages[$parr[0]]) {
-                $baseDir = $this->pages[$parr[0]]['dir'];
+            if ($this->modules[$parr[0]]) {
+                $baseDir = $this->modules[$parr[0]]['dir'];
                 $path = str_replace(".", DIRECTORY_SEPARATOR, $parr[1]) . ".php";
                 $class = str_replace(".", '\\', $parr[1]);
                 $shortcutNs = $parr[0] . '\\';
