@@ -26,6 +26,7 @@ class HtmlToJson
             }
 
             $clean = preg_replace("/js:\s*?([\w\W]+?)/im", "\${1}", $props);
+            $clean = trim($clean);
             return $clean;
         };
 
@@ -161,6 +162,50 @@ class HtmlToJson
               }
             }
 
+            if (($tag->name === "Switch" || $tag->name === "switch") && $tag->child && $tag->props) {
+              if ($requireProps("evaluate", $tag)) {
+                $evaluate = $cleanJSProps($tag->props->evaluate);
+
+                $cases = [];
+                $childLength = count($tag->child);
+                for ($i=0; $i < $childLength; $i++) {
+                  $openingSwitch = ($i === 0 ? "switch (" . $evaluate . ") { \n" : "");
+                  $closingSwitch = ($i === ($childLength - 1) ? "\n}" : "");
+
+                  $currentChild = $tag->child[$i];
+                  $currentChildTag = $defineTagStructure($currentChild);
+
+                  $caseOrDefault =  $currentChildTag->name === "Default" || $currentChildTag->name === "default" ? "default" : "case";
+
+                  $openingCase = "";
+                  if ($caseOrDefault === "case") {
+                    $is = $cleanJSProps($currentChildTag->props->is);
+                    $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . " (" . $is . "): { \n\treturn ";
+                  } else {
+                    $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . ": { \n\treturn ";
+                  }
+
+                  array_push($cases, $openingCase);
+                  array_push($cases, $currentChildTag->child[0]);
+                  array_push($cases, "\nbreak;\n\t}" . $closingSwitch);
+                }
+                // self::log($cases);
+
+                $newStructure = [
+                  "js", // tag name
+
+                  // Children
+                  $cases,
+
+                  // Null
+                  null
+                ];
+                // self::log($newStructure);
+
+                $currentTag = $newStructure;
+                $tag = $defineTagStructure($currentTag);
+              }
+            }
 
             if (isset($tag) && $tag->recursiveable) {
               $callback = function ($child) use ($recursive) {
@@ -175,6 +220,7 @@ class HtmlToJson
         };
 
         $json = $recursive($json, $recursive);
+        // self::log($json);
         return $json;
     }
 
