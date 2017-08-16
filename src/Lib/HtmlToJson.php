@@ -104,7 +104,7 @@ class HtmlToJson
         };
 
 
-        $recursive = function ($currentTag, $recursive) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
+        $recursive = function ($currentTag, $recursive, $nextTag) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
             $tag = $defineTagStructure($currentTag);
 
             $requireProps = function ($props, $tag) {
@@ -116,6 +116,7 @@ class HtmlToJson
                 $condition = $cleanJSProps($tag->props->condition);
 
                 $child = $coverChild($tag);
+
                 $newStructure = [
                   "js", // tag name
 
@@ -130,11 +131,29 @@ class HtmlToJson
                   null
                 ];
 
+                if ($nextTag && $nextTag[0] === "Else" || $nextTag[0] === "else") {
+                  $elseTag = $defineTagStructure($nextTag);
+                  $elseTagChild = $coverChild($elseTag);
+                  array_push($newStructure[1], " else { \n\t return ");
+                  array_push($newStructure[1], $makeResultTag($convertBack($elseTagChild)));
+                  array_push($newStructure[1], "\t\n}");
+                  unset($nextTag);
+                }
+
                 $currentTag = $newStructure;
                 $tag = $defineTagStructure($currentTag);
               }
             }
 
+            if (($tag->name === "Else" || $tag->name === "else") && $tag->child) {
+              $child = $coverChild($tag);
+              $newStructure = [
+                "jstext", // tag name
+                "",
+              ];
+              $currentTag = $newStructure;
+              $tag = $defineTagStructure($currentTag);
+            }
 
             if (($tag->name === "For" || $tag->name === "for") && $tag->child && $tag->props) {
               if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
@@ -208,18 +227,21 @@ class HtmlToJson
             }
 
             if (isset($tag) && $tag->recursiveable) {
-              $callback = function ($child) use ($recursive) {
-                  return $recursive($child, $recursive);
+              $callback = function ($child, $index) use ($recursive, $tag) {
+                  $nextTag = isset($tag->child[$index + 1]) ? $tag->child[$index + 1] : false;
+                  $prevTag = isset($tag->child[$index - 1]) ? $tag->child[$index - 1] : false;
+                  return $recursive($child, $recursive, $nextTag);
               };
-              $child = array_map($callback, $tag->child);
-              $tag->child = $child;
+              // https://stackoverflow.com/a/5868491/6086756
+              $newChild = array_map($callback, $tag->child, array_keys($tag->child));
+              $tag->child = $newChild;
             }
 
             $currentTag = $tag->convertable ? $convertBack($tag) : $currentTag;
             return $currentTag;
         };
 
-        $json = $recursive($json, $recursive);
+        $json = $recursive($json, $recursive, false);
         // self::log($json);
         return $json;
     }
