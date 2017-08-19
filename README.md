@@ -40,18 +40,16 @@ my-project
         ├─ src
         └─ ...
      └─ ...
+  └─ base.php        
   └─ index.php   
  ```
  
- And put this code into `index.php` file:
- 
+ Put this code into `base.php` file:
  ```php
-<?php
-
-require("vendor/autoload.php");
-
-$host = str_replace("index.php", "", strtok($_SERVER["REQUEST_URI"], '?'));
-$base = new \Yard\Base([
+ <?php
+ 
+ $host = str_replace("index.php", "", strtok($_SERVER["REQUEST_URI"], '?'));
+ return [
     'name' => 'PLANSYS',
     'offline' => false,
     'settings' => null,
@@ -72,7 +70,17 @@ $base = new \Yard\Base([
         'cache' => $host . '/tmp/[file]',
         'page' => $host . '/index.php?p=[page]',
     ]
-]);
+ ]
+ ```
+ 
+ And put this code into `index.php` file:
+ 
+ ```php
+<?php
+
+require("vendor/autoload.php");
+
+$base = new \Yard\Base("base.php");
 $yard = new \Yard\Renderer($base);
 
 $parr = explode('...', $_GET['p']);
