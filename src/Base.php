@@ -9,6 +9,7 @@ class Base
     public $offline = false;
     public $host = '';
     public $dir = [
+        'root' => '',
         'base' => '',
         'cache' => ''
     ];
@@ -75,6 +76,10 @@ class Base
         $this->dir = $conf['dir'];
         $this->url = $conf['url'];
         $this->modules = $conf['modules'];
+
+        if (!isset($this->dir['root'])) {
+            $this->dir['root'] = dirname($this->baseFile);
+        }
 
         $d = DIRECTORY_SEPARATOR;
 
