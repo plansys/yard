@@ -92,8 +92,8 @@ if ($mode == 'css') {
 } else if (in_array($mode, ['js', 'jsdev', 'sw'])) {
     header('Content-type: text/javascript');
 }
-
-echo $yard->render($_GET['p']);
+$page = isset($_GET['p']) ? $_GET['p'] : 'yard.Welcome';
+echo $yard->render($page);
 
  ```
  
