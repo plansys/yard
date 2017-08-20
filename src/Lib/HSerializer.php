@@ -5,17 +5,18 @@ namespace Yard\Lib;
 class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 {
     public $base;
-    
+
     /**
      * @param \DOMNode $node
      * @param int $options
      * @param int $depth
      */
-    public function __construct($base, \DOMNode $node, $options = 0, $depth = 512) {
+    public function __construct($base, \DOMNode $node, $options = 0, $depth = 512)
+    {
         parent::__construct($node, $options, $depth);
         $this->base = $base;
     }
-    
+
 
     /**
      * @param \DOMElement $node
@@ -27,7 +28,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
             $node->nodeName,
         ];
 
-        
         $attributes = array_merge(
             $this->getNamespaces($node),
             $this->getAttributes($node)
@@ -36,7 +36,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         if (!empty($attributes)) {
             $result[] = $attributes;
         }
-
 
         if ($this->base->isPage($result[0])) {
             $result = $this->getPage($result);
@@ -53,7 +52,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                         if ($j[0] == 'jstext') {
                             $content[] = $j[1];
                         } elseif ($j[0] == 'el') {
-                            
+
                             if (count($j[1]) > 1) {
                                 $jc = ['div', []];
                                 foreach ($j[1] as $jj) {
@@ -68,10 +67,11 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
                     $c = [$c[0], $content];
                 }
+
                 if ($this->base->isPage($c[0])) {
                     $c = $this->getPage($c);
                 }
-                
+
                 if (is_array($childs)) {
                     $childs[] = $c;
                 } else {
@@ -111,13 +111,14 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         return $result;
     }
 
-    private function getPage($c) {
+    private function getPage($c)
+    {
         $newc = ['Page', ['name' => $c[0]]];
         if (count($c) > 1) {
             if (isset($c[1][0])) {
                 $newc[] = $c[1];
             } else {
-                foreach ($c[1] as $k=>$cc) {
+                foreach ($c[1] as $k => $cc) {
                     $newc[1][$k] = $cc;
                 }
                 $newc[1]['name'] = $c[0];
@@ -141,9 +142,9 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         if ($this->isBoolean($value)) {
             return (strtolower($value) === 'true');
         } elseif ($this->isInteger($value)) {
-            return (int) $value;
+            return (int)$value;
         } elseif ($this->isNumber($value)) {
-            return (float) $value;
+            return (float)$value;
         }
         return $value;
     }
@@ -154,7 +155,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
      */
     private function isInteger($value)
     {
-        return (bool) preg_match('(^[1-9]\d*$)D', $value);
+        return (bool)preg_match('(^[1-9]\d*$)D', $value);
     }
 
     /**
@@ -163,7 +164,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
      */
     private function isNumber($value)
     {
-        return (bool) preg_match('(^(?:\\d+\\.\\d+|[1-9]\d*)$)D', $value);
+        return (bool)preg_match('(^(?:\\d+\\.\\d+|[1-9]\d*)$)D', $value);
     }
 
     /**
@@ -172,6 +173,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
      */
     private function isBoolean($value)
     {
-        return (bool) preg_match('(^(?:true|false)$)Di', $value);
+        return (bool)preg_match('(^(?:true|false)$)Di', $value);
     }
 }

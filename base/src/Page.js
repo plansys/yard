@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import h from 'react-hyperscript';
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import PageLoader from './PageLoader';
 import Placeholder from './ui/Placeholder';
 import ReactDOM from 'react-dom';
@@ -36,7 +36,7 @@ export class Page extends React.Component {
         redirect: function (page) {
             var url = window.yard.url.page
                 .replace('[page]', page);
-            
+
             Page.history.doChangeListener(page);
             window.location.href = url;
         },
@@ -52,18 +52,18 @@ export class Page extends React.Component {
             const pageArr = match[1].split("...");
             return pageArr[0].split('/')[0];
         },
-        onChange: function(func) {
+        onChange: function (func) {
             if (typeof func !== 'function') {
                 throw new Error('Parameter must be a function');
             }
 
-            window.onpopstate = function(e) {
+            window.onpopstate = function (e) {
                 Page.history.doChangeListener(Page.history.now());
             };
 
             Page.history.changeListener.push(func);
         },
-        doChangeListener: function(page) {
+        doChangeListener: function (page) {
             Page.history.changeListener.forEach(c => {
                 c(page);
             })
@@ -84,17 +84,20 @@ export class Page extends React.Component {
             return;
         }
 
-        this.url = window.yard.url.pages[''];
+        let moduleArr = window.yard.page.name.split(':');
+        let module = moduleArr.length > 1 ? moduleArr[0] : false;
+
+        this.url = window.yard.url.pages[module];
         this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);
     }
 
     componentWillReceiveProps(nextProps) {
         this.applyEvent('componentWillReceiveProps', arguments);
         if (this.props.name !== nextProps.name) {
-            this.setState({ '[[loaded]]': false });
+            this.setState({'[[loaded]]': false});
             this.props.loader.loadPage(nextProps.name).then(conf => {
                 if (!this._isMounted) return null;
-                this.setState({ '[[loaded]]': true });
+                this.setState({'[[loaded]]': true});
             });
         }
     }
@@ -102,16 +105,16 @@ export class Page extends React.Component {
     componentDidMount() {
         this._isMounted = true;
         this.props.loader.init.then(conf => {
-            this.setState({ '[[loaded]]': true });
+            this.setState({'[[loaded]]': true});
         })
 
         if (typeof this.props.refbind === 'function') {
             this.props.refbind(this);
-        } 
-        
+        }
+
         let args = arguments;
         setTimeout(() => {
-            this.applyEvent('componentDidMount', args);        
+            this.applyEvent('componentDidMount', args);
         })
     }
 
@@ -127,7 +130,7 @@ export class Page extends React.Component {
             return null;
         }
         let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this), ReactDOM, React);
-        if (!content) return null;        
+        if (!content) return null;
         if (!content.type) return null;
 
         let render = React.Children.only(content);
@@ -153,7 +156,7 @@ export class Page extends React.Component {
             case "js":
                 return props.bind(this)(this.hswap.bind(this));
             case "Page":
-                let newProps = { ...props }
+                let newProps = {...props};
 
                 if (newProps.ref) {
                     delete newProps.ref;
@@ -172,11 +175,16 @@ export class Page extends React.Component {
             default:
                 var stag = tag;
 
-                if (PageLoader.ui.loaded[tag]) {
-                    stag = PageLoader.ui.loaded[tag];
+                if (typeof stag === 'function') {
+                    return h(stag(), props, children);
+                } else {
+                    if (PageLoader.ui.loaded[tag]) {
+                        stag = PageLoader.ui.loaded[tag];
+                    }
+
+                    return h(stag, props, children);
                 }
 
-                return h(stag, props, children);
         }
     }
 
@@ -208,9 +216,9 @@ export const createPage = function (name, loader, props) {
     if (loader.isRoot && PageLoader.redux.store) {
         return (
             <Provider store={PageLoader.redux.store}>
-                <NewPage { ...newProps } />
+                <NewPage {...newProps} />
             </Provider>
         )
     }
-    return <NewPage { ...newProps } />
+    return <NewPage {...newProps} />
 }

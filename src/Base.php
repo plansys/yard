@@ -83,38 +83,35 @@ class Base
 
         $d = DIRECTORY_SEPARATOR;
 
-        # load sample yard pages
+        # load yard modules pages
         $vurl = strtr($this->url['page'], [
             '[page]' => 'vendor...vendor'
         ]);
-
         if (strpos($vurl, '?') === false) {
             $vurl = $vurl . "?_v_dr=";
         } else {
             $vurl = $vurl . "&_v_dr=";
         }
-
         $this->modules['yard'] = [
             'dir' => dirname(__FILE__) . $d . 'Sample',
             'url' => $vurl . "/plansys/yard/src/Sample"
         ];
 
-        # load db if exists
-        if (class_exists('\Plansys\Db\Init')) {
-            $base = \Plansys\Db\Init::getBase($this->host);
-            $this->modules['db'] = $base;
-        }
+        # load plansys modules pages
+        $this->loadPlansysModules();
+    }
 
-        # load ui if exists
-        if (class_exists('\Plansys\Ui\Init')) {
-            $base = \Plansys\Ui\Init::getBase($this->host);
-            $this->modules['ui'] = $base;
-        }
+    private function loadPlansysModules()
+    {
+        $plansysModules = ['db', 'ui', 'user', 'builder'];
+        foreach ($plansysModules as $m) {
+            $m = strtolower($m);
+            $class = '\Plansys\\' . ucfirst($m) . '\Init';
 
-        # load user if exists
-        if (class_exists('\Plansys\User\Init')) {
-            $base = \Plansys\User\Init::getBase($this->host);
-            $this->modules['user'] = $base;
+            if (class_exists($class)) {
+                $base = $class::getBase($this->host);
+                $this->modules[$m] = $base;
+            }
         }
     }
 

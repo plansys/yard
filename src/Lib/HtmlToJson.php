@@ -30,18 +30,6 @@ class HtmlToJson
             return $clean;
         };
 
-
-        $makeValidTextContent = function ($tag) {
-            $childStructure = $child[0];
-            $childTagName = $childStructure[0];
-            $childContent = $childStructure[1];
-            $trimContent = trim($tag->child[1]);
-            $replaceQuote = str_replace("'", "\"", $trimContent);
-            $child[0][1] = $replaceQuote;
-            return $child;
-        };
-
-
         $defineTagStructure = function ($tag) {
             $TAG = 0;
             $CHILDREN_OR_PROPS = 1;
@@ -103,8 +91,7 @@ class HtmlToJson
             return $child;
         };
 
-
-        $recursive = function ($currentTag, $recursive, $nextTag = false, $group = false, $index = false) use ($convertBack, $cleanJSProps, $makeValidTextContent, $defineTagStructure, $makeResultTag, $coverChild) {
+        $recursive = function ($currentTag, $recursive, $nextTag = false, $group = false, $index = false) use ($convertBack, $cleanJSProps, $defineTagStructure, $makeResultTag, $coverChild) {
             $tag = $defineTagStructure($currentTag);
 
             $requireProps = function ($props, $tag) {
@@ -115,6 +102,7 @@ class HtmlToJson
                 return false;
             }
 
+            $elseTag = $defineTagStructure($nextTag);
             if (($tag->name === "If" || $tag->name === "if") && $tag->child && $tag->props) {
                 if ($requireProps("condition", $tag)) {
                     $condition = $cleanJSProps($tag->props->condition);
@@ -134,29 +122,28 @@ class HtmlToJson
                         null
                     ];
 
-                if ($nextTag && $nextTag[0] === "Else" || $nextTag[0] === "else") {
-                  $elseTagChild = $coverChild($elseTag);
-                  array_push($newStructure[1], " else { \n\t return ");
-                  array_push($newStructure[1], $makeResultTag($convertBack($elseTagChild)));
-                  array_push($newStructure[1], "\t\n}");
-                  unset($group[$index + 1]);
-                  unset($nextTag);
-                }
+                    if ($nextTag && $nextTag[0] === "Else" || $nextTag[0] === "else") {
+                        $elseTagChild = $coverChild($elseTag);
+                        array_push($newStructure[1], " else { \n\t return ");
+                        array_push($newStructure[1], $makeResultTag($convertBack($elseTagChild)));
+                        array_push($newStructure[1], "\t\n}");
+                        unset($group[$index + 1]);
+                        unset($nextTag);
+                    }
 
-                $currentTag = $newStructure;
-                $tag = $defineTagStructure($currentTag);
-              }
-                  $elseTag = $defineTagStructure($nextTag);
+                    $currentTag = $newStructure;
+                    $tag = $defineTagStructure($currentTag);
+                }
             }
 
             if (($tag->name === "Else" || $tag->name === "else") && $tag->child) {
-              $child = $coverChild($tag);
-              $newStructure = [
-                "jstext", // tag name
-                "",
-              ];
-              $currentTag = $newStructure;
-              $tag = $defineTagStructure($currentTag);
+                $child = $coverChild($tag);
+                $newStructure = [
+                    "jstext", // tag name
+                    "",
+                ];
+                $currentTag = $newStructure;
+                $tag = $defineTagStructure($currentTag);
             }
 
             if (($tag->name === "For" || $tag->name === "for") && $tag->child && $tag->props) {
@@ -186,59 +173,59 @@ class HtmlToJson
             }
 
             if (($tag->name === "Switch" || $tag->name === "switch") && $tag->child && $tag->props) {
-              if ($requireProps("evaluate", $tag)) {
-                $evaluate = $cleanJSProps($tag->props->evaluate);
+                if ($requireProps("evaluate", $tag)) {
+                    $evaluate = $cleanJSProps($tag->props->evaluate);
 
-                $cases = [];
-                $childLength = count($tag->child);
-                for ($i=0; $i < $childLength; $i++) {
-                  $openingSwitch = ($i === 0 ? "switch (" . $evaluate . ") { \n" : "");
-                  $closingSwitch = ($i === ($childLength - 1) ? "\n}" : "");
+                    $cases = [];
+                    $childLength = count($tag->child);
+                    for ($i = 0; $i < $childLength; $i++) {
+                        $openingSwitch = ($i === 0 ? "switch (" . $evaluate . ") { \n" : "");
+                        $closingSwitch = ($i === ($childLength - 1) ? "\n}" : "");
 
-                  $currentChild = $tag->child[$i];
-                  $currentChildTag = $defineTagStructure($currentChild);
+                        $currentChild = $tag->child[$i];
+                        $currentChildTag = $defineTagStructure($currentChild);
 
-                  $caseOrDefault =  $currentChildTag->name === "Default" || $currentChildTag->name === "default" ? "default" : "case";
+                        $caseOrDefault = $currentChildTag->name === "Default" || $currentChildTag->name === "default" ? "default" : "case";
 
-                  $openingCase = "";
-                  if ($caseOrDefault === "case") {
-                    $is = $cleanJSProps($currentChildTag->props->is);
-                    $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . " (" . $is . "): { \n\treturn ";
-                  } else {
-                    $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . ": { \n\treturn ";
-                  }
+                        $openingCase = "";
+                        if ($caseOrDefault === "case") {
+                            $is = $cleanJSProps($currentChildTag->props->is);
+                            $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . " (" . $is . "): { \n\treturn ";
+                        } else {
+                            $openingCase = $openingSwitch . "\n\t" . $caseOrDefault . ": { \n\treturn ";
+                        }
 
-                  array_push($cases, $openingCase);
-                  array_push($cases, $currentChildTag->child[0]);
-                  array_push($cases, "\nbreak;\n\t}" . $closingSwitch);
+                        array_push($cases, $openingCase);
+                        array_push($cases, $currentChildTag->child[0]);
+                        array_push($cases, "\nbreak;\n\t}" . $closingSwitch);
+                    }
+                    // self::log($cases);
+
+                    $newStructure = [
+                        "js", // tag name
+
+                        // Children
+                        $cases,
+
+                        // Null
+                        null
+                    ];
+                    // self::log($newStructure);
+
+                    $currentTag = $newStructure;
+                    $tag = $defineTagStructure($currentTag);
                 }
-                // self::log($cases);
-
-                $newStructure = [
-                  "js", // tag name
-
-                  // Children
-                  $cases,
-
-                  // Null
-                  null
-                ];
-                // self::log($newStructure);
-
-                $currentTag = $newStructure;
-                $tag = $defineTagStructure($currentTag);
-              }
             }
 
             if (isset($tag) && $tag->recursiveable) {
-              $callback = function ($child, $index) use ($recursive, $tag) {
-                  $nextTag = isset($tag->child[$index + 1]) ? $tag->child[$index + 1] : false;
-                  $prevTag = isset($tag->child[$index - 1]) ? $tag->child[$index - 1] : false;
-                  return $recursive($child, $recursive, $nextTag, $tag->child, $index);
-              };
-              // https://stackoverflow.com/a/5868491/6086756
-              $newChild = array_map($callback, $tag->child, array_keys($tag->child));
-              $tag->child = $newChild;
+                $callback = function ($child, $index) use ($recursive, $tag) {
+                    $nextTag = isset($tag->child[$index + 1]) ? $tag->child[$index + 1] : false;
+                    $prevTag = isset($tag->child[$index - 1]) ? $tag->child[$index - 1] : false;
+                    return $recursive($child, $recursive, $nextTag, $tag->child, $index);
+                };
+                // https://stackoverflow.com/a/5868491/6086756
+                $newChild = array_map($callback, $tag->child, array_keys($tag->child));
+                $tag->child = $newChild;
             }
 
             $currentTag = $tag->convertable ? $convertBack($tag) : $currentTag;

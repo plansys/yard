@@ -84,7 +84,7 @@ class Page
                 include($path);
                 $results[] = ob_get_clean();
             } else {
-                $results[] = "";
+                throw new \Exception("Failed to load file {$path} not found!");
             }
         }
 
