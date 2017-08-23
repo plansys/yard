@@ -23,6 +23,8 @@ class Base
     public $modules = [];
     public $pageNamespace = 'Pages\\';
 
+    const PLANSYS_MODULES = ['db', 'ui', 'user', 'builder', 'jasper'];
+
     function __construct($baseFile = '')
     {
         if (!is_string($baseFile)) {
@@ -103,8 +105,7 @@ class Base
 
     private function loadPlansysModules()
     {
-        $plansysModules = ['db', 'ui', 'user', 'builder'];
-        foreach ($plansysModules as $m) {
+        foreach (self::PLANSYS_MODULES as $m) {
             $m = strtolower($m);
             $class = '\Plansys\\' . ucfirst($m) . '\Init';
 

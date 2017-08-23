@@ -1,4 +1,5 @@
 <?php
+
 namespace Yard\Page\Renderer;
 
 trait Component
@@ -6,6 +7,7 @@ trait Component
     private static function parseRender($page)
     {
         $render = $page->render();
+
         if (is_array($render)) {
             return $render;
         } elseif (is_string($render)) {
@@ -20,7 +22,14 @@ trait Component
             } catch (\Exception $e) {
                 $render = explode("\n", \Yard\Lib\HtmlToJson::preConvert($render));
                 $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
-                $col = self::explode_first(":", self::explode_last('character ', $e->getMessage())) + 1;
+                $col = self::explode_first(":", self::explode_last('character ', $e->getMessage()));
+
+                if (is_numeric($col)) {
+                    $col = $col + 1;
+                } else {
+                    throw $e;
+                }
+
                 $tab = "    ";
 
                 $errors = [];
@@ -29,7 +38,7 @@ trait Component
                 $errors[] = ['div', $style, $e->getMessage()];
                 foreach ($render as $ln => $line) {
                     $num = str_pad($ln + 1, 4, " ", STR_PAD_LEFT) . " | ";
-                    if ($ln == $row -1) {
+                    if ($ln == $row - 1) {
                         $style = ['style' => ['background' => 'red', 'color' => 'white']];
                         $errors[] = ['div', $style, $num . str_replace("\t", $tab, $line)];
 
@@ -48,12 +57,12 @@ trait Component
                 }
 
                 return ['pre', ['style' => [
-                'border' => '1px solid red',
-                'position'=> 'fixed',
-                'background' => 'white',
-                'color' => 'black',
-                'zIndex' => '9999',
-                'fontSize' => '11px'
+                    'border' => '1px solid red',
+                    'position' => 'fixed',
+                    'background' => 'white',
+                    'color' => 'black',
+                    'zIndex' => '9999',
+                    'fontSize' => '11px'
                 ]], $errors];
             }
         }
@@ -147,7 +156,7 @@ trait Component
         }
 
         if ($content[0] == "jstext") {
-            return "`" . $content[1] . "`";
+            return "'" . str_replace("'", "\'", trim($content[1])) . "'";
         }
 
         return "h({$tag}{$attr}{$child})";

@@ -14,7 +14,7 @@ export class Page extends React.Component {
                 throw new Error('PageLoader.redux is not defined!');
             }
 
-            var url = window.yard.url.page
+            let url = window.yard.url.page
                 .replace('[page]', page);
 
             window.yard.page.name = page;
@@ -26,7 +26,7 @@ export class Page extends React.Component {
                 throw new Error('PageLoader.redux is not defined!');
             }
 
-            var url = window.yard.url.page
+            let url = window.yard.url.page
                 .replace('[page]', page);
 
             window.yard.page.name = page;
@@ -34,7 +34,7 @@ export class Page extends React.Component {
             Page.history.doChangeListener(page);
         },
         redirect: function (page) {
-            var url = window.yard.url.page
+            let url = window.yard.url.page
                 .replace('[page]', page);
 
             Page.history.doChangeListener(page);
@@ -69,13 +69,13 @@ export class Page extends React.Component {
             })
         },
         changeListener: []
-    }
+    };
 
     constructor() {
-        super(...arguments)
+        super(...arguments);
         this.state = {
             '[[loaded]]': false
-        }
+        };
 
         this._events = {};
 
@@ -106,7 +106,7 @@ export class Page extends React.Component {
         this._isMounted = true;
         this.props.loader.init.then(conf => {
             this.setState({'[[loaded]]': true});
-        })
+        });
 
         if (typeof this.props.refbind === 'function') {
             this.props.refbind(this);
@@ -115,7 +115,7 @@ export class Page extends React.Component {
         let args = arguments;
         setTimeout(() => {
             this.applyEvent('componentDidMount', args);
-        })
+        });
     }
 
     componentWillUnmount() {
@@ -133,9 +133,7 @@ export class Page extends React.Component {
         if (!content) return null;
         if (!content.type) return null;
 
-        let render = React.Children.only(content);
-
-        return render;
+        return React.Children.only(content);
     }
 
     on(event, func) {
@@ -173,7 +171,7 @@ export class Page extends React.Component {
                     history: PageLoader.history
                 });
             default:
-                var stag = tag;
+                let stag = tag;
 
                 if (typeof stag === 'function') {
                     return h(stag(), props, children);
@@ -192,7 +190,7 @@ export class Page extends React.Component {
 
 Page.propTypes = {
     loader: PropTypes.object.isRequired
-}
+};
 
 export const createPage = function (name, loader, props) {
     if (!loader) {
@@ -200,14 +198,6 @@ export const createPage = function (name, loader, props) {
     }
 
     let NewPage = loader.pageComponent;
-    // if (loader.conf.propTypes) {
-    //     NewPage.propTypes = {};
-    //     map(loader.conf.propTypes, (types, tag) => {
-    //         //eslint-disable-next-line
-    //         (new Function('NewPage', 'PropTypes', `NewPage.propTypes["${tag}"] = PropTypes.${types}`))(NewPage, PropTypes)
-    //     })
-    // }
-
     let newProps = {
         ...props,
         loader

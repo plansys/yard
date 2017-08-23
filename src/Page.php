@@ -16,6 +16,7 @@ class Page
     public $placeholder = null;
     public $url = "";
     public $props = [];
+    public $executePostRender = false;
 
     public $isRoot = false;
     public $showDeps = false;
@@ -49,6 +50,11 @@ class Page
 
     public function render()
     {
+    }
+
+    public function postRender($props, $children)
+    {
+        return $children;
     }
 
     public function propTypes()

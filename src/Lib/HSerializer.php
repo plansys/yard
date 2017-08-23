@@ -17,7 +17,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         $this->base = $base;
     }
 
-
     /**
      * @param \DOMElement $node
      * @return array
@@ -95,6 +94,18 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         }
         $result[] = $childs;
 
+        if (isset($result[1]['__postRender']) && is_object($result[1]['__postRender'])) {
+            $htmlChild = $node->saveHtml();
+            $htmlChild = preg_replace("/<\/?" . $result[1]['name'] . "[^>]*\>/i", "", $htmlChild);
+            $postRenderedHtml = $result[1]['__postRender']->postRender($result[1], $htmlChild);
+            if (is_string($postRenderedHtml) && trim($postRenderedHtml) != '') {
+                $result[2] = [HtmlToJson::doConvert($this->base, $postRenderedHtml, true)];
+            }
+
+
+            unset($result[1]['__postRender']);
+        }
+
         return $result;
     }
 
@@ -128,6 +139,13 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                 }
             }
         }
+
+        $page = $this->base->newPage($c[0]);
+
+        if ($page->executePostRender) {
+            $newc[1]['__postRender'] = $page;
+        }
+
         return $newc;
     }
 
