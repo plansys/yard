@@ -62,6 +62,7 @@ my-project
         ]
     ],
     'dir' => [
+        'dir'=> dirname(__FILE__) . '/pages',
         'base' => dirname(__FILE__) . '/vendor/plansys/yard/base/build',
         'cache' => dirname(__FILE__) . '/tmp',
     ],
@@ -80,7 +81,7 @@ my-project
 
 require("vendor/autoload.php");
 
-$base = new \Yard\Base("base.php");
+$base = new \Yard\Base(dirname(__FILE__) . DIRECTORY_SEPARATOR . "base.php");
 $yard = new \Yard\Renderer($base);
 
 $parr = explode('...', $_GET['p']);
