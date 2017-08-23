@@ -68,7 +68,7 @@ class Page
         $this->showDeps = $showDeps;
         $this->base = $base;
 
-        $this->url = @$base->pages['']['url'];
+        $this->url = @$base->modules['']['url'];
         $this->conf = new Page\Configuration($this);
     }
 

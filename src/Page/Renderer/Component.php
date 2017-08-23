@@ -156,7 +156,7 @@ trait Component
         }
 
         if ($content[0] == "jstext") {
-            return "'" . str_replace("'", "\'", trim($content[1])) . "'";
+            return "`" . trim($content[1]) . "`";
         }
 
         return "h({$tag}{$attr}{$child})";

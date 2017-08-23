@@ -60,10 +60,10 @@ trait Redux
                 $storeRaw = $moduleArr[1];
             }
             $storeArr = explode(".", $storeRaw);
-            $storePath = $this->page->base->pages[$module]['redux'];
+            $storePath = $this->page->base->modules[$module]['redux'];
             if (count($storeArr) > 1) {
                 $reducer = array_pop($storeArr);
-                $storePath = $this->page->base->pages[$module]['redux'] . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $storeArr);
+                $storePath = $this->page->base->modules[$module]['redux'] . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $storeArr);
             } else {
                 $reducer = $storeRaw;
             }
@@ -85,7 +85,7 @@ trait Redux
                     }
                     $class = str_replace(".php", "", basename($file));
                     $reducer = str_replace("Reducer.php", "", basename($file));
-                    $storePrefix = self::explode_first(basename($file), substr($file, strlen($this->page->base->pages[$module]['redux'])));
+                    $storePrefix = self::explode_first(basename($file), substr($file, strlen($this->page->base->modules[$module]['redux'])));
 
                     if (strlen($storePrefix) > 1) {
                         $sep = $storePrefix[0];

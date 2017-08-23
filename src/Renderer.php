@@ -25,12 +25,7 @@ class Renderer
         $alias = $aliasarr[0];
 
         $isRoot = strtok($mode, '.') == 'r';
-        $mode = self::explode_last(".", $mode);
-        
-        if ($mode != 'vendor') {
-            $this->page = $this->base->newPage($alias, $isRoot);
-        }
-        
+
         if (strpos($mode, 'db') === 0) {
             $dbpage = explode("_", $mode);
             if (count($dbpage) > 1) {
@@ -41,6 +36,12 @@ class Renderer
             }
 
             $mode = 'db';
+        } else {
+            $mode = self::explode_last(".", $mode);
+        }
+        
+        if ($mode != 'vendor') {
+            $this->page = $this->base->newPage($alias, $isRoot);
         }
         
         switch ($mode) {

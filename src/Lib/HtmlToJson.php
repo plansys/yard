@@ -153,49 +153,15 @@ class HtmlToJson
                     $index = $requireProps("index", $tag) ? $tag->props->index : false;
 
                     $child = $coverChild($tag);
-                    $eachVar = '';
-                    if (strpos(trim($each), 'js:') === 0) {
-                        $eachVar = "\n" . 'let eachVar = ' . substr($each, 3) . ";\n";
-                        $each = 'eachVar';
-                    } else {
-                        $each = "'{$each}'";
-                    }
-
-                    $indexVar = '';
-                    if (strpos(trim($indexVar), 'js:') === 0) {
-                        $indexVar = 'let indexVar = ' . substr($index, 3) . ";\n";
-                        $index = 'indexVar';
-                    } else if ($index) {
-                        $index = "'{$index}'";
-                    }
-
-                    $ofVar = '';
-                    if (strpos(trim($indexVar), 'js:') === 0) {
-                        $ofVar = 'let ofVar = ' . substr($index, 3) . ";\n";
-                        $of = 'ofVar';
-                    } else if ($of) {
-                        $of = "{$of}";
-                    }
-
                     $newStructure = [
                         "js", // tag name
 
                         // Children
-                        array_values(array_filter([
-                            $eachVar,
-                            $indexVar,
-                            $ofVar,
-                            "\t\t\tlet forFunc = new Function('h', 'ReactDOM', 'React', " . $each . ($index ? "," . $index : "") . ", \n",
-                            "`\t\t\t\t return ",
+                        [
+                            "\n" . $of . ".map((" . $each . ($index ? "," . $index : "") . ") => { \n\t return ",
                             $makeResultTag($convertBack($child)),
-                            "\n\t\t\t\t`);\n",
-                            "\t\t\tlet __results = [];\n",
-                            "\t\t\tfor (let __idx in $of) {\n",
-                            "\t\t\t   let __item = {$of}[__idx];\n",
-                            "\t\t\t   __results.push(forFunc(h, ReactDOM, React, __item, __idx));\n",
-                            "\t\t\t}\n",
-                            "\t\t\treturn __results;\n"
-                        ])),
+                            "})",
+                        ],
 
                         // Null
                         null
