@@ -64,12 +64,12 @@
                 $render = trim($render, "h('jsdiv', [");
                 $render = trim($render, "])");
                 $render = trim($render);
-                $render = trim($render, "'");
-                $render = explode("',h(", $render);
+                $render = trim($render, "`");
+                $render = explode("`,h(", $render);
 
                 if (count($render) > 1) {
                     $js = array_shift($render);
-                    $render = trim($js . 'h(' . implode(" ',h(", $render));
+                    $render = trim($js . 'h(' . implode("`,h(", $render));
                     $render = str_replace('h(', ' h(', $render);
                 } else {
                     $render = array_shift($render);

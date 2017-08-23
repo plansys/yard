@@ -102,7 +102,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                 $result[2] = [HtmlToJson::doConvert($this->base, $postRenderedHtml, true)];
             }
 
-
             unset($result[1]['__postRender']);
         }
 

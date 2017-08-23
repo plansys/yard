@@ -233,7 +233,6 @@ class HtmlToJson
         };
 
         $json = $recursive($json, $recursive);
-        // self::log($json);
         return $json;
     }
 

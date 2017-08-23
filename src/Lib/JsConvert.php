@@ -44,6 +44,7 @@ trait JsConvert
             }
         }
         $output .= $object ? "}" : "]";
+
         return $output;
     }
 }
