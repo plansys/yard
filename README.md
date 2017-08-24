@@ -19,18 +19,15 @@ Follow these steps to use yard:
  
  1. Create `my-project` directory
  2. Open terminal and execute `composer require plansys\yard` in that directory
- 1. Create `bases`, `pages`, `cache`  and `redux` directory in `my-project` directory 
- 2. Copy `/vendor/yard/base` into `/bases`, and rename it to default
- 4. Make sure `/cache` directory is writeable by web server process (`chmod 755` into this directory)
- 3. Create `index.php` file
+ 1. Create `pages`, `tmp`  and `redux` directory in `my-project` directory 
+ 4. Make sure `/tmp` directory is writeable by web server process (`chmod 755` into this directory)
+ 3. Create  `base.php` and `index.php` file
  
 After those steps, your directory structure should look like this:
 
 ```
 my-project
-  └─ bases
-     └─ default    (copied from /vendor/yard/base)
-  ├─ cache         (writable)
+  ├─ tmp         (writable)
   ├─ pages 
   ├─ redux 
   └─ vendors
@@ -65,13 +62,14 @@ my-project
         'dir'=> dirname(__FILE__) . '/pages',
         'base' => dirname(__FILE__) . '/vendor/plansys/yard/base/build',
         'cache' => dirname(__FILE__) . '/tmp',
+        'root' => dirname(__FILE__) 
     ],
     'url' => [
         'base' => $host . '/vendor/plansys/yard/base/build',
         'cache' => $host . '/tmp/[file]',
         'page' => $host . '/index.php?p=[page]',
     ]
- ]
+ ];
  ```
  
  And put this code into `index.php` file:
