@@ -68,8 +68,18 @@ class Page
         $this->showDeps = $showDeps;
         $this->base = $base;
 
-        $this->url = @$base->modules['']['url'];
+        $this->url = @$base->modules[$this->currentModule()]['url'];
         $this->conf = new Page\Configuration($this);
+    }
+
+    public function currentModule()
+    {
+        $class = explode('\\', get_class($this));
+        if ($class[0] == 'Pages') {
+            return '';
+        } else {
+            return $class[0];
+        }
     }
 
     public function app()

@@ -86,7 +86,6 @@ export class Page extends React.Component {
 
         let moduleArr = window.yard.page.name.split(':');
         let module = moduleArr.length > 1 ? moduleArr[0] : false;
-
         this.url = window.yard.url.pages[module];
         this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);
     }

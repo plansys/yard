@@ -23,7 +23,8 @@ trait JsConvert
                     }
                 }
             }
-            if ($key != 'js:spread') {
+
+            if (!is_string($key) || $key != 'js:spread') {
                 if (is_array($value)) {
                     $output .= self::toJs($value, $sequential_keys, $quotes, $beautiful_json);
                 } elseif (is_bool($value)) {

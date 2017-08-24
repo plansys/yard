@@ -50,12 +50,18 @@ class HtmlToJson
             }
 
             $hasArrayChild = is_array($child);
+            if (count($child) == 1 && is_string($child[0])) {
+                $hasArrayChild = false;
+            }
+
             $define = new \stdClass();
             $define->name = $tagName;
             $define->props = $hasProps ? $props : false;
             $define->child = $child;
+
             $define->recursiveable = $hasArrayChild;
             $define->convertable = $hasArrayChild;
+
             return $define;
         };
 
@@ -72,11 +78,7 @@ class HtmlToJson
         };
 
         $makeResultTag = function ($structure) {
-            return [
-                "el",
-                [$structure],
-                null,
-            ];
+            return $structure;
         };
 
         $coverChild = function ($tag) use ($defineTagStructure) {
@@ -245,7 +247,6 @@ class HtmlToJson
         $fdom = \FluentDom::load($render, 'text/xml', ['libxml' => LIBXML_COMPACT, 'is_string' => true]);
         $json = new HSerializer($base, $fdom);
         $json = self::postConvert(json_decode($json->__toString()));
-
         if ($returnAsArray) {
             return $json;
         }

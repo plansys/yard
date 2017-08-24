@@ -25,7 +25,7 @@ export const mapInput = function (input) {
                     }(store, props);
                     break;
                 default:
-                break;
+                    break;
             }
         }
 
@@ -45,27 +45,27 @@ const printKeys = function (obj, stack = '', result = '') {
         }
     }
     return result;
-}
+};
 
 export const mapAction = function (action) {
     let list = action();
     let result = {};
 
     for (let p in list) {
-        let act = list[p]
+        let act = list[p];
         switch (typeof act) {
             case "string":
                 result[p] = function () {
-                    let actions = PageLoader.redux.actionCreators
-                    let keys = Object.keys(actions);
+                    let actions = PageLoader.redux.actionCreators;
+                    let keys = Object.keys(actions).map(key => key.replace('.', '_'));
                     let values = Object.keys(actions).map((key) => actions[key]);
 
                     // eslint-disable-next-line
                     let func = (new Function(...keys, `return ${this}`))(...values);
                     if (typeof func !== "function") {
                         console.error("Action [" + this + "] is not defined!\n Avilable actions are: \n\n" +
-                                printKeys(actions));
-                        return { type: "~~ERROR~~"};
+                            printKeys(actions));
+                        return {type: "~~ERROR~~"};
                     }
 
                     return func(...arguments);

@@ -127,6 +127,7 @@ trait Component
                             $jsstr = " return (" . $jsstr . ")";
                         }
 
+
                         $attr = "," . " function(h) { $jsstr }";
                     } else {
                         if (self::is_assoc($content[1])) {

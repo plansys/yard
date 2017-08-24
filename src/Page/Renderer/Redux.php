@@ -8,7 +8,12 @@ trait Redux
 
     private function renderMapStore()
     {
-        $mapstore = self::toJs($this->page->mapStore());
+        $stores = $this->page->mapStore();
+        foreach ($stores as $k => $act) {
+            $stores[$k] = str_replace(":", "_", $act);
+        }
+
+        $mapstore = self::toJs($stores);
         if (trim($mapstore) == "[]") {
             return "";
         }
@@ -18,12 +23,17 @@ trait Redux
 
     private function renderMapAction()
     {
-        $mapaction = self::toJs($this->page->mapAction());
-        if (trim($mapaction) == "[]") {
+        $actions = $this->page->mapAction();
+        foreach ($actions as $k => $act) {
+            $actions[$k] = str_replace(":", "_", $act);
+        }
+
+        $result = self::toJs($actions);
+        if (trim($result) == "[]") {
             return "";
         }
 
-        return "return " . $mapaction;
+        return "return " . $result;
     }
 
     private function getReducers($loaders)
@@ -67,7 +77,7 @@ trait Redux
             } else {
                 $reducer = $storeRaw;
             }
-            $modulePrefix = $module != '' ? $module . '.' : '';
+            $modulePrefix = $module != '' ? $module . '_' : '';
 
             $reducer = strtr($reducer, [
                 '.*' => '',
@@ -138,9 +148,14 @@ trait Redux
 
                     $script = isset($kv['script']) ? substr($kv['script'], 3) : '';
 
+                    $payload = @$kv['payload'];
+                    if (strpos($payload, 'js:') !== 0) {
+                        $payload = 'js: ' . $payload;
+                    }
+
                     $return = self::toJs([
                         'type' => $kv['type'],
-                        'payload' => @$kv['payload']
+                        'payload' => $payload
                     ]);
 
                     if (trim($script) != '') {
@@ -167,12 +182,12 @@ trait Redux
                 }
 
                 $item = new $class;
-
-                if (!isset($list[$k])) {
-                    $list[$k] = [];
+                $key = str_replace(".", "_", $k);
+                if (!isset($list[$key])) {
+                    $list[$key] = [];
                 }
-                $list[$k] = $item->actionCreators();
-                $declareList($list[$k]);
+                $list[$key] = $item->actionCreators();
+                $declareList($list[$key]);
             }
         }
         return "return " . self::toJs($list) . ";";
@@ -195,10 +210,11 @@ trait Redux
 
         $list = [];
         foreach ($reducers as $k => $r) {
-            if (!isset($list[$k])) {
-                $list[$k] = [];
+            $key = str_replace(":", "_", $k);
+            if (!isset($list[$key])) {
+                $list[$key] = [];
             }
-            $declareList($r, $list[$k]);
+            $declareList($r, $list[$key]);
         }
 
         return "return " . self::toJs($list) . ";";
