@@ -151,7 +151,12 @@ export class Page extends React.Component {
     hswap(tag, props, children) {
         switch (tag) {
             case "js":
-                return props.bind(this)(this.hswap.bind(this));
+                if (children) {
+                    let propsValue = Object.keys(props).map(key => props[key]);
+                    return children(this.hswap.bind(this), ...propsValue);
+                } else {
+                    return props.bind(this)(this.hswap.bind(this));
+                }
             case "Page":
                 let newProps = {...props};
 
@@ -162,6 +167,8 @@ export class Page extends React.Component {
 
                 return h(PageLoader, {
                     ...newProps,
+                    className: newProps.className || null,
+                    style: newProps.style || null,
                     children: !!children && children.length === 1 ? children[0] : children,
                     name: props.name
                 });
@@ -184,7 +191,6 @@ export class Page extends React.Component {
 
         }
     }
-
 }
 
 Page.propTypes = {

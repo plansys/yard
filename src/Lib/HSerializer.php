@@ -44,28 +44,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         foreach ($node->childNodes as $childNode) {
             if ($childNode instanceof \DOMElement) {
                 $c = $this->getNode($childNode);
-                if ($c[0] == 'js') {
-                    $content = [];
-
-                    foreach ($c[1] as $j) {
-                        if ($j[0] == 'jstext') {
-                            $content[] = $j[1];
-                        } elseif ($j[0] == 'el') {
-
-                            if (count($j[1]) > 1) {
-                                $jc = ['div', []];
-                                foreach ($j[1] as $jj) {
-                                    $jc[1][] = $jj;
-                                }
-                                $content[] = $jc;
-                            } else {
-                                $content[] = $j[1][0];
-                            }
-                        }
-                    }
-
-                    $c = [$c[0], $content];
-                }
 
                 if ($this->base->isPage($c[0])) {
                     $c = $this->getPage($c);
@@ -80,26 +58,22 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
             if ($childNode instanceof \DOMText || $childNode instanceof \DOMCdataSection) {
                 $c = $this->getValue($childNode->data);
-
-                if (is_array($childs)) {
-                    if (is_array($c)) {
-                        $childs[] = $c;
-                    } else {
-                        if (trim($c) != '') {
-                            $childs[] = ['jstext', $c];
-                        }
-                    }
-                }
+                $childs[] = ['jstext', $c];
             }
         }
         $result[] = $childs;
 
         if (isset($result[1]['__postRender']) && is_object($result[1]['__postRender'])) {
-            $htmlChild = $node->saveHtml();
+            $htmlChild = html_entity_decode($node->saveXML());
             $htmlChild = preg_replace("/<\/?" . $result[1]['name'] . "[^>]*\>/i", "", $htmlChild);
-            $postRenderedHtml = $result[1]['__postRender']->postRender($result[1], $htmlChild);
-            if (is_string($postRenderedHtml) && trim($postRenderedHtml) != '') {
-                $result[2] = [HtmlToJson::doConvert($this->base, $postRenderedHtml, true)];
+            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild);
+            if (is_array($htmlResult)) {
+                $result[1] = $htmlResult['props'];
+                $htmlResult = $htmlResult['children'];
+            }
+
+            if (is_string($htmlResult) && trim($htmlResult) != '') {
+                $result[2] = [HtmlToJson::doConvert($this->base, $htmlResult, true)];
             }
 
             unset($result[1]['__postRender']);

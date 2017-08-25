@@ -177,7 +177,7 @@ class Dependency
 
     private static function parseTags($pageRender, $tags = false)
     {
-        $excludeTags = ['js', 'jstext', 'el'];
+        $excludeTags = ['js', 'jstext'];
 
         if ($tags === false) {
             $tag = $pageRender;

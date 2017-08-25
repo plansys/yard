@@ -11,155 +11,125 @@ trait Component
         if (is_array($render)) {
             return $render;
         } elseif (is_string($render)) {
-            try {
-                $jsontxt = \Yard\Lib\HtmlToJson::convert($page->base, $render);
+            $jsontxt = \Yard\Lib\HtmlToJson::convert($page->base, $render);
+            if (is_array($jsontxt)) {
+                return $jsontxt;
+            } else {
                 $json = json_decode($jsontxt, true);
 
-                if ($json[0] == 'js') {
-                    return ['jsdiv', $json[1]];
-                }
                 return $json;
-            } catch (\Exception $e) {
-                $render = explode("\n", \Yard\Lib\HtmlToJson::preConvert($render));
-                $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
-                $col = self::explode_first(":", self::explode_last('character ', $e->getMessage()));
-
-                if (is_numeric($col)) {
-                    $col = $col + 1;
-                } else {
-                    throw $e;
-                }
-
-                $tab = "    ";
-
-                $errors = [];
-
-                $style = ['style' => ['borderBottom' => '1px solid red']];
-                $errors[] = ['div', $style, $e->getMessage()];
-                foreach ($render as $ln => $line) {
-                    $num = str_pad($ln + 1, 4, " ", STR_PAD_LEFT) . " | ";
-                    if ($ln == $row - 1) {
-                        $style = ['style' => ['background' => 'red', 'color' => 'white']];
-                        $errors[] = ['div', $style, $num . str_replace("\t", $tab, $line)];
-
-                        for ($k = 1; $k < strlen($line); $k++) {
-                            if ($k != $col) {
-                                $line[$k] = $line[$k] === "\t" ? $tab : " ";
-                            } else {
-                                $line[$k] = "^";
-                            }
-                        }
-
-                        $errors[] = ['div', "     | " . str_replace("\t", $tab, $line)];
-                    } else {
-                        $errors[] = ['div', $num . str_replace("\t", $tab, $line)];
-                    }
-                }
-
-                return ['pre', ['style' => [
-                    'border' => '1px solid red',
-                    'position' => 'fixed',
-                    'background' => 'white',
-                    'color' => 'black',
-                    'zIndex' => '9999',
-                    'fontSize' => '11px'
-                ]], $errors];
             }
         }
     }
 
     private function renderComponent($content, $level = 0)
     {
+        if (is_string($content))
+            return $content;
+
         $attr = '';
         $child = '';
         $tag = $content[0];
 
-        $renderSub = function ($ct, $level) {
-            $els = [];
-            foreach ($ct as $el) {
-                $els[] = $this->renderComponent($el, $level + 1);
+        $renderSub = function ($children, $level) {
+            # concat child
+            $results = [];
+            foreach ($children as $k => $c) {
+                if (is_array($c)) {
+                    if ($c[0] == 'jstext') {
+                        $results[] = "`" . trim($c[1]) . "`";
+                        continue;
+                    }
+                    $results[] = $this->renderComponent($c, $level + 1);
+                } else {
+                    $results[] = "`$c`";
+                }
             }
-            $bc = "";
+
+            # prettify
+            $tabs = str_pad("    ", ($level + 1) * 4);
+            $innerTabs = "";
             if ($level > 0) {
-                $bc = str_pad("    ", ($level) * 4);
+                $innerTabs = str_pad("    ", ($level) * 4);
             }
-            return ", [\n" . str_pad("    ", ($level + 1) * 4) . implode(",", $els) . "\n" . $bc . "]";
+            return ", [\n" . $tabs . implode(",", $results) . "\n" . $innerTabs . "]";
         };
+
+        $renderJs = function ($children, $level, $returnFuncBody = false) use ($renderSub) {
+            # concat child
+            $results = [];
+            foreach ($children as $k => $c) {
+                if (is_array($c)) {
+                    if ($c[0] == 'jstext') {
+                        $results[] = trim($c[1]);
+                        continue;
+                    }
+
+                    $results[] = $this->renderComponent($c, $level + 1);
+                } else {
+                    $results[] = $c;
+                }
+            }
+
+            # process function body
+            $funcbody = trim(implode(' ', $results));
+            $noReturnIf = ["if", "while", "return", "for", "switch", "console", "var", "let", "const"];
+            $prependWithReturn = true;
+            foreach ($noReturnIf as $keyword) {
+                if (strpos($funcbody, $keyword) === 0) {
+                    $prependWithReturn = false;
+                }
+            }
+            if ($prependWithReturn) {
+                $funcbody = 'return ' . $funcbody . ';';
+            }
+
+            # prettify and return
+            $tabs = str_pad("    ", ($level + 1) * 4);
+            $funcbody = explode("\n", $funcbody);
+            $funcbody = "    " . trim(implode("\n    ", $funcbody));
+
+            if ($returnFuncBody || $level == 0) {
+                return $funcbody;
+            }
+            return " function(h) { \n{$tabs}" . $funcbody . "\n{$tabs}} ";
+        };
+
+        # render component
+        $renderedTag = '"' . $tag . '"';
         $count = count($content);
         if ($count > 1) {
             if ($count >= 2) {
                 if (is_array($content[1])) {
-                    if ($tag == 'js') {
-                        $jsstr = "";
-                        foreach ($content[1] as $jsc) {
-                            if (is_string($jsc)) {
-                                $jsstr .= $jsc;
-                            } elseif (is_array($jsc)) {
-                                $jsstr .= $this->renderComponent($jsc, $level + 1);
-                            }
-                        }
+                    if (strpos($tag, 'js:') === 0) {
+                        $renderedTag = substr($tag, 3);
+                    }
 
-                        $noReturn = false;
-                        $noReturnIf = ["if", "while", "return", "for", "switch", "console", "var", "let", "const"];
-                        $jsstr = trim($jsstr);
-                        foreach ($noReturnIf as $nr) {
-                            if (strpos($jsstr, $nr) === 0) {
-                                $noReturn = true;
-                                break;
-                            }
-                        }
+                    if ($count == 2) {
+                        $children = $content[1];
+                        if ($tag == 'js') {
 
-                        if ($noReturn) {
-                            if (strpos($jsstr, "return ") === false && strpos($jsstr, "console") !== 0) {
-                                $jscode = explode("\n", $jsstr);
-                                foreach ($jscode as $ln => $v) {
-                                    $num = str_pad($ln + 1, 4, " ", STR_PAD_LEFT) . " | ";
-                                    $jscode[$ln] = $num . $v;
-                                }
-                                $jsstr = json_encode($jscode);
-                                $jsstr = "console.error('The <js> should return <el> or string in Page [{$this->page->alias}]:', \"\\n\\n\" + {$jsstr}.join(\"\\n\"))";
+                            # if current is root, return the resulting js
+                            if ($level == 0) {
+                                return "        " . $renderJs($children, $level);
                             }
+
+                            $child = "," . $renderJs($children, $level);
                         } else {
-                            if (trim($jsstr) == '') {
-                                $jsstr = "''";
-                            }
-
-                            $jsstr = " return (" . $jsstr . ")";
+                            $child = $renderSub($children, $level);
                         }
-
-
-                        $attr = "," . " function(h) { $jsstr }";
-                    } else {
+                    } else if ($count == 3) {
                         if (self::is_assoc($content[1])) {
-                            $attr = ", " . self::toJS($content[1]);
-                        } elseif ($count == 2) {
-                            $child = $renderSub($content[1], $level);
+                            $attr = ', ' . self::toJS($content[1]);
                         }
+                        $child = $renderSub($content[2], $level);
                     }
                 } else {
-                    $child = ',' . json_encode($content[1]);
-                }
-
-                if ($count == 3) {
-                    if (is_array($content[2]) && !self::is_assoc($content[2])) {
-                        $child = $renderSub($content[2], $level);
-                    } else {
-                        $child = "," . json_encode($content[2]);
-                    }
+                    $child = ',' . json_encode($content[1], JSON_PRETTY_PRINT);
                 }
             }
         }
 
-        if (strpos($tag, 'js:') !== 0) {
-            $tag = "'" . $tag . "'";
-        } else {
-            $tag = substr(trim($tag), 3);
-        }
-
-        if ($content[0] == "jstext") {
-            return "`" . trim($content[1]) . "`";
-        }
-
-        return "h({$tag}{$attr}{$child})";
+        return ($level === 0 ? 'return ' : '') . 'h(' . $renderedTag . $attr . $child . ")";
     }
 }

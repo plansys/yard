@@ -6,13 +6,6 @@ class HtmlToJson
 {
     use ArrayTools;
 
-    public static function log($value)
-    {
-        header("Content-Type: application/json");
-        echo json_encode($value);
-        die();
-    }
-
     public static function preConvert($render)
     {
         return $render;
@@ -152,9 +145,15 @@ class HtmlToJson
                 if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
                     $each = $tag->props->each;
                     $of = $cleanJSProps($tag->props->of);
-                    $index = $requireProps("index", $tag) ? $tag->props->index : false;
+                    $index = $requireProps("index", $tag) ? $tag->props->index : '__idx';
 
                     $child = $coverChild($tag);
+                    if (is_object($child)) {
+                        if (!isset($child->props->key)) {
+                            $child->props->key = 'js:' . $index;
+                        }
+                    }
+
                     $newStructure = [
                         "js", // tag name
 
@@ -201,7 +200,6 @@ class HtmlToJson
                         array_push($cases, $currentChildTag->child[0]);
                         array_push($cases, "\nbreak;\n\t}" . $closingSwitch);
                     }
-                    // self::log($cases);
 
                     $newStructure = [
                         "js", // tag name
@@ -212,7 +210,6 @@ class HtmlToJson
                         // Null
                         null
                     ];
-                    // self::log($newStructure);
 
                     $currentTag = $newStructure;
                     $tag = $defineTagStructure($currentTag);
@@ -240,50 +237,74 @@ class HtmlToJson
 
     public static function doConvert($base, $render, $returnAsArray = false)
     {
-        $render = str_replace('&', '~^AND^~', $render); #replace '&' with something.
-        $render = self::preConvert($render);
+        try {
+            $render = str_replace('&', '~^AND^~', $render); #replace '&' with something.
+            $render = self::preConvert($render);
 
-        # parse the dom
-        $fdom = \FluentDom::load($render, 'text/xml', ['libxml' => LIBXML_COMPACT, 'is_string' => true]);
-        $json = new HSerializer($base, $fdom);
-        $json = self::postConvert(json_decode($json->__toString()));
-        if ($returnAsArray) {
-            return $json;
-        }
-        $json = json_encode($json);
+            # parse the dom
+            $fdom = \FluentDom::load($render, 'text/xml', ['libxml' => LIBXML_COMPACT, 'is_string' => true]);
+            $json = new HSerializer($base, $fdom);
+            $json = self::postConvert(json_decode($json->__toString()));
 
-        # turn it to string again, and then un-format it
-        return str_replace('~^AND^~', '&', $json); #un-replace '&'
-    }
+            if ($returnAsArray) {
+                return $json;
+            }
+            $json = json_encode($json);
 
-    public static function convert($base, $render, $try = 0)
-    {
-        if ($try > 0) {
-            # format string, so that DomDocument does not choke on 'weird' mark up
-            return self::doConvert($base, $render);
-        } else {
-            try {
-                return self::doConvert($base, $render);
-            } catch (\Exception $e) {
-                $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
-                $col = self::explode_first(":", self::explode_last('character ', $e->getMessage()));
-                if (is_numeric($col)) {
-                    $col = $col - 1;
+            # turn it to string again, and then un-format it
+            return str_replace('~^AND^~', '&', $json); #un-replace '&'
+        } catch (\Exception $e) {
+            $render = explode("\n", \Yard\Lib\HtmlToJson::preConvert($render));
+            $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
+            $col = self::explode_first(":", self::explode_last('character ', $e->getMessage()));
+
+            if (is_numeric($col)) {
+                $col = $col + 1;
+            } else {
+                throw $e;
+            }
+
+            $tab = "    ";
+
+            $errors = [];
+
+            $style = ['style' => ['borderBottom' => '1px solid red']];
+            $errors[] = ['div', $style, $e->getMessage()];
+            foreach ($render as $ln => $line) {
+                $num = str_pad($ln + 1, 4, " ", STR_PAD_LEFT) . " | ";
+                if ($ln == $row - 1) {
+                    $style = ['style' => ['background' => 'red', 'color' => 'white']];
+                    $errors[] = ['div', $style, $num . str_replace("\t", $tab, $line)];
+
+                    for ($k = 1; $k < strlen($line); $k++) {
+                        if ($k != $col) {
+                            $line[$k] = $line[$k] === "\t" ? $tab : " ";
+                        } else {
+                            $line[$k] = "^";
+                        }
+                    }
+
+                    $errors[] = ['div', "     | " . str_replace("\t", $tab, $line)];
                 } else {
-                    throw $e;
-                }
-
-                $lines = explode("\n", self::preConvert($render));
-                if (strpos($e->getMessage(), 'StartTag') !== false) {
-                    $lines[$row - 1] = substr($lines[$row - 1], 0, $col - 1) . '~^LT^~' . substr($lines[$row - 1], $col);
-                    $newrender = implode("\n", self::preConvert($lines));
-                    $json = self::convert($base, $newrender, $try + 1);
-
-                    return str_replace('~^LT^~', '<', $json);;
-                } else {
-                    throw $e;
+                    $errors[] = ['div', $num . str_replace("\t", $tab, $line)];
                 }
             }
+
+            return ['pre', ['style' => [
+                'border' => '1px solid red',
+                'position' => 'fixed',
+                'background' => 'white',
+                'color' => 'black',
+                'zIndex' => '9999',
+                'maxWidth' => '800px',
+                'overflowX' => 'auto',
+                'fontSize' => '11px'
+            ]], $errors];
         }
+    }
+
+    public static function convert($base, $render)
+    {
+        return self::doConvert($base, $render);
     }
 }
