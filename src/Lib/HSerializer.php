@@ -41,7 +41,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         }
 
         $childs = [];
-        foreach ($node->childNodes as $childNode) {
+        foreach ($node->childNodes as $k => $childNode) {
             if ($childNode instanceof \DOMElement) {
                 $c = $this->getNode($childNode);
 

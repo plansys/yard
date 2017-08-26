@@ -83,7 +83,6 @@ class Base
             $this->dir['root'] = dirname($this->baseFile);
         }
 
-        $d = DIRECTORY_SEPARATOR;
 
         # load yard modules pages
         $vurl = strtr($this->url['page'], [
@@ -94,9 +93,10 @@ class Base
         } else {
             $vurl = $vurl . "&_v_dr=";
         }
+        $d = DIRECTORY_SEPARATOR;
         $this->modules['yard'] = [
-            'dir' => dirname(__FILE__) . $d . 'Sample',
-            'url' => $vurl . "/plansys/yard/src/Sample"
+            'dir' => realpath(dirname(__FILE__) . $d . "..") . $d . 'pages',
+            'url' => $vurl . "/plansys/yard/pages"
         ];
 
         # load plansys modules pages

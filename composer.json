@@ -14,7 +14,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "Yard\\": "src/"
+            "Yard\\": "src/",
+            "yard\\Pages": "pages/"
         }
     }
 }

@@ -1,0 +1,90 @@
+.db-query-debug {
+    position:absolute;
+    min-width:350px;
+    font-size:11px;
+    border:1px solid red;
+    display:flex;
+    flex-direction: column;
+    align-items:stretch;
+    background:white;
+    color:black;
+    font-family: sans-serif;
+    cursor:pointer;
+}
+.db-query-debug.drag {
+    position:fixed;
+    z-index:1001;
+}
+.db-query-debug-overlay {
+    position:fixed;
+    left:0px;
+    right:0px;
+    top:0px;
+    bottom:0px;
+    z-index:1000;
+    cursor:pointer;
+}
+
+.db-query-debug > .title {
+    border-bottom:1px solid red;
+    padding:3px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    color: #333;
+    user-select:none;
+}
+.db-query-content {
+    display:flex;
+    flex-direction: column;
+    align-items:stretch;
+}
+
+.db-query-content > .params,
+.db-query-content > .result {
+    border:0px;
+    height:70px;
+    cursor: auto;
+    font-size:10px;
+    outline: none;
+    background:#fafafa;
+    font-family: monospace;
+    border-bottom:1px solid red;
+}
+
+.db-query-content > .params.invalid {
+    background: rgba(255, 0,0, .4)
+}
+
+.db-query-content > .params {
+    resize:vertical;
+}
+.db-query-content > .result {
+    flex:1;
+    overflow:auto;
+    padding:3px;
+}
+
+.db-query-content .params-status-invalid {
+    color:red;
+}
+.db-query-content .params-status-valid {
+    color:green;
+}
+
+.db-query-content > .result-title,
+.db-query-content > .params-title {
+    font-size:90%;
+    opacity:.8;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    padding:3px 0px 3px 3px;
+    margin-bottom:0px;
+    border-bottom:1px solid #ccc;
+}
+
+.db-query-content > .result-title label {
+    display:flex;
+    align-items:center;
+}

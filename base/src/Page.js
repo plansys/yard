@@ -165,11 +165,17 @@ export class Page extends React.Component {
                     newProps.refbind = props.ref;
                 }
 
+                if (typeof children === 'object' && children.length > 0) {
+                    if (children.length === 1) {
+                        children = children[0];
+                    }
+                }
+
                 return h(PageLoader, {
                     ...newProps,
                     className: newProps.className || null,
                     style: newProps.style || null,
-                    children: !!children && children.length === 1 ? children[0] : children,
+                    children,
                     name: props.name
                 });
             case "Placeholder":

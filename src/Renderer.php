@@ -8,43 +8,57 @@ class Renderer
 
     private $base;
     private $page;
-  
+
     function __construct($base)
     {
         if (!($base instanceof Base)) {
             throw new \Exception ('$base must be an instance of \Yard\Base');
         }
-    
+
         $this->base = $base;
     }
 
     public function render($rawAlias)
     {
-        $aliasarr = explode("...", $rawAlias);
-        $mode = count($aliasarr) > 1 ? $aliasarr[1] : 'html' ;
+        if (strpos($rawAlias, '::') !== false) {
+            $mode = 'api';
+            $aliasarr = explode("::", $rawAlias);
+        } else {
+            $aliasarr = explode("...", $rawAlias);
+            $mode = count($aliasarr) > 1 ? $aliasarr[1] : 'html';
+        }
+
+        $isRoot = false;
+        if (strpos($mode, '.') !== false) {
+            $modearr = explode(".", $mode);
+            if (count($modearr) > 1) {
+                $mode = $modearr[1];
+                $isRoot = true;
+            }
+        }
+
         $alias = $aliasarr[0];
 
-        $isRoot = strtok($mode, '.') == 'r';
-
-        if (strpos($mode, 'db') === 0) {
-            $dbpage = explode("_", $mode);
-            if (count($dbpage) > 1) {
-                $dbpage = array_pop($dbpage);
-                $dbpage = $this->base->newPage($dbpage);
-            } else {
-                $dbpage = $this->page;
-            }
-
-            $mode = 'db';
-        } else {
-            $mode = self::explode_last(".", $mode);
-        }
-        
         if ($mode != 'vendor') {
             $this->page = $this->base->newPage($alias, $isRoot);
         }
-        
+
         switch ($mode) {
+            case "api":
+                $api = 'api' . ucfirst(strtolower($aliasarr[1]));
+                if (!method_exists($this->page, $api)) {
+                    return "Method does not exists";
+                }
+
+                $params = array_merge($_GET, $_POST);
+                $post = json_decode(file_get_contents("php://input"), true);
+                if (is_array($post)) {
+                    $params = array_merge($params, $post);
+                }
+
+                return $this->page->{$api}($params);
+
+                break;
             case "html":
                 if ($this->page->norender == false) {
                     $this->renderHTML();
@@ -70,17 +84,6 @@ class Renderer
                 $post = file_get_contents("php://input");
                 $this->page->updateCache($post);
                 break;
-            case "db":
-                if (class_exists('\Plansys\Db\Init')) {
-                    $post = file_get_contents("php://input");
-                    $res = \Plansys\Db\Init::query($dbpage, $post);
-                    if (is_object($res) || is_array($res)) {
-                        echo json_encode($res);
-                    } else if (!is_null($res)) {
-                        echo json_encode($res);
-                    }
-                }
-                break;
             case "sw":
                 $swjs = @file_get_contents($this->base->dir['base'] . '/service-worker.js');
                 $start = strpos($swjs, 'var precacheConfig=') + strlen('var precacheConfig=');
@@ -102,12 +105,12 @@ class Renderer
                 if (isset($_GET['_v_dr'])) {
                     $d = DIRECTORY_SEPARATOR;
                     $dir = realpath(dirname(__FILE__) . "{$d}..{$d}..{$d}..{$d}");
-                    
-                    if (is_file($dir .  $_GET['_v_dr'])) {
+
+                    if (is_file($dir . $_GET['_v_dr'])) {
                         $info = new \SplFileInfo($dir . $_GET['_v_dr']);
                         if ($info->getExtension() != "php") {
-                            $file = file_get_contents($dir . $d. $_GET['_v_dr']);
-                            header("Content-Type:" . mime_content_type($dir . $d. $_GET['_v_dr']));
+                            $file = file_get_contents($dir . $d . $_GET['_v_dr']);
+                            header("Content-Type:" . mime_content_type($dir . $d . $_GET['_v_dr']));
                             echo $file;
                             die();
                         }
@@ -116,7 +119,7 @@ class Renderer
                 break;
         }
     }
-  
+
     public function renderHTML()
     {
         $d = DIRECTORY_SEPARATOR;
@@ -129,8 +132,8 @@ class Renderer
                 throw new \Exception("Base file not found: " . $path);
             }
         }
-        
-        $baseUrl = $this->base->url['base'] .'/';
+
+        $baseUrl = $this->base->url['base'] . '/';
 
         if (strpos($path, 'https:') === 0) {
             $ch = curl_init();

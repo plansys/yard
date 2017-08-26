@@ -232,6 +232,33 @@ class HtmlToJson
         };
 
         $json = $recursive($json, $recursive);
+
+
+        if ($json[0] != 'js' && count($json) >= 2) {
+            if (count($json) == 2) {
+                $json[] = $json[1];
+                $json[1] = [];
+            }
+
+            if (is_object($json[1])) {
+                if (!isset($json[1]->className)) {
+                    $json[1]->className = 'js: this.props.className || null';
+                }
+
+                if (!isset($json[1]->style)) {
+                    $json[1]->style = 'js: this.props.style || null';
+                }
+            } else if (is_array($json[1])) {
+                if (!isset($json[1]['className'])) {
+                    $json[1]['className'] = 'js: this.props.className || null';
+                }
+
+                if (!isset($json[1]['style'])) {
+                    $json[1]['style'] = 'js: this.props.style || null';
+                }
+            }
+        }
+
         return $json;
     }
 

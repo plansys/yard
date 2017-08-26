@@ -16,6 +16,7 @@ class Page
     public $placeholder = null;
     public $url = "";
     public $props = [];
+    public $app = null;
     public $executePostRender = false;
 
     public $isRoot = false;
@@ -67,7 +68,7 @@ class Page
         $this->isRoot = $isRoot;
         $this->showDeps = $showDeps;
         $this->base = $base;
-
+        $this->app = $this->base->settings;;
 
         $this->url = @$base->modules[$this->currentModule()]['url'];
         $this->conf = new Page\Configuration($this);
@@ -81,11 +82,6 @@ class Page
         } else {
             return $class[0];
         }
-    }
-
-    public function app()
-    {
-        return $this->base->settings;
     }
 
     public function loadFile()
