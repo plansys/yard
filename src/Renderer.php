@@ -56,8 +56,8 @@ class Renderer
                     $params = array_merge($params, $post);
                 }
 
-                return $this->page->{$api}($params);
-
+                $output = $this->page->{$api}($params);
+                return is_string($output) ? $output : json_encode($output);
                 break;
             case "html":
                 if ($this->page->norender == false) {

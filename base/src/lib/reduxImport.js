@@ -46,6 +46,7 @@ export const importReducers = function (rawReducers, additionalReducers) {
                 let init = extractFunc(r.init);
                 let switchtype = switchReducers(r.reducers);
                 let importLib = extractLib(r.import);
+
                 //eslint-disable-next-line
                 cursor[k] = new Function('state', '{ payload, type }', `
                     ${importLib}
