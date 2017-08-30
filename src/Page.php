@@ -53,7 +53,7 @@ class Page
     {
     }
 
-    public function postRender($props, $children)
+    public function postRender($props, $children, $instanceIndex)
     {
         return $children;
     }

@@ -116,12 +116,18 @@ trait Component
 
                             $child = "," . $renderJs($children, $level);
                         } else {
+
                             $child = $renderSub($children, $level);
                         }
                     } else if ($count == 3) {
                         if (self::is_assoc($content[1])) {
                             $attr = ', ' . self::toJS($content[1]);
                         }
+
+                        if (!is_array($content[2])) {
+                            $content[2] = [$content[2]];
+                        }
+
                         $child = $renderSub($content[2], $level);
                     }
                 } else {

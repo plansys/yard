@@ -80,7 +80,9 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
             }
 
             if (is_string($htmlResult) && trim($htmlResult) != '') {
-                $result[2] = [HtmlToJson::doConvert($this->base, $htmlResult, true)];
+                $converted = HtmlToJson::doConvert($this->base, '<dummy>' . $htmlResult . '</dummy>', true);
+
+                $result[2] = $converted[2];
             }
 
             unset($result[1]['__postRender']);
