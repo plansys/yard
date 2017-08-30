@@ -5,6 +5,7 @@ namespace Yard\Lib;
 class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 {
     public $base;
+    private $postRenderIdx = [];
 
     /**
      * @param \DOMNode $node
@@ -64,9 +65,15 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
         $result[] = $childs;
 
         if (isset($result[1]['__postRender']) && is_object($result[1]['__postRender'])) {
+            if (!isset($this->postRenderIdx[$result[0]])) {
+                $this->postRenderIdx[$result[0]] = 0;
+            }
+
+            $this->postRenderIdx[$result[0]] = $this->postRenderIdx[$result[0]] + 1;
+
             $htmlChild = html_entity_decode($node->saveXML());
             $htmlChild = preg_replace("/<\/?" . $result[1]['name'] . "[^>]*\>/i", "", $htmlChild);
-            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild);
+            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild, $this->postRenderIdx[$result[0]]);
             if (is_array($htmlResult)) {
                 $result[1] = $htmlResult['props'];
                 $htmlResult = $htmlResult['children'];

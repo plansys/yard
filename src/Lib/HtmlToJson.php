@@ -149,7 +149,7 @@ class HtmlToJson
 
                     $child = $coverChild($tag);
                     if (is_object($child)) {
-                        if (!isset($child->props->key)) {
+                        if (!isset($child->props->key) && is_object($child->props)) {
                             $child->props->key = 'js:' . $index;
                         }
                     }
