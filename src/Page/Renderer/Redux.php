@@ -24,6 +24,9 @@ trait Redux
     private function renderMapAction()
     {
         $actions = $this->page->mapAction();
+        if (!is_array($actions)) {
+            $actions = [];
+        }
         foreach ($actions as $k => $act) {
             $actions[$k] = str_replace(":", "_", $act);
         }
