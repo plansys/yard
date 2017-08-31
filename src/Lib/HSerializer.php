@@ -76,18 +76,16 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
             $htmlChild = preg_replace("/<\/?" . $result[1]['name'] . "[^>]*\>/i", "", $htmlChild);
             $htmlChild = str_replace("!!!=@@##=!!!", '=>', $htmlChild);
 
-            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild, $this->postRenderIdx[$result[0]]);
+            $htmlArray = HtmlToJson::doConvert($this->base, '<dummy>' . $htmlChild . '</dummy>', true);
+            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild, $this->postRenderIdx[$result[0]], $htmlArray[2]);
 
             if (is_array($htmlResult)) {
                 $result[1] = $htmlResult['props'];
                 $htmlResult = $htmlResult['children'];
             }
 
-
             if (is_string($htmlResult) && trim($htmlResult) != '') {
-
                 $converted = HtmlToJson::doConvert($this->base, '<dummy>' . $htmlResult . '</dummy>', true);
-
 
                 $result[2] = $converted[2];
             }

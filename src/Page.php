@@ -6,6 +6,7 @@ class Page
 {
     use Page\Cache;
     use \Yard\Lib\JsConvert;
+    use \Yard\Lib\PostRender;
 
     public $conf;
     public $alias = "";
@@ -51,11 +52,6 @@ class Page
 
     public function render()
     {
-    }
-
-    public function postRender($props, $children, $instanceIndex)
-    {
-        return $children;
     }
 
     public function propTypes()
