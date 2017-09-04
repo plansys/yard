@@ -125,8 +125,10 @@ class Configuration
             }
 
             $path = $this->page->path();
-            if (strpos($js, '..') === 0) {
-                $patharr = explode('/', $path);
+            if (strpos($js, '/') === 0) {
+                $path = '';
+            } else if (strpos($js, '..') === 0) {
+                $patharr = explode('/', trim($path));
                 $jsarr = explode('/', $js);
                 $newjsarr = [];
                 foreach ($jsarr as $j) {
@@ -138,11 +140,16 @@ class Configuration
                 $path = implode('/', $patharr);
             }
 
-            if ($path[strlen($path) - 1] != '/') {
+            if (strlen($path) == 0 || $path[strlen($path) - 1] != '/') {
                 $path .= '/';
             }
 
-            return $moduleDir . $path . $js;
+            $return = array_merge(explode('/', $moduleDir),
+                explode('/', $path),
+                explode('/', $js));
+                $return = array_filter($return);
+
+            return '/' . implode('/', $return);
         }
         return $js;
     }
