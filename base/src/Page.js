@@ -84,9 +84,16 @@ export class Page extends React.Component {
             return;
         }
 
-        let moduleArr = window.yard.page.name.split(':');
-        let module = moduleArr.length > 1 ? moduleArr[0] : false;
-        this.url = window.yard.url.pages[module];
+        let getUrl = (alias) => {
+            let moduleArr = alias.split(':');
+            let module = moduleArr.length > 1 ? moduleArr[0] : false;
+            return window.yard.url.pages[module];
+
+        }
+
+        this.url = getUrl(window.yard.page.name);
+        this.moduleUrl = getUrl(this.props.loader.conf.alias);
+
         this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);
     }
 

@@ -137,11 +137,11 @@ class Base
         }
     }
 
-    public function getRootUrl($shortcut = '')
+    public function getRootUrl($module = '')
     {
         $url = $this->modules['']['url'];
-        if (isset($this->modules[$shortcut])) {
-            $url = $this->modules[$shortcut]['url'];
+        if (isset($this->modules[$module])) {
+            $url = $this->modules[$module]['url'];
         }
         return $url;
     }
@@ -228,8 +228,9 @@ class Base
 
     private function validateReduxStore($new, $master)
     {
-        if (!empty($new->store)) {
+        if (is_array($new->store) && is_array($master->store) && !empty($new->store)) {
             $ms = [];
+
             foreach ($master->store as $raws) {
                 $ss = explode(".", $raws);
                 if (!isset($ms[$ss[0]])) {

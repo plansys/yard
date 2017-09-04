@@ -8,6 +8,11 @@ trait PostRender
     {
         $regex = '/(<' . $tag . '[^>]*>)(.*?)(<\/' . $tag . '>)/i';
         preg_match($regex, $content, $matches);
+
+        if (!isset($matches[2])) {
+            return $content;
+        }
+
         $children = $func($matches[2]);
 
         if ($retainOriginalTags) {

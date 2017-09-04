@@ -12,6 +12,9 @@ const render = (pageName) => {
 
 window.Root = Root;
 window.render = render;
+window.React = React;
+window.ReactDOM = ReactDOM;
+
 
 if (!window.yard) {
     render();

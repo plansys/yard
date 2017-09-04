@@ -64,7 +64,7 @@ class Page
         $this->isRoot = $isRoot;
         $this->showDeps = $showDeps;
         $this->base = $base;
-        $this->app = $this->base->settings;;
+        $this->app = $this->base->settings;
 
         $this->url = @$base->modules[$this->currentModule()]['url'];
         $this->conf = new Page\Configuration($this);
@@ -80,14 +80,66 @@ class Page
         }
     }
 
+    public function path()
+    {
+        $class = get_class($this);
+        $class = substr($class, strpos($class, '\Pages') + 6);
+        $path = explode('\\', $class);
+        array_pop($path);
+        return implode('/', $path);
+    }
+
+    public function absolutePath($abs = false)
+    {
+        $moduledir = str_replace('\\', '/', $this->base->modules[$this->currentModule()]['dir']);
+        if ($moduledir[strlen($moduledir) - 1] !== '/') {
+            $moduledir .= '/';
+        }
+
+        $path = trim($this->path(), '/');
+        if ($path == '/') {
+            $path = '';
+        }
+
+        $result = $moduledir . $path;
+
+        if ($result[strlen($result) - 1] === '/') {
+            $result = substr($result, 0, strlen($result) - 1);
+        }
+
+        return $result;
+    }
+
+    public function resolveFile($file)
+    {
+        $file = str_replace("\\", "/", $file);
+        $filearr = explode('/', $file);
+        $dir = $this->absolutePath();
+        $dirarr = explode('/', str_replace("\\", '/', $dir));
+
+        if (strpos($file, '..') === 0) {
+            $newfilearr = [];
+            foreach ($filearr as $f) {
+                if ($f == '..' && count($dirarr) > 0) array_pop($dirarr);
+                else $newfilearr[] = $f;
+            }
+            $file = implode(DIRECTORY_SEPARATOR, $newfilearr);
+            if ($file[0] != DIRECTORY_SEPARATOR) {
+                $file = DIRECTORY_SEPARATOR . $file;
+            }
+
+            return implode(DIRECTORY_SEPARATOR, $dirarr) . $file;
+        } else {
+            return $dir . '/' . $file;
+        }
+    }
+
     public function loadFile()
     {
         $files = func_get_args();
-        $reflector = new \ReflectionClass(get_class($this));
-        $dir = dirname($reflector->getFileName());
         $results = [];
         foreach ($files as $file) {
-            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            $path = $this->resolveFile($file);
             if (realpath($path)) {
                 ob_start();
                 include($path);

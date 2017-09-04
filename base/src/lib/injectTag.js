@@ -20,7 +20,7 @@ export const addJS = function (href, id, onload) {
 
 export const addCSS = function (href, onload) {
     var id = href.replace(/\W/g, '');
-    
+
     (function (d, s, id) {
         var link, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) {
@@ -35,13 +35,13 @@ export const addCSS = function (href, onload) {
                 onload();
             }
         };
-        link.onerror = function() {
+        link.onerror = function () {
             if (typeof onload === 'function') {
                 onload();
             }
         }
-        
-        link.type = 'text/css'  
+
+        link.type = 'text/css'
         link.rel = 'stylesheet'
         link.href = href
         fjs.parentNode.appendChild(link);

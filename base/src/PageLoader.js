@@ -1,20 +1,20 @@
 // loader
 import React from 'react';
-import { Page, createPage } from './Page';
-import { addJS, addCSS } from './lib/injectTag';
-import { loadConf, parseConf } from './lib/componentLoader';
-import { mapInput, mapAction } from './lib/reduxConnector';
+import {Page, createPage} from './Page';
+import {addJS, addCSS} from './lib/injectTag';
+import {loadConf, parseConf} from './lib/componentLoader';
+import {mapInput, mapAction} from './lib/reduxConnector';
 
 // redux
 import initStore from './lib/initStore';
-import { connect } from 'react-redux';
-import { importReducers } from './lib/reduxImport';
+import {connect} from 'react-redux';
+import {importReducers} from './lib/reduxImport';
 import createSagaMiddleware from 'redux-saga';
 import * as reduxSagaEffects from 'redux-saga/effects';
 
 // router
 import createHistory from 'history/createBrowserHistory'
-import { routerReducer, routerMiddleware } from 'react-router-redux'
+import {routerReducer, routerMiddleware} from 'react-router-redux'
 
 class PageLoader extends React.Component {
     static page = {
@@ -26,7 +26,7 @@ class PageLoader extends React.Component {
     static loaders = [];
     static ui = {
         promise: {},
-        loaded: { Page },
+        loaded: {Page},
     };
 
     static history = null;
@@ -46,7 +46,8 @@ class PageLoader extends React.Component {
         }
 
         this.isRoot = isRoot;
-        this.name = name.replace(/[^0-9a-z.:]/gi, '');;
+        this.name = name.replace(/[^0-9a-z.:]/gi, '');
+        ;
         this.conf = null;
         this.pageComponent = Page;
 
@@ -70,8 +71,7 @@ class PageLoader extends React.Component {
                         reject(res);
                     })
                     .then(rawconf => {
-                        var conf = parseConf(rawconf, name);
-
+                        let conf = parseConf(rawconf, name);
                         PageLoader.page.conf[conf.alias] = conf;
                         if (conf.alias !== name && conf.dependencies.pages[name]) {
                             PageLoader.page.conf[name] = conf.dependencies.pages[name];
@@ -80,7 +80,7 @@ class PageLoader extends React.Component {
 
                         const deps = [];
 
-                        function includeCSS(alias, shouldLoad) {
+                        let includeCSS = (alias, shouldLoad) => {
                             if (shouldLoad && PageLoader.page.css.indexOf(alias) < 0) {
                                 var url = window.yard.url.page
                                     .replace('[page]', alias + '...css');
@@ -97,19 +97,28 @@ class PageLoader extends React.Component {
 
                         includeCSS(conf.alias, conf.css);
                         if (conf.dependencies) {
-                            for (var p in conf.dependencies.pages) {
+                            for (let p in conf.dependencies.pages) {
                                 includeCSS(p, conf.dependencies.pages[p].css);
                             }
                         }
 
-                        if (conf.includeJS) {
-                            conf.includeJS.forEach(js => {
-                                deps.push(new Promise(resolve => {
-                                    addJS(js, js, function () {
-                                        resolve(js);
-                                    });
-                                }))
-                            })
+                        let includeJS = (conf) => {
+                            if (conf.includeJS) {
+                                conf.includeJS.forEach(js => {
+                                    deps.push(new Promise(resolvejs => {
+                                        addJS(js, js, function () {
+                                            resolvejs(js);
+                                        });
+                                    }))
+                                })
+                            }
+                        }
+
+                        includeJS(conf);
+                        if (conf.dependencies) {
+                            for (let p in conf.dependencies.pages) {
+                                includeJS(conf.dependencies.pages[p]);
+                            }
                         }
 
                         Promise.all(deps).then(() => {
@@ -173,13 +182,14 @@ class PageLoader extends React.Component {
             if (this.isRoot !== false) {
                 PageLoader.history = createHistory()
             }
-        
+
             if (this.isRoot !== false && conf.redux) {
                 if (typeof conf.redux.actionCreators === 'function') {
                     PageLoader.redux.actionCreators = conf.redux.actionCreators();
                 }
 
-                PageLoader.redux.reducers = function () { };
+                PageLoader.redux.reducers = function () {
+                };
                 this._reducersScope = {};
                 if (typeof conf.redux.reducers === 'function') {
                     PageLoader.redux.reducers = importReducers.bind(this._reducersScope)(conf.redux.reducers(), {
@@ -208,7 +218,7 @@ class PageLoader extends React.Component {
                 //eslint-disable-next-line
                 const sagasStore = (new Function(...keys, body))(...values);
 
-                Object.keys(sagasStore).forEach(k=> {
+                Object.keys(sagasStore).forEach(k => {
                     Object.keys(sagasStore[k]).forEach(f => {
                         sagaMiddleware.run(sagasStore[k][f]);
                     })
@@ -239,7 +249,7 @@ class PageLoader extends React.Component {
             resolve(conf);
 
             if (this.isRoot) {
-                document.body.className = document.body.className.replace("body-loading","");
+                document.body.className = document.body.className.replace("body-loading", "");
             }
         })
     }

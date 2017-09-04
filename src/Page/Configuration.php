@@ -112,24 +112,37 @@ class Configuration
         $js = explode("\n", $js);
         $js = implode("\n" . $pad, $js);
         $js = trim($js) . "\n";
-        // var_dump($js);
-        //
-        // $js = \Yard\Lib\HtmlToJson::convert($this->page->base, $js);
-        // var_dump($js);
-        // die();
 
         return $js;
     }
 
-    public function getJSPath($js)
+    public function getJSUrl($js, $module = '')
     {
         if (strpos($js, 'http') !== 0) {
-            $ex = explode(":", $js);
-            if (count($ex) > 1) {
-                return $this->page->base->getRootUrl($ex[0]) . '/' . $ex[1];
-            } else {
-                return $this->page->base->getRootUrl('') . '/' . $ex[0];
+            $moduleDir = $this->page->base->getRootUrl($module);
+            if ($moduleDir[strlen($moduleDir) - 1] != '/') {
+                $moduleDir .= '/';
             }
+
+            $path = $this->page->path();
+            if (strpos($js, '..') === 0) {
+                $patharr = explode('/', $path);
+                $jsarr = explode('/', $js);
+                $newjsarr = [];
+                foreach ($jsarr as $j) {
+                    if ($j == '..' && count($patharr) > 0) array_pop($patharr);
+                    else $newjsarr[] = $j;
+                }
+
+                $js = implode('/', $newjsarr);
+                $path = implode('/', $patharr);
+            }
+
+            if ($path[strlen($path) - 1] != '/') {
+                $path .= '/';
+            }
+
+            return $moduleDir . $path . $js;
         }
         return $js;
     }
@@ -140,7 +153,7 @@ class Configuration
 
         if (is_array($js) && !empty($js)) {
             foreach ($js as $k => $v) {
-                $js[$k] = $this->getJSPath($v);
+                $js[$k] = $this->getJSUrl($v, $this->page->currentModule());
             }
 
             return $this->toJs($js);
