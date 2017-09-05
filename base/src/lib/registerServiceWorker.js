@@ -11,8 +11,8 @@
 export default function register() {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      const base = !!window.yard.url ? window.yard.url.page : '';
-      const swUrl = base.replace('[page]', window.yard.page.name + '...sw');
+      const base = !!window.plansys.url ? window.plansys.url.page : '';
+      const swUrl = base.replace('[page]', window.plansys.page.name + '...sw');
       
       navigator.serviceWorker
         .register(swUrl)

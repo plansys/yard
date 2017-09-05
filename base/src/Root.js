@@ -3,7 +3,7 @@ import PageLoader from './PageLoader';
 
 class Root extends React.Component {
     render() {
-        if (!window.yard) {
+        if (!window.plansys) {
             return (<div style={{textAlign: 'center'}}>
                 <h1>Welcome To Yard</h1>
 

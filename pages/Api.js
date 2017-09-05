@@ -38,7 +38,7 @@ this.query = (params, execDone = true) => {
 
     this.promise = requestLatest(
         {
-            url: window.yard.url.page.replace('[page]', page + "::" + method),
+            url: window.plansys.url.page.replace('[page]', page + "::" + method),
             method: "POST",
             headers: {
                 "Content-type": "application/json"

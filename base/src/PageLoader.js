@@ -82,7 +82,7 @@ class PageLoader extends React.Component {
 
                         let includeCSS = (alias, shouldLoad) => {
                             if (shouldLoad && PageLoader.page.css.indexOf(alias) < 0) {
-                                var url = window.yard.url.page
+                                var url = window.plansys.url.page
                                     .replace('[page]', alias + '...css');
 
                                 PageLoader.page.css.push(alias);

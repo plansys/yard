@@ -16,10 +16,10 @@ window.React = React;
 window.ReactDOM = ReactDOM;
 
 
-if (!window.yard) {
+if (!window.plansys) {
     render();
 }
 
-if (window.yard && window.yard.offline) {
+if (window.plansys && window.plansys.offline) {
     registerServiceWorker();
 }

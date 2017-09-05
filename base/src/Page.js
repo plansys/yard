@@ -14,10 +14,10 @@ export class Page extends React.Component {
                 throw new Error('PageLoader.redux is not defined!');
             }
 
-            let url = window.yard.url.page
+            let url = window.plansys.url.page
                 .replace('[page]', page);
 
-            window.yard.page.name = page;
+            window.plansys.page.name = page;
             PageLoader.history.push(url);
             Page.history.doChangeListener(page);
         },
@@ -26,27 +26,27 @@ export class Page extends React.Component {
                 throw new Error('PageLoader.redux is not defined!');
             }
 
-            let url = window.yard.url.page
+            let url = window.plansys.url.page
                 .replace('[page]', page);
 
-            window.yard.page.name = page;
+            window.plansys.page.name = page;
             PageLoader.history.replace(url);
             Page.history.doChangeListener(page);
         },
         redirect: function (page) {
-            let url = window.yard.url.page
+            let url = window.plansys.url.page
                 .replace('[page]', page);
 
             Page.history.doChangeListener(page);
             window.location.href = url;
         },
         now: function () {
-            const rule = ".*" + window.yard.url.page.split("[page]").join("(.*)")
+            const rule = ".*" + window.plansys.url.page.split("[page]").join("(.*)")
             const url = window.location.href.replace(/\/?$/, '/');
 
             const match = url.match(new RegExp(rule));
             if (!match) {
-                return window.yard.page.name;
+                return window.plansys.page.name;
             }
 
             const pageArr = match[1].split("...");
@@ -87,11 +87,11 @@ export class Page extends React.Component {
         let getUrl = (alias) => {
             let moduleArr = alias.split(':');
             let module = moduleArr.length > 1 ? moduleArr[0] : false;
-            return window.yard.url.pages[module];
+            return window.plansys.url.pages[module];
 
         }
 
-        this.url = getUrl(window.yard.page.name);
+        this.url = getUrl(window.plansys.page.name);
         this.moduleUrl = getUrl(this.props.loader.conf.alias);
 
         this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);

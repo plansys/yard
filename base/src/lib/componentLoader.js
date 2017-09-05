@@ -18,10 +18,10 @@ export const componentLoader = (tag) => {
 
 export const loadConf = (alias, isRoot) => {
 
-    var url = window.yard.url.page
+    var url = window.plansys.url.page
                 .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'js')
     
-    var pageUrl = window.yard.url.page
+    var pageUrl = window.plansys.url.page
                 .replace('[page]', alias)
     
     return fetch(url)
@@ -48,10 +48,10 @@ export const loadConf = (alias, isRoot) => {
                 // we need to do this in client side, because it is too complex to convert
                 // es5 to es2015 in php (server side)
                 return new Promise((resolve, reject) => {
-                    const babelUrl = window.yard.url.base + '/babel.min.js';
-                    const postUrl = window.yard.url.page
+                    const babelUrl = window.plansys.url.base + '/babel.min.js';
+                    const postUrl = window.plansys.url.page
                                         .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'post');
-                    const clearUrl = window.yard.url.page
+                    const clearUrl = window.plansys.url.page
                                         .replace('[page]', alias + '...' + (isRoot ? 'r.' : '') + 'clean');
                     
                     if (text.indexOf('<html') === 0) {

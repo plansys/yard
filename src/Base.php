@@ -152,7 +152,9 @@ class Base
         if (!class_exists($rp['class'], false)) {
             require($rp['fullPath']);
         }
-
+        if (!class_exists($rp['class'], false)) {
+            throw new \Exception('Page ' . $alias . ' not found');
+        }
         $new = new $rp['class']($alias, $isRoot, $showDeps, $this);
 
         if ($isRoot && is_string($new->masterpage)) {

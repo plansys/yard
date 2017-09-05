@@ -8,7 +8,7 @@
         else f();
     }
 
-    window.yard = {
+    window.plansys = {
         url: <?= json_encode($page->base->renderUrl()) ?>,
         page: {
             name: '<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>'
@@ -17,6 +17,6 @@
     };
     
     pageReady(function() {
-        window.render(window.yard.page.name);
+        window.render(window.plansys.page.name);
     });
 </script>

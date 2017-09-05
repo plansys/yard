@@ -24,7 +24,7 @@ const toQueryString = function (params, url) {
 
 const api = {
     get: function (endpoint, params, mode = 'text') {
-        var url = window.yard.url.page
+        var url = window.plansys.url.page
                 .replace('[page]', endpoint + '...api')
         var promise = fetch(toQueryString(params, url));
         
