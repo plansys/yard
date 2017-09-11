@@ -9,6 +9,7 @@
     }
 
     window.plansys = {
+        ui: {},
         url: <?= json_encode($page->base->renderUrl()) ?>,
         page: {
             name: '<?= ($page->placeholder ?  $page->placeholder->alias : $page->alias) ?>'
