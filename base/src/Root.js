@@ -16,7 +16,11 @@ class Root extends React.Component {
                 <br/> <a href="https://github.com/plansys/yard">Yard Github Page</a></pre>
             </div>);
         }
-        return <PageLoader name={this.props.name} isRoot={true}/>;
+        let attrs = {
+            '[[name]]': this.props.name,
+            '[[isRoot]]': true
+        }
+        return <PageLoader {...attrs} />;
     }
 }
 

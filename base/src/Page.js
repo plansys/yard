@@ -79,7 +79,7 @@ export class Page extends React.Component {
 
         this._events = {};
 
-        if (!this.props.loader.conf) {
+        if (!this.props['[[loader]]'].conf) {
             console.error('Loader conf is not loaded! You must have loader conf loaded before creating Page');
             return;
         }
@@ -92,16 +92,16 @@ export class Page extends React.Component {
         }
 
         this.url = getUrl(window.plansys.page.name);
-        this.moduleUrl = getUrl(this.props.loader.conf.alias);
+        this.moduleUrl = getUrl(this.props['[[loader]]'].conf.alias);
 
-        this.props.loader.conf.js.bind(this)(Page, ReactDOM, React);
+        this.props['[[loader]]'].conf.js.bind(this)(Page, ReactDOM, React);
     }
 
     componentWillReceiveProps(nextProps) {
         this.applyEvent('componentWillReceiveProps', arguments);
-        if (this.props.name !== nextProps.name) {
+        if (this.props['[[name]]'] !== nextProps['[[name]]']) {
             this.setState({'[[loaded]]': false});
-            this.props.loader.loadPage(nextProps.name).then(conf => {
+            this.props['[[name]]'].loadPage(nextProps['[[name]]']).then(conf => {
                 if (!this._isMounted) return null;
                 this.setState({'[[loaded]]': true});
             });
@@ -110,7 +110,7 @@ export class Page extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        this.props.loader.init.then(conf => {
+        this.props['[[loader]]'].init.then(conf => {
             this.setState({'[[loaded]]': true});
         });
 
@@ -131,11 +131,11 @@ export class Page extends React.Component {
 
     render() {
         if (!this.state['[[loaded]]']) return null;
-        if (!this.props.loader.conf) {
-            console.log(this.props.loader);
+        if (!this.props['[[loader]]'].conf) {
+            console.log(this.props['[[loader]]']);
             return null;
         }
-        let content = this.props.loader.conf.render.bind(this)(this.hswap.bind(this), ReactDOM, React);
+        let content = this.props['[[loader]]'].conf.render.bind(this)(this.hswap.bind(this), ReactDOM, React);
         if (!content) return null;
         if (!content.type) return null;
 
@@ -182,8 +182,7 @@ export class Page extends React.Component {
                     ...newProps,
                     className: newProps.className || null,
                     style: newProps.style || null,
-                    children,
-                    name: props.name
+                    children
                 });
             case "Placeholder":
                 return h(Placeholder, {
@@ -207,7 +206,7 @@ export class Page extends React.Component {
 }
 
 Page.propTypes = {
-    loader: PropTypes.object.isRequired
+    '[[loader]]': PropTypes.object.isRequired
 };
 
 export const createPage = function (name, loader, props) {
@@ -218,9 +217,10 @@ export const createPage = function (name, loader, props) {
     let NewPage = loader.pageComponent;
     let newProps = {
         ...props,
-        loader
     };
 
+    newProps['[[name]]'] = name;
+    newProps['[[loader]]'] = loader;
     if (loader.isRoot && PageLoader.redux.store) {
         return (
             <Provider store={PageLoader.redux.store}>

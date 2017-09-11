@@ -6,33 +6,6 @@ trait JsConvert
 {
     use ArrayTools;
 
-    static function findTag(array $arr, $tag)
-    {
-        foreach ($arr as $key => $value) {
-            if (is_array($value) && $value[0] == 'Page') {
-                if ($value[1]->name == $tag) {
-                    return $value;
-                }
-            }
-
-            if (count($value) == 2 && is_array($value[1]) && count($value[1]) > 0) {
-                $res = self::findTag($value[1], $tag);
-                if ($res !== false) {
-                    return $res;
-                }
-            }
-
-            if (count($value) == 3 && is_array($value[2]) && count($value[2]) > 0) {
-                $res = self::findTag($value[2], $tag);
-                if ($res !== false) {
-                    return $res;
-                }
-            }
-        }
-
-        return false;
-    }
-
     static function toJs(array $arr, $sequential_keys = false, $quotes = false, $beautiful_json = true)
     {
         $object = self::is_assoc($arr);

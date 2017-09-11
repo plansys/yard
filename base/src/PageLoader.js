@@ -37,7 +37,7 @@ class PageLoader extends React.Component {
         this.state = {
             loaded: false
         }
-        this.loadPage(this.props.name, this.props.isRoot || false);
+        this.loadPage(this.props['[[name]]'], this.props['[[isRoot]]'] || false);
     }
 
     loadPage(name, isRoot = false) {
@@ -46,8 +46,8 @@ class PageLoader extends React.Component {
         }
 
         this.isRoot = isRoot;
-        this.name = name.replace(/[^0-9a-z.:]/gi, '');
-        ;
+        this.name = name.replace(/[^0-9a-z.:_]/gi, '');
+
         this.conf = null;
         this.pageComponent = Page;
 
@@ -259,7 +259,7 @@ class PageLoader extends React.Component {
             return null;
         }
 
-        return createPage(this.name, this, this.props);
+        return createPage(this.props['[[name]]'], this, this.props);
     }
 
 }

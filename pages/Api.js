@@ -79,10 +79,10 @@ this.query = (params, execDone = true) => {
 this.on('componentWillMount', () => {
     let parent = this._reactInternalInstance._currentElement._owner._currentElement._owner._instance;
 
-    if (!parent.props.name || !parent.props.loader) {
-        throw new Error('Parent is not a Page! You should use db:Query inside Yard Page');
+    if (!parent.props['[[name]]'] || !parent.props['[[loader]]']) {
+        throw new Error('Parent is not a Page! You should use yard:Api inside Yard Page');
     }
-    this.page = parent.props.name;
+    this.page = parent.props['[[name]]'];
 
     if (this.props.tag) {
         this.setState({

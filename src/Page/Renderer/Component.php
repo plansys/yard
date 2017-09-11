@@ -22,7 +22,7 @@ trait Component
         }
     }
 
-    private function renderComponent($content, $level = 0)
+    public function renderComponent($content, $level = 0)
     {
         if (is_string($content))
             return $content;
@@ -37,7 +37,7 @@ trait Component
             foreach ($children as $k => $c) {
                 if (is_array($c)) {
                     if ($c[0] == 'jstext') {
-                        $results[] = "`" . trim($c[1]) . "`";
+                        $results[] = "`" . $c[1] . "`";
                         continue;
                     }
                     $results[] = $this->renderComponent($c, $level + 1);
@@ -61,7 +61,9 @@ trait Component
             foreach ($children as $k => $c) {
                 if (is_array($c)) {
                     if ($c[0] == 'jstext') {
-                        $results[] = trim($c[1]);
+                        if (is_string($c[1])) {
+                            $results[] = trim($c[1]);
+                        }
                         continue;
                     }
 

@@ -71,13 +71,23 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
             $this->postRenderIdx[$result[0]] = $this->postRenderIdx[$result[0]] + 1;
 
+
             $htmlChild = html_entity_decode($node->saveXML());
             $htmlChild = str_replace("=>", '!!!=@@##=!!!', $htmlChild);
-            $htmlChild = preg_replace("/<\/?" . $result[1]['name'] . "[^>]*\>/i", "", $htmlChild);
-            $htmlChild = str_replace("!!!=@@##=!!!", '=>', $htmlChild);
+            $htmlChild = preg_replace("/<\/?" . $result[1]['[[name]]'] . "[^>]*>\>/i", "", $htmlChild);
 
+            $regex = '/(<' . $result[1]['[[name]]'] . '[^>]*>)(.*?)(<\/' . $result[1]['[[name]]'] . '>)/is';
+            preg_match($regex, $htmlChild, $matches);
+            if (count($matches) > 3) {
+                $htmlChild = $matches[2];
+            }
+
+            $htmlChild = str_replace("!!!=@@##=!!!", '=>', $htmlChild);
             $htmlArray = HtmlToJson::doConvert($this->base, '<dummy>' . $htmlChild . '</dummy>', true);
-            $htmlResult = $result[1]['__postRender']->postRender($result[1], $htmlChild, $this->postRenderIdx[$result[0]], $htmlArray[2]);
+
+            $props = $result[1];
+            unset($props['__postRender']);
+            $htmlResult = $result[1]['__postRender']->postRender($props, $htmlChild, $this->postRenderIdx[$result[0]], $htmlArray[2]);
 
             if (is_array($htmlResult)) {
                 $result[1] = $htmlResult['props'];
@@ -86,7 +96,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
             if (is_string($htmlResult) && trim($htmlResult) != '') {
                 $converted = HtmlToJson::doConvert($this->base, '<dummy>' . $htmlResult . '</dummy>', true);
-
                 $result[2] = $converted[2];
             }
 
@@ -111,7 +120,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
     private function getPage($c)
     {
-        $newc = ['Page', ['name' => $c[0]]];
+        $newc = ['Page', ['[[name]]' => $c[0]]];
         if (count($c) > 1) {
             if (isset($c[1][0])) {
                 $newc[] = $c[1];
@@ -119,7 +128,7 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
                 foreach ($c[1] as $k => $cc) {
                     $newc[1][$k] = $cc;
                 }
-                $newc[1]['name'] = $c[0];
+                $newc[1]['[[name]]'] = $c[0];
 
                 if (count($c) > 2) {
                     $newc[] = $c[2];

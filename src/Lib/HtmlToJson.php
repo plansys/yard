@@ -43,8 +43,10 @@ class HtmlToJson
             }
 
             $hasArrayChild = is_array($child);
-            if (count($child) == 1 && is_string($child[0])) {
-                $hasArrayChild = false;
+            if ($hasArrayChild && count($child) == 1) {
+                if (is_string($child[0])) {
+                    $hasArrayChild = false;
+                }
             }
 
             $define = new \stdClass();
@@ -70,9 +72,6 @@ class HtmlToJson
             return $structure;
         };
 
-        $makeResultTag = function ($structure) {
-            return $structure;
-        };
 
         $coverChild = function ($tag) use ($defineTagStructure) {
             # try to detect if child is a string.
@@ -86,18 +85,18 @@ class HtmlToJson
             return $child;
         };
 
-        $recursive = function ($currentTag, $recursive, $nextTag = false, $group = false, $index = false) use ($convertBack, $cleanJSProps, $defineTagStructure, $makeResultTag, $coverChild) {
+        $recursive = function ($currentTag, $recursive, $nextTag = false, $group = false, $index = false) use ($convertBack, $cleanJSProps, $defineTagStructure, $coverChild) {
+            if (!$currentTag) {
+                return false;
+            }
+
             $tag = $defineTagStructure($currentTag);
 
             $requireProps = function ($props, $tag) {
                 return property_exists($tag->props, $props);
             };
 
-            if ($tag === false) {
-                return false;
-            }
 
-            $elseTag = $defineTagStructure($nextTag);
             if (($tag->name === "If" || $tag->name === "if") && $tag->child && $tag->props) {
                 if ($requireProps("condition", $tag)) {
                     $condition = $cleanJSProps($tag->props->condition);
@@ -109,7 +108,7 @@ class HtmlToJson
                         // Children
                         [
                             "\nif (" . $condition . ") { \n\t return ",
-                            $makeResultTag($convertBack($child)),
+                            $convertBack($child),
                             "\t\n}",
                         ],
 
@@ -118,9 +117,9 @@ class HtmlToJson
                     ];
 
                     if ($nextTag && $nextTag[0] === "Else" || $nextTag[0] === "else") {
-                        $elseTagChild = $coverChild($elseTag);
+                        $elseTagChild = $coverChild($defineTagStructure($nextTag));
                         array_push($newStructure[1], " else { \n\t return ");
-                        array_push($newStructure[1], $makeResultTag($convertBack($elseTagChild)));
+                        array_push($newStructure[1], $convertBack($elseTagChild));
                         array_push($newStructure[1], "\t\n}");
                         unset($group[$index + 1]);
                         unset($nextTag);
@@ -132,7 +131,7 @@ class HtmlToJson
             }
 
             if (($tag->name === "Else" || $tag->name === "else") && $tag->child) {
-                $child = $coverChild($tag);
+                $coverChild($tag);
                 $newStructure = [
                     "jstext", // tag name
                     "",
@@ -142,26 +141,61 @@ class HtmlToJson
             }
 
             if (($tag->name === "For" || $tag->name === "for") && $tag->child && $tag->props) {
-                if ($requireProps("each", $tag) && $requireProps("of", $tag)) {
-                    $each = $tag->props->each;
-                    $of = $cleanJSProps($tag->props->of);
+                if ($requireProps("each", $tag) && $requireProps("as", $tag)) {
+                    $each = $cleanJSProps($tag->props->each);
+                    $as = $tag->props->as;
                     $index = $requireProps("index", $tag) ? $tag->props->index : '__idx';
 
                     $child = $coverChild($tag);
                     if (is_object($child)) {
                         if (!isset($child->props->key) && is_object($child->props)) {
                             $child->props->key = 'js:' . $index;
+                        } else {
+                            $child->props = new \stdClass();
+                            $child->props->key = 'js:' . $index;
                         }
+                    }
+
+
+                    $eachChecker = '';
+                    if (preg_match('/[a-z0-9_\.]/i', $each) && strpos($each, '.') !== false) {
+                        $eachArr = explode(".", $each);
+                        $eachArrRes = [];
+                        foreach ($eachArr as $k => $e) {
+                            $ear = [];
+                            for ($i = 0; $i <= $k; $i++) {
+                                $ear[] = $eachArr[$i];
+                            }
+                            $eachArrRes[] = implode(".", $ear);
+                        }
+                        $eachChecker = implode(" && ", $eachArrRes);
+                        $eachChecker = "if (!({$eachChecker})) return [];\n";
                     }
 
                     $newStructure = [
                         "js", // tag name
-
                         // Children
                         [
-                            "\n" . $of . ".map((" . $each . ($index ? "," . $index : "") . ") => { \n\t return ",
-                            $makeResultTag($convertBack($child)),
-                            "})",
+                            "(function() {",
+                            $eachChecker,
+                            "   let __each = $each;",
+                            "   let __mapfunc = ({$as},{$index}) => { return ",
+                            $convertBack($child),
+                            "   };\n",
+                            "   if (typeof __each === 'object' && __each != null) {      
+                                    if (__each.length) { return __each.map(__mapfunc); }
+                                    else {
+                                        let __result = [];
+                                        for (let __i in __each) {
+                                            if (__each.hasOwnProperty(__i)) {
+                                                __result.push(__mapfunc(__each[__i], __i));
+                                            }
+                                        }
+                                        return __result;
+                                    }
+                                }
+                            ",
+                            "}.bind(this)())"
                         ],
 
                         // Null

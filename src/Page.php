@@ -13,7 +13,7 @@ class Page
     public $base;
     public $store;
     public $masterpage = false;
-    public $norender = false;
+    public $library = false;
     public $placeholder = null;
     public $url = "";
     public $props = [];

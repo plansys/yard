@@ -11,9 +11,13 @@ class Placeholder extends React.Component {
         let router = <Route render={
             (route) => {
                 const pageName = Page.history.now();
+
                 if (!pageName) return null;
-                
-                return <PageLoader name={pageName} />;
+                let attrs = {
+                    '[[name]]': pageName
+                };
+
+                return <PageLoader {...attrs} />;
             }
         } />;
 

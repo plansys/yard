@@ -60,7 +60,7 @@ class Renderer
                 return is_string($output) ? $output : json_encode($output);
                 break;
             case "html":
-                if ($this->page->norender == false) {
+                if ($this->page->library == false) {
                     $this->renderHTML();
                 }
                 break;

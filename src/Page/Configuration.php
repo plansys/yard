@@ -147,9 +147,13 @@ class Configuration
             $return = array_merge(explode('/', $moduleDir),
                 explode('/', $path),
                 explode('/', $js));
-                $return = array_filter($return);
+            $return = array_filter($return);
+            $return = '/' . implode('/', $return);
 
-            return '/' . implode('/', $return);
+            $content = file_get_contents($this->page->base->getServerHost() . $return);
+            $hash = crc32($content);
+
+            return $return . '?' . $hash;
         }
         return $js;
     }

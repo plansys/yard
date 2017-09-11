@@ -203,7 +203,7 @@ class Dependency
                 }
 
                 if ($tag[0] == 'Page') {
-                    $tags["Page:" . $tag[1]['name']] = true;
+                    $tags["Page:" . $tag[1]['[[name]]']] = true;
                 } else if (!in_array($tag[0], $excludeTags)) {
                     $tags[$tag[0]] = true;
                 }
@@ -246,10 +246,10 @@ class Dependency
         } else {
             foreach ($pageRender as $tag) {
                 if ($tag[0] == 'Page') {
-                    if (strpos(trim($tag[1]['name']), "js:") === 0) {
+                    if (strpos(trim($tag[1]['[[name]]']), "js:") === 0) {
                         continue;
                     }
-                    $tags[] = $tag[1]['name'];
+                    $tags[] = $tag[1]['[[name]]'];
                 }
                 
                 if (count($tag) == 2 &&
