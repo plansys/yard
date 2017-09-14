@@ -44,7 +44,14 @@ const printKeys = function (obj, stack = '', result = '') {
             }
         }
     }
-    return result;
+    
+    let cleanedResult = [];
+    result.split('\n').forEach(item => {
+        if (cleanedResult.indexOf(item) < 0) {
+            cleanedResult.push(item);
+        }
+    })
+    return cleanedResult.join("\n");
 };
 
 export const mapAction = function (action) {
@@ -57,15 +64,16 @@ export const mapAction = function (action) {
             case "string":
                 result[p] = function () {
                     let actions = PageLoader.redux.actionCreators;
+
                     let keys = Object.keys(actions).map(key => key.replace('.', '_'));
                     let values = Object.keys(actions).map((key) => actions[key]);
 
                     // eslint-disable-next-line
                     let func = (new Function(...keys, `return ${this}`))(...values);
                     if (typeof func !== "function") {
-                        console.error("Action [" + this + "] is not defined!\n Avilable actions are: \n\n" +
+                        console.error("Action [" + this + "] is not defined!\n Available actions are: \n\n" +
                             printKeys(actions));
-                        return {type: "~~ERROR~~"};
+                        return { type: "~~ERROR~~" };
                     }
 
                     return func(...arguments);

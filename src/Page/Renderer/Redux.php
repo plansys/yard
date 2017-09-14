@@ -175,23 +175,21 @@ trait Redux
         };
 
         $list = [];
-
         foreach ($reducers as $k => $r) {
-            $glob = glob(dirname($r['file']) . DIRECTORY_SEPARATOR . "*Action.php");
-            foreach ($glob as $file) {
-                $class = str_replace(".php", "", basename($file));
-                if (!class_exists($class, false)) {
-                    require($file);
-                }
-
-                $item = new $class;
-                $key = str_replace(".", "_", $k);
-                if (!isset($list[$key])) {
-                    $list[$key] = [];
-                }
-                $list[$key] = $item->actionCreators();
-                $declareList($list[$key]);
+            $name = str_replace("Reducer.php", "", basename($r['file']));
+            $file = dirname($r['file']) . DIRECTORY_SEPARATOR . "{$name}Action.php";
+            $class = str_replace(".php", "", basename($file));
+            if (!class_exists($class, false)) {
+                require($file);
             }
+
+            $item = new $class;
+            $key = str_replace(".", "_", $k);
+            if (!isset($list[$key])) {
+                $list[$key] = [];
+            }
+            $list[$key] = $item->actionCreators();
+            $declareList($list[$key]);
         }
         return "return " . self::toJs($list) . ";";
     }
