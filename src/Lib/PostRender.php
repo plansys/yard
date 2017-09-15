@@ -15,12 +15,10 @@ trait PostRender
             }
         }
 
-
         $props['ref'] = "js: function(ref) {
             {$refCallback}
             {$oldRef}
         }.bind(this)";
-        $props['[[parent]]'] = 'js: this';
     }
 
     public function replaceTagContent($tag, $content, $func, $retainOriginalTags = false)
@@ -95,42 +93,48 @@ trait PostRender
 
     private function cleanSingleHtmlArray(&$v)
     {
-        $count = count($v);
-        if ($count >= 2) {
-            $isobject = is_object($v[1]);
-            if ($isobject || is_array($v[1])) {
-                foreach ($v[1] as $k => &$attr) {
-                    if (is_array($attr)) {
-                        if ($isobject) {
-                            $this->cleanSingleHtmlArray($v[1]->{$k});
-                        } else {
-                            $this->cleanSingleHtmlArray($v[1][$k]);
-                        }
-                    } else if (is_string($attr)) {
-                        if ($isobject) {
-                            $v[1]->{$k} = str_replace('~^AND^~', '&', $attr);
-                        } else {
-                            $v[1][$k] = str_replace('~^AND^~', '&', $attr);
+        if (self::is_assoc($v)) {
+            foreach ($v as $i => $j) {
+                $v[$i] = str_replace('~^AND^~', '&', $v[$i]);
+            }
+        } else {
+
+            $count = count($v);
+            if ($count >= 2) {
+                $isobject = is_object($v[1]);
+                if ($isobject || is_array($v[1])) {
+                    foreach ($v[1] as $k => &$attr) {
+                        if (is_array($attr)) {
+                            if ($isobject) {
+                                $this->cleanSingleHtmlArray($v[1]->{$k});
+                            } else {
+                                $this->cleanSingleHtmlArray($v[1][$k]);
+                            }
+                        } else if (is_string($attr)) {
+                            if ($isobject) {
+                                $v[1]->{$k} = str_replace('~^AND^~', '&', $attr);
+                            } else {
+                                $v[1][$k] = str_replace('~^AND^~', '&', $attr);
+                            }
                         }
                     }
                 }
-            }
 
-            if (is_string($v[1])) {
-                $v[1] = str_replace('~^AND^~', '&', $v[1]);
-            }
+                if (is_string($v[1])) {
+                    $v[1] = str_replace('~^AND^~', '&', $v[1]);
+                }
 
-            if ($count == 3 && is_array($v[2])) {
-                foreach ($v[2] as $k => &$attr) {
-                    if (is_array($attr)) {
-                        $this->cleanSingleHtmlArray($v[2][$k]);
-                    } else if (is_string($attr)) {
-                        $v[2][$k] = str_replace('~^AND^~', '&', $attr);
+                if ($count == 3 && is_array($v[2])) {
+                    foreach ($v[2] as $k => &$attr) {
+                        if (is_array($attr)) {
+                            $this->cleanSingleHtmlArray($v[2][$k]);
+                        } else if (is_string($attr)) {
+                            $v[2][$k] = str_replace('~^AND^~', '&', $attr);
+                        }
                     }
                 }
             }
         }
-
     }
 
     private function cleanHtmlArray(&$array)

@@ -71,7 +71,6 @@ class HSerializer extends \FluentDOM\Serializer\Json\JsonML
 
             $this->postRenderIdx[$result[0]] = $this->postRenderIdx[$result[0]] + 1;
 
-
             $htmlChild = html_entity_decode($node->saveXML());
             $htmlChild = str_replace("=>", '!!!=@@##=!!!', $htmlChild);
             $htmlChild = preg_replace("/<\/?" . $result[1]['[[name]]'] . "[^>]*>\>/i", "", $htmlChild);

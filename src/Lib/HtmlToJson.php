@@ -304,6 +304,7 @@ class HtmlToJson
 
             # parse the dom
             $fdom = \FluentDom::load($render, 'text/xml', ['libxml' => LIBXML_COMPACT, 'is_string' => true]);
+
             $json = new HSerializer($base, $fdom);
             $json = self::postConvert(json_decode($json->__toString()));
 
@@ -315,6 +316,8 @@ class HtmlToJson
             # turn it to string again, and then un-format it
             return str_replace('~^AND^~', '&', $json); #un-replace '&'
         } catch (\Exception $e) {
+            echo($render);
+            die();
             $render = explode("\n", \Yard\Lib\HtmlToJson::preConvert($render));
             $row = self::explode_first(" ", self::explode_last('in line ', $e->getMessage()));
             $col = self::explode_first(":", self::explode_last('character ', $e->getMessage()));
