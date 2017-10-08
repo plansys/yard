@@ -82,7 +82,7 @@ require("vendor/autoload.php");
 $base = new \Yard\Base(dirname(__FILE__) . DIRECTORY_SEPARATOR . "base.php");
 $yard = new \Yard\Renderer($base);
 
-$parr = explode('...', $_GET['p']);
+$parr = explode('...', @$_GET['p']);
 $modearr = count($parr) > 1 ? explode(".", $parr[1]) : [''];
 $mode = count($modearr) > 1 ? $modearr[1] : $modearr[0];
 
@@ -91,14 +91,12 @@ if ($mode == 'css') {
 } else if (in_array($mode, ['js', 'jsdev', 'sw'])) {
     header('Content-type: text/javascript');
 }
-$page = isset($_GET['p']) ? $_GET['p'] : 'yard.Welcome';
+$page = isset($_GET['p']) ? $_GET['p'] : 'builder:Index';
 echo $yard->render($page);
 
  ```
  
 Then open `index.php` in your browser.
-
-This will render `Welcome` Page in `/vendor/yard/src/sample/Welcome.php` file. 
 
 <hr/>
 

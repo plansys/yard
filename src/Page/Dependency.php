@@ -230,8 +230,8 @@ class Dependency
             $tag = $pageRender;
             $tags = [];
 
-            if ($tag[0] == 'Page') {
-                $tags[] = $tag[1]['name'];
+            if ($tag[0] == 'Page' && isset($tag[1]['[[name]]'])) {
+                $tags[] = $tag[1]['[[name]]'];
             }
 
             if (count($tag) == 2 &&

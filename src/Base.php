@@ -182,7 +182,9 @@ class Base
     {
         $pages = [];
         foreach ($this->modules as $k => $v) {
-            $pages[$k] = $v['url'];
+            if (isset($v['url'])) {
+                $pages[$k] = $v['url'];        
+            }
         }
 
         return [
