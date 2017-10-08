@@ -129,6 +129,37 @@ export class Page extends React.Component {
         this.applyEvent('componentWillUnmount', arguments);
     }
 
+    _getOwner() {
+        let parent = null;
+        if (this._reactInternalFiber) {
+            let cur = this._reactInternalFiber.return.return;
+            while (typeof cur.type !== 'function' && cur.return) {
+                cur = cur.return;
+            }
+            parent = cur.stateNode;
+        }
+        return parent;
+    }
+
+    _getRenderedChilds() {
+        let childs = [];
+        if (this._reactInternalFiber) {
+            let cur = this._reactInternalFiber.child.child;
+
+            if (cur && cur.sibling) {
+                while (cur !== null) {
+                    if (cur.stateNode.constructor && cur.stateNode.constructor.name === 'PageLoader') {
+                        childs.push(cur.child.stateNode);
+                    } else {
+                        childs.push(cur.stateNode);
+                    }
+                    cur = cur.sibling;
+                }
+            }
+        }
+        return childs;
+    }
+
     render() {
         if (!this.state['[[loaded]]']) return null;
         if (!this.props['[[loader]]'].conf) {

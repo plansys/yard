@@ -77,7 +77,7 @@ this.query = (params, execDone = true) => {
 }
 
 this.on('componentWillMount', () => {
-    let parent = this._reactInternalInstance._currentElement._owner._currentElement._owner._instance;
+    let parent = this._getOwner();
 
     if (!parent.props['[[name]]'] || !parent.props['[[loader]]']) {
         throw new Error('Parent is not a Page! You should use yard:Api inside Yard Page');
